@@ -15,6 +15,15 @@ export async function api(request, env, waitUntil = () => {}) {
   const name = url.pathname.replace(/^\/api\//, "").replace(/\/$/, "");
   const q = Object.fromEntries(url.searchParams);
   try {
+    // setup check: which keys the server sees and whether TomTom accepts ours (never shows the keys)
+    if (name === "health") {
+      const out = { fmcsa_key: !!env.FMCSA_KEY, tomtom_key: !!env.TOMTOM_KEY, tomtom: null };
+      if (env.TOMTOM_KEY) {
+        try { await search({ q: "Denver, CO", limit: 1 }, env); out.tomtom = "ok"; }
+        catch (e) { out.tomtom = String(e.message || e).replace(env.TOMTOM_KEY, "***").slice(0, 300); }
+      }
+      return json(out, 200, 0);
+    }
     if (request.method === "GET" && (name === "search" || name === "traffic" || name === "wx")) {
       const cache = typeof caches !== "undefined" ? caches.default : null;
       const key = new Request(url.toString(), { method: "GET" });
