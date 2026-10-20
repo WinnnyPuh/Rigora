@@ -398,7 +398,7 @@ main .wrap{padding-block:20px 48px}
 #v-plan .empty{padding:28px 16px;color:var(--muted);display:grid;gap:6px}
 #v-plan .empty strong{color:var(--ink);font-size:16px}
 #v-plan .mapbox{background:var(--bg);border:1px solid var(--line);border-radius:6px;overflow:hidden}
-#v-plan .mapbox svg{display:block;width:100%;height:auto}
+
 #v-plan .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
 #v-plan .legend span{display:flex;align-items:center;gap:6px}
 #v-plan .legend i{display:inline-block;width:16px;height:4px;border-radius:2px}
@@ -428,6 +428,35 @@ main .wrap{padding-block:20px 48px}
 #v-plan .pl-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 #v-plan .conn{color:var(--muted)}
 #v-plan .dot{background:var(--amber)}#v-plan .dot.ok{background:var(--good)}#v-plan .dot.bad{background:var(--bad)}
+
+[hidden]{display:none!important}
+/* route map */
+#lmap{height:440px;width:100%;border-radius:12px;z-index:0;background:#e9e9e6}
+@media (max-width:640px){#lmap{height:340px}}
+.mapbox{border-radius:12px;overflow:hidden}
+#lmap .leaflet-control-attribution{font-size:10px}
+.leaflet-marker-icon.mk{display:flex;align-items:center;justify-content:center;font:700 12px/1 "Geist Mono",ui-monospace,monospace;box-sizing:border-box}
+.mk-stop{background:#4a4a48;color:#fff;border:2.5px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.mk-a{background:#111;color:#fff}.mk-z{background:#ff6a1a;color:#111}
+.mk-alt{height:24px;background:#fff;color:#111;border:2px solid #6b7280;border-radius:7px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.3);white-space:nowrap;padding:0 7px;width:auto!important;font-size:11px}
+.mk-alt.on{background:#ff6a1a;border-color:#111;color:#111}
+.mk-st{background:rgba(255,255,255,.92);color:#4a4a48;border:1.5px solid #111;border-radius:6px;font-size:10px}
+.mk-cert{background:#17803f;border:2px solid #fff;border-radius:50%}
+.mk-weigh{background:#c62a1f;border:2px solid #fff}
+.mk-tr{background:#c62a1f;clip-path:polygon(50% 0,100% 100%,0 100%)}
+.mk-tr-warn{background:#b45a00}
+#mapCard .alts{margin-top:14px}
+#mapCard .maplinks{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+/* folding cards */
+.fold-btn{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;cursor:pointer}
+.fold-btn h2{margin:0;flex:1}
+.fold-btn .fold-t{font-size:13px;font-weight:600;color:var(--muted)}
+.fold-btn .chev{transition:transform .15s}
+.fold-btn[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.fold-btn:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:6px}
+#wxCard .card-head,#schedCard .card-head{margin-bottom:10px}
+#wxBody>.seg{margin-bottom:12px}
+#fullBtn{margin:4px 0 0}
 
 /* check page */
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -475,7 +504,7 @@ footer.site{border-top:1px solid var(--line);padding-block:20px 32px;color:var(-
         <form class="here-in" id="hereForm"><input id="hereLoc" type="text" autocomplete="off" aria-label="Your location" placeholder="City, ZIP or address" data-pi18n-ph="here_ph"><button class="btn" type="submit" data-pi18n="check">Check</button><button class="btn" type="button" id="hereGps" data-pi18n="gps_btn">📍 My location</button></form>
         <div id="hereNow" class="here-now"><p class="note" data-pi18n="here_loading">Loading weather for your start location…</p></div>
         <details id="hereWeek"><summary data-pi18n="week">7-day forecast</summary><div class="tblwrap"><table><thead><tr><th data-pi18n="th_day">Day</th><th data-pi18n="th_cond">Conditions</th><th class="n" data-pi18n="th_hilo">High / low</th><th class="n" data-pi18n="th_wind">Wind</th><th class="n" data-pi18n="th_rain">Rain</th></tr></thead><tbody id="tbWeek"></tbody></table></div></details>
-        <p class="note" id="hereNote" data-pi18n="here_note">The browser can't share your GPS location with this page, so it uses the start address. Type where you are to change it.</p>
+        <p class="note" id="hereNote" data-pi18n="here_note">Allow location to see weather where you are, or type a city or ZIP. Until then it shows the start address.</p>
       </section>
 
       <section class="card" aria-labelledby="hStops">
@@ -570,41 +599,49 @@ footer.site{border-top:1px solid var(--line);padding-block:20px 32px;color:var(-
           <div class="f"><label class="lbl" for="when" id="whenLbl">Departure, your local time</label><input id="when" type="datetime-local"></div>
           <div class="f"><label class="lbl" for="dwell" data-pi18n="dwell">Time at each stop, h</label><input id="dwell" type="number" min="0" max="12" step="0.25" value="1" inputmode="decimal"></div>
         </div>
-        <div class="alts" id="alts" hidden></div>
+        
         <div class="tiles" id="tiles"></div>
-        <button class="more-btn" type="button" id="fullBtn" aria-expanded="false" aria-controls="fullWrap"><span id="fullBtnTxt" data-pi18n="full_show">Show full details</span><span class="chev" aria-hidden="true">▾</span></button>
+              </section>
+
+      <section class="card" id="mapCard" hidden>
+        <div class="card-head"><h2 data-pi18n="sketch_h">Route map</h2>
+          <div class="maplinks"><div class="seg seg-sm" role="radiogroup" aria-label="Map type"><button type="button" role="radio" class="segb" data-base="map" aria-checked="true" data-pi18n="mt_map">Map</button><button type="button" role="radio" class="segb" data-base="sat" aria-checked="false" data-pi18n="mt_sat">Satellite</button></div><a class="btn" id="gmMap" href="#" target="_blank" rel="noopener" data-pi18n="open_map">Open map ↗</a><a class="btn" id="gmSat" href="#" target="_blank" rel="noopener" data-pi18n="open_sat" style="display:none">Open satellite ↗</a></div>
+        </div>
+        <div class="legend"><span><i style="background:#ff6a1a"></i><span data-pi18n="lg_route">Route</span></span><span><i style="background:transparent;border-top:3px dashed #6b7280;height:0"></i><span data-pi18n="lg_alt">Other route</span></span><span><i style="background:#7c3aed"></i><span data-pi18n="lg_toll">Toll road</span></span><span><i style="background:#c62a1f;width:8px;height:8px"></i><span data-pi18n="lg_weigh">Weigh / inspection</span></span><span><i style="background:#17803f;width:8px;height:8px;border-radius:50%"></i><span data-pi18n="lg_cert">Certified scale</span></span><span><i style="background:#c62a1f;width:9px;height:8px;clip-path:polygon(50% 0,100% 100%,0 100%)"></i><span data-pi18n="lg_traffic">Traffic incident</span></span><span><i style="width:10px;height:10px;border:2px dashed #b45a00;border-radius:50%;background:transparent"></i><span data-pi18n="lg_wx">Weather to watch</span></span></div>
+        <div class="mapbox" id="mapBox"><div id="lmap" role="region" aria-label="Route map"></div></div>
+        <div class="alts" id="alts" hidden></div>
+        <p class="note" id="gmNote" hidden></p>
       </section>
 
-      <div id="fullWrap" class="col" hidden>
       <section class="card" id="schedCard" hidden aria-labelledby="hSched">
-        <div class="card-head"><h2 id="hSched" data-pi18n="sched_h">Schedule</h2></div>
+        <div class="card-head"><button type="button" class="fold-btn" aria-expanded="false" aria-controls="schedBody"><h2 id="hSched" data-pi18n="sched_h">Schedule</h2><span class="fold-t" data-pi18n="fold_show">Show</span><span class="chev" aria-hidden="true">▾</span></button></div>
         <div class="answer" id="answer"></div>
-        <div class="tblwrap"><table><thead><tr><th data-pi18n="th_when">When</th><th data-pi18n="th_event">Event</th><th class="n" data-pi18n="th_mile">Mile</th></tr></thead><tbody id="tbSched"></tbody></table></div>
-        <p class="note" id="hosNote"></p>
+        <div class="fold-body" id="schedBody" hidden><div class="tblwrap"><table><thead><tr><th data-pi18n="th_when">When</th><th data-pi18n="th_event">Event</th><th class="n" data-pi18n="th_mile">Mile</th></tr></thead><tbody id="tbSched"></tbody></table></div>
+        <p class="note" id="hosNote"></p></div>
       </section>
 
       <section class="card" id="wxCard" hidden aria-labelledby="hWx">
-        <div class="card-head"><h2 id="hWx" data-pi18n="wx_h">Weather on the route</h2>
-          <div class="seg seg-3" role="radiogroup" aria-label="Weather time">
+        <div class="card-head"><button type="button" class="fold-btn" aria-expanded="false" aria-controls="wxBody"><h2 id="hWx" data-pi18n="wx_h">Weather on the route</h2><span class="fold-t" data-pi18n="fold_show">Show</span><span class="chev" aria-hidden="true">▾</span></button>
+                </div>
+        <div class="alertbar calm" id="wxBar">Weather not checked yet.</div>
+        <div class="fold-body" id="wxBody" hidden><div class="seg seg-3" role="radiogroup" aria-label="Weather time">
             <button type="button" role="radio" class="segb" data-wx="eta" aria-checked="true" data-pi18n="wx_eta">At my ETA</button>
             <button type="button" role="radio" class="segb" data-wx="now" aria-checked="false" data-pi18n="wx_now">Right now</button>
             <button type="button" role="radio" class="segb" data-wx="p24" aria-checked="false" data-pi18n="wx_24">In 24 h</button>
           </div>
-        </div>
-        <div class="alertbar calm" id="wxBar">Weather not checked yet.</div>
         <div class="row-btns"><button class="btn" type="button" id="wxGo" data-pi18n="wx_go">↻ Check weather</button><span class="note" id="wxMeta"></span></div>
         <div class="tblwrap"><table><thead><tr><th data-pi18n="th_when">When</th><th data-pi18n="th_where">Where</th><th data-pi18n="th_weather">Weather</th><th class="n" data-pi18n="th_temp">Temp</th><th class="n" data-pi18n="th_wind">Wind</th><th class="n" data-pi18n="th_rain">Rain</th><th data-pi18n="th_road">Road</th></tr></thead><tbody id="tbWx"></tbody></table></div>
-        <p class="note" data-pi18n="wx_note">Checked every 50 miles and at each stop. "At my ETA" uses your schedule above, so change the departure time or HOS and press Check weather again. Road surface forecasts reach 24 hours ahead. Alerts are the official watches and warnings in effect now.</p>
+        <p class="note" data-pi18n="wx_note">Checked every 50 miles and at each stop. "At my ETA" uses your schedule above, so change the departure time or HOS and press Check weather again. Forecasts and alerts come from the National Weather Service (US only). Road-surface data isn't available yet.</p></div>
       </section>
 
-      <section class="card" id="mapCard" hidden>
-        <div class="card-head"><h2 data-pi18n="sketch_h">Route sketch</h2>
-          <div class="maplinks"><a class="btn" id="gmMap" href="#" target="_blank" rel="noopener" data-pi18n="open_map">Open map ↗</a><a class="btn" id="gmSat" href="#" target="_blank" rel="noopener" data-pi18n="open_sat">Open satellite ↗</a></div>
-        </div>
-        <div class="legend"><span><i style="background:var(--route)"></i><span data-pi18n="lg_route">Route</span></span><span><i style="background:transparent;border-top:3px dashed var(--muted);height:0"></i><span data-pi18n="lg_alt">Other route</span></span><span><i style="background:var(--toll)"></i><span data-pi18n="lg_toll">Toll road</span></span><span><i style="background:var(--scale);width:8px;height:8px"></i><span data-pi18n="lg_weigh">Weigh / inspection</span></span><span><i style="background:var(--good);width:8px;height:8px;border-radius:50%"></i><span data-pi18n="lg_cert">Certified scale</span></span><span><i style="background:var(--stop);width:8px;height:8px;border-radius:50%"></i><span data-pi18n="lg_stop">Stop</span></span><span><i style="background:var(--bad);width:9px;height:8px;clip-path:polygon(50% 0,100% 100%,0 100%)"></i><span data-pi18n="lg_traffic">Traffic incident</span></span><span><i style="width:10px;height:10px;border:2px dashed var(--warn);border-radius:50%;background:transparent"></i><span data-pi18n="lg_wx">Weather to watch</span></span></div>
-        <div class="mapbox"><svg id="map" viewBox="0 0 800 420" role="img" aria-label="Route sketch"></svg></div>
-        <p class="note" id="gmNote">The buttons open this route in Google Maps, where you can switch between the regular map and satellite view.</p>
-      </section>
+      <button class="more-btn" type="button" id="fullBtn" aria-expanded="false" aria-controls="fullWrap"><span id="fullBtnTxt" data-pi18n="full_show">Show full details</span><span class="chev" aria-hidden="true">▾</span></button>
+
+      <div id="fullWrap" class="col" hidden>
+      
+
+      
+
+      
 
       <section class="card" id="detailCard" hidden>
         <div class="alertbar" id="alertbar" hidden></div>
@@ -631,7 +668,7 @@ footer.site{border-top:1px solid var(--line);padding-block:20px 32px;color:var(-
       </section>
       </div>
 
-      <div class="caveat"><b data-pi18n="cav_b">About this route.</b> <span data-pi18n="cav">The route is calculated by TomTom with your truck's weight and speed, but this connection doesn't support truck height, length or hazmat restrictions. Check low bridges and restricted roads before you dispatch. State miles come from sampling the route every 25 miles and pinning down each state line.</span></div>
+      <div class="caveat"><b data-pi18n="cav_b">About this route.</b> <span data-pi18n="cav">Routes are calculated for your truck's height, length, weight and speed, so low bridges and truck-restricted roads are avoided. Always follow posted signs. Miles by state are measured along the route from state boundaries.</span></div>
     </div>
 </div>
   </section>
@@ -744,7 +781,7 @@ const TRUCKS={
     12:{weight:11000,mpg:11,tank:35,speed:70,fuel:"gas",h:10.5,len:21,gvwr:"~12,000 GVWR"},
     16:{weight:14000,mpg:10,tank:40,speed:70,fuel:"gas",h:11.5,len:26,gvwr:"~14,500 GVWR"},
     20:{weight:19000,mpg:9,tank:50,speed:70,fuel:"diesel",h:12,len:31,gvwr:"~19,500 GVWR"},
-    26:{weight:25000,mpg:8,tank:50,speed:70,fuel:"diesel",h:12.5,len:36,gvwr:"25,999 GVWR"}
+    26:{weight:25000,mpg:9.5,tank:50,speed:70,fuel:"diesel",h:13,len:36,gvwr:"25,999 GVWR"}
   }
 };
 const TOLL_PER_AXLE=0.07;
@@ -758,7 +795,7 @@ const $=id=>document.getElementById(id);
 // ---------- language ----------
 const I18N={
 en:{
-gps_ok:"Showing weather at your location. Type a city or ZIP to check somewhere else.",gps_no:"Location is off for this site. Type a city or ZIP instead.",gps_here:"My location",gps_btn:"📍 My location",length:"Length, ft",height:"Height, ft",alts_h:"Route options",alt_fast:"Fastest",alt_n:"Option {n}",alt_tolls:"{n} toll mi",alt_notolls:"no tolls",alt_fuel:"fuel",alt_loading:"Loading this route…",alt_note:"Fuel for each option is an estimate from distance. Pick an option to get its full breakdown, weather and traffic. Scales and truck stops are listed along the fastest route.",lg_alt:"Other route",app_title:"Truck Route Planner",here_h:"Weather here",here_ph:"City, ZIP or address",check:"Check",here_loading:"Loading weather for your start location…",week:"7-day forecast",
+map_err:"The map couldn't load. Check your connection and plan the route again.",fold_hide:"Hide",fold_show:"Show",mt_sat:"Satellite",mt_map:"Map",map_route:"Route {n}",gps_ok:"Showing weather at your location. Type a city or ZIP to check somewhere else.",gps_no:"Location is off for this site. Type a city or ZIP instead.",gps_here:"My location",gps_btn:"📍 My location",length:"Length, ft",height:"Height, ft",alts_h:"Route options",alt_fast:"Fastest",alt_n:"Option {n}",alt_tolls:"{n} toll mi",alt_notolls:"no tolls",alt_fuel:"fuel",alt_loading:"Loading this route…",alt_note:"Tap a route on the map or a card here to switch. Fuel for other options is estimated from distance; the picked route gets the full breakdown, weather and traffic.",lg_alt:"Other route",app_title:"Truck Route Planner",here_h:"Weather here",here_ph:"City, ZIP or address",check:"Check",here_loading:"Loading weather for your start location…",week:"7-day forecast",
 here_note:"Allow location to see weather where you are, or type a city or ZIP. Until then it shows the start address.",
 stops_h:"Stops",example:"Example trip",add_stop:"+ Add stop",reverse:"⇅ Reverse",optimize:"Optimize the order of middle stops",avoid_tolls:"Avoid toll roads",
 truck_h:"Truck",tt:"Tractor-trailer",box:"Box truck",box_len:"Box length",axles:"Axles",axles_box:"Box trucks: 2 axles",fuel:"Fuel",diesel:"Diesel",gasoline:"Gasoline",
@@ -769,7 +806,7 @@ fuel_tolls:"Fuel + tolls",tolls_est:"Tolls (est.)",cpm:"Cost per mile",miles:"Mi
 sched_h:"Schedule",hos_on:"With HOS",hos_off:"No HOS",dep_at:"Depart at",arr_by:"Arrive by",dwell:"Time at each stop, h",
 wx_h:"Weather on the route",wx_eta:"At my ETA",wx_now:"Right now",wx_24:"In 24 h",wx_go:"↻ Check weather",
 wx_note:"Checked every 50 miles and at each stop. \"At my ETA\" uses your schedule above, so change the departure time or HOS and press Check weather again. Forecasts and alerts come from the National Weather Service (US only). Road-surface data isn't available yet.",
-sketch_h:"Route sketch",open_map:"Open map ↗",open_sat:"Open satellite ↗",
+sketch_h:"Route map",open_map:"Open map ↗",open_sat:"Open satellite ↗",
 lg_route:"Route",lg_toll:"Toll road",lg_weigh:"Weigh / inspection",lg_cert:"Certified scale",lg_stop:"Stop",lg_traffic:"Traffic incident",lg_wx:"Weather to watch",
 tab_states:"Miles by state",tab_traffic:"Traffic now",tab_legs:"Legs",tab_tolls:"Tolls",tab_cert:"Certified scales",tab_scales:"Weigh stations & inspections",tab_tstops:"Truck stops",
 tr_refresh:"↻ Refresh traffic",tr_note:"Live incidents from TomTom on the roads your route uses: accidents, closures, lane closures, jams, and hazards like ice, fog, flooding or high wind. This shows what's happening right now.",
@@ -813,7 +850,7 @@ cs_unavail:"TomTom unavailable here",s_needclaude:"This page needs to be opened 
 trip_est:"Trip estimate",more_settings:"More settings",ov_h:"Trip overview",full_show:"Show full details",full_hide:"Hide full details",ov_weather:"Weather",ov_traffic:"Traffic now",ov_tolls:"Tolls",ov_scales:"Scales",ov_fuel:"Cheapest fuel",v_hos:"with HOS",v_nohos:"no HOS",v_checking:"Checking…",v_clear:"All clear",v_wx_bad:"{n} to watch",v_tr_bad:"{n} serious",v_tr_minor:"{n} minor",v_delay:"~{m} min delay",v_nodelay:"no delays",v_tolls_none:"No tolls",v_toll_mi:"{n} toll mi",v_cert:"{n} certified",v_weigh:"{n} weigh / inspection",v_fuel_sub:"{p}/gal · fuel stops: {n}"
 },
 ru:{
-gps_ok:"Погода по вашему местоположению. Впишите город или ZIP, чтобы посмотреть другое место.",gps_no:"Геолокация для сайта выключена. Впишите город или ZIP.",gps_here:"Моё местоположение",gps_btn:"📍 Где я",length:"Длина, фт",height:"Высота, фт",alts_h:"Варианты маршрута",alt_fast:"Быстрее всего",alt_n:"Вариант {n}",alt_tolls:"платных миль: {n}",alt_notolls:"без toll",alt_fuel:"топливо",alt_loading:"Загружаю этот маршрут…",alt_note:"Топливо по вариантам — оценка по расстоянию. Выберите вариант, чтобы получить полный расчёт, погоду и пробки по нему. Весовые и стоянки показаны вдоль самого быстрого маршрута.",lg_alt:"Другой маршрут",app_title:"Планировщик рейсов",here_h:"Погода здесь",here_ph:"Город, ZIP или адрес",check:"Показать",here_loading:"Загружаю погоду для стартового адреса…",week:"Прогноз на 7 дней",
+map_err:"Карта не загрузилась. Проверьте интернет и постройте маршрут ещё раз.",fold_hide:"Скрыть",fold_show:"Показать",mt_sat:"Спутник",mt_map:"Карта",map_route:"Маршрут {n}",gps_ok:"Погода по вашему местоположению. Впишите город или ZIP, чтобы посмотреть другое место.",gps_no:"Геолокация для сайта выключена. Впишите город или ZIP.",gps_here:"Моё местоположение",gps_btn:"📍 Где я",length:"Длина, фт",height:"Высота, фт",alts_h:"Варианты маршрута",alt_fast:"Быстрее всего",alt_n:"Вариант {n}",alt_tolls:"платных миль: {n}",alt_notolls:"без toll",alt_fuel:"топливо",alt_loading:"Загружаю этот маршрут…",alt_note:"Нажмите на маршрут на карте или на карточку здесь, чтобы переключиться. Топливо для других вариантов — оценка по расстоянию; для выбранного считаются полный расчёт, погода и пробки.",lg_alt:"Другой маршрут",app_title:"Планировщик рейсов",here_h:"Погода здесь",here_ph:"Город, ZIP или адрес",check:"Показать",here_loading:"Загружаю погоду для стартового адреса…",week:"Прогноз на 7 дней",
 here_note:"Разрешите геолокацию, чтобы видеть погоду там, где вы, или впишите город или ZIP. Пока показан стартовый адрес.",
 stops_h:"Остановки",example:"Пример рейса",add_stop:"+ Добавить остановку",reverse:"⇅ Развернуть",optimize:"Оптимизировать порядок промежуточных остановок",avoid_tolls:"Объезжать платные дороги",
 truck_h:"Трак",tt:"Тягач с прицепом",box:"Бокс-трак",box_len:"Длина кузова",axles:"Оси",axles_box:"Бокс-траки: 2 оси",fuel:"Топливо",diesel:"Дизель",gasoline:"Бензин",
@@ -824,7 +861,7 @@ fuel_tolls:"Топливо + toll",tolls_est:"Toll (оценка)",cpm:"Цена
 sched_h:"Расписание",hos_on:"С HOS",hos_off:"Без HOS",dep_at:"Выезд в",arr_by:"Прибыть к",dwell:"Время на остановке, ч",
 wx_h:"Погода на маршруте",wx_eta:"На моё время",wx_now:"Сейчас",wx_24:"Через 24 ч",wx_go:"↻ Проверить погоду",
 wx_note:"Проверка каждые 50 миль и на каждой остановке. «На моё время» берёт расписание выше: измените выезд или HOS и снова нажмите «Проверить погоду». Прогноз и предупреждения — от National Weather Service (только США). Данных о покрытии дороги пока нет.",
-sketch_h:"Схема маршрута",open_map:"Открыть карту ↗",open_sat:"Открыть спутник ↗",
+sketch_h:"Карта маршрута",open_map:"Открыть карту ↗",open_sat:"Открыть спутник ↗",
 lg_route:"Маршрут",lg_toll:"Платная дорога",lg_weigh:"Весовая / инспекция",lg_cert:"Сертиф. весы",lg_stop:"Остановка",lg_traffic:"ДТП / пробка",lg_wx:"Опасная погода",
 tab_states:"Мили по штатам",tab_traffic:"Трафик сейчас",tab_legs:"Участки",tab_tolls:"Toll",tab_cert:"Сертифицированные весы",tab_scales:"Весовые и инспекции",tab_tstops:"Траковые стоянки",
 tr_refresh:"↻ Обновить трафик",tr_note:"Живые события TomTom на дорогах вашего маршрута: аварии, перекрытия, закрытые полосы, пробки и опасности вроде гололёда, тумана, подтоплений или сильного ветра. Это то, что происходит прямо сейчас.",
@@ -868,7 +905,7 @@ cs_unavail:"TomTom здесь недоступен",s_needclaude:"Откройт
 trip_est:"Расчёт рейса",more_settings:"Дополнительные настройки",ov_h:"Сводка рейса",full_show:"Полный расчёт",full_hide:"Свернуть полный расчёт",ov_weather:"Погода",ov_traffic:"Трафик сейчас",ov_tolls:"Toll",ov_scales:"Весы",ov_fuel:"Дешевле всего топливо",v_hos:"с HOS",v_nohos:"без HOS",v_checking:"Проверяю…",v_clear:"Всё чисто",v_wx_bad:"Опасных участков: {n}",v_tr_bad:"Серьёзных: {n}",v_tr_minor:"Мелких: {n}",v_delay:"задержка ~{m} мин",v_nodelay:"без задержек",v_tolls_none:"Без toll",v_toll_mi:"платных миль: {n}",v_cert:"Сертиф.: {n}",v_weigh:"весовых / инспекций: {n}",v_fuel_sub:"{p}/gal · заправок: {n}"
 },
 es:{
-gps_ok:"Clima en tu ubicación. Escribe una ciudad o ZIP para ver otro lugar.",gps_no:"La ubicación está desactivada para este sitio. Escribe una ciudad o ZIP.",gps_here:"Mi ubicación",gps_btn:"📍 Mi ubicación",length:"Largo, pies",height:"Altura, pies",alts_h:"Opciones de ruta",alt_fast:"La más rápida",alt_n:"Opción {n}",alt_tolls:"{n} mi de peaje",alt_notolls:"sin peajes",alt_fuel:"combustible",alt_loading:"Cargando esta ruta…",alt_note:"El combustible de cada opción es un estimado por distancia. Elige una opción para ver su cálculo completo, clima y tráfico. Las básculas y paradas se muestran a lo largo de la ruta más rápida.",lg_alt:"Otra ruta",app_title:"Planificador de rutas",here_h:"Clima aquí",here_ph:"Ciudad, código postal o dirección",check:"Ver",here_loading:"Cargando el clima del punto de salida…",week:"Pronóstico de 7 días",
+map_err:"El mapa no se pudo cargar. Revisa tu conexión y vuelve a planear la ruta.",fold_hide:"Ocultar",fold_show:"Mostrar",mt_sat:"Satélite",mt_map:"Mapa",map_route:"Ruta {n}",gps_ok:"Clima en tu ubicación. Escribe una ciudad o ZIP para ver otro lugar.",gps_no:"La ubicación está desactivada para este sitio. Escribe una ciudad o ZIP.",gps_here:"Mi ubicación",gps_btn:"📍 Mi ubicación",length:"Largo, pies",height:"Altura, pies",alts_h:"Opciones de ruta",alt_fast:"La más rápida",alt_n:"Opción {n}",alt_tolls:"{n} mi de peaje",alt_notolls:"sin peajes",alt_fuel:"combustible",alt_loading:"Cargando esta ruta…",alt_note:"Toca una ruta en el mapa o una tarjeta aquí para cambiar. El combustible de otras opciones se estima por distancia; la ruta elegida recibe el cálculo completo, clima y tráfico.",lg_alt:"Otra ruta",app_title:"Planificador de rutas",here_h:"Clima aquí",here_ph:"Ciudad, código postal o dirección",check:"Ver",here_loading:"Cargando el clima del punto de salida…",week:"Pronóstico de 7 días",
 here_note:"Permite la ubicación para ver el clima donde estás, o escribe una ciudad o ZIP. Mientras tanto muestra la dirección de salida.",
 stops_h:"Paradas",example:"Viaje de ejemplo",add_stop:"+ Agregar parada",reverse:"⇅ Invertir",optimize:"Optimizar el orden de las paradas intermedias",avoid_tolls:"Evitar peajes",
 truck_h:"Camión",tt:"Tractocamión",box:"Camión de caja",box_len:"Largo de la caja",axles:"Ejes",axles_box:"Camiones de caja: 2 ejes",fuel:"Combustible",diesel:"Diésel",gasoline:"Gasolina",
@@ -879,7 +916,7 @@ fuel_tolls:"Combustible + peajes",tolls_est:"Peajes (est.)",cpm:"Costo por milla
 sched_h:"Horario",hos_on:"Con HOS",hos_off:"Sin HOS",dep_at:"Salir a las",arr_by:"Llegar antes de",dwell:"Tiempo en cada parada, h",
 wx_h:"Clima en la ruta",wx_eta:"A mi hora de paso",wx_now:"Ahora",wx_24:"En 24 h",wx_go:"↻ Revisar clima",
 wx_note:"Se revisa cada 50 millas y en cada parada. «A mi hora de paso» usa tu horario de arriba: cambia la salida o el HOS y vuelve a pulsar Revisar clima. El pronóstico y las alertas son del National Weather Service (solo EE. UU.). Aún no hay datos del pavimento.",
-sketch_h:"Esquema de la ruta",open_map:"Abrir mapa ↗",open_sat:"Abrir satélite ↗",
+sketch_h:"Mapa de la ruta",open_map:"Abrir mapa ↗",open_sat:"Abrir satélite ↗",
 lg_route:"Ruta",lg_toll:"Peaje",lg_weigh:"Báscula / inspección",lg_cert:"Báscula certificada",lg_stop:"Parada",lg_traffic:"Incidente vial",lg_wx:"Clima a vigilar",
 tab_states:"Millas por estado",tab_traffic:"Tráfico ahora",tab_legs:"Tramos",tab_tolls:"Peajes",tab_cert:"Básculas certificadas",tab_scales:"Básculas e inspecciones",tab_tstops:"Paradas de camiones",
 tr_refresh:"↻ Actualizar tráfico",tr_note:"Incidentes en vivo de TomTom en las vías de tu ruta: accidentes, cierres, carriles cerrados, embotellamientos y peligros como hielo, niebla, inundaciones o viento fuerte. Muestra lo que pasa ahora mismo.",
@@ -1300,8 +1337,8 @@ function render(){
   last.ov={rows,fuelStops,tollN:tolls.length,tollMi,tollCost,certN:cert.length,enfN:enf.length};
   $("ovCard").hidden=false;
   renderTraffic();
-  drawMap(coords,tolls,all,pts,sm);
   $("mapCard").hidden=false;$("detailCard").hidden=false;$("schedCard").hidden=false;$("wxCard").hidden=false;
+  drawMap(coords,tolls,all,pts,sm);
 }
 function classify(f){
   const p=(f.properties||{}).poi||{},n=p.name||"";
@@ -1342,43 +1379,66 @@ function renderAlts(){
   el.querySelectorAll("[data-alt]").forEach(x=>x.addEventListener("click",()=>pickAlt(+x.dataset.alt)));
 }
 
-function drawMap(coords,tolls,sc,pts,sm){
-  const svg=$("map");const W=800,H=420,pad=36;
-  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
-  const ALTS=((last&&last.alts)||[]);
-  [coords].concat(ALTS.map(a=>a.coords)).forEach(cs=>cs.forEach(c=>{if(c[0]<minX)minX=c[0];if(c[0]>maxX)maxX=c[0];if(c[1]<minY)minY=c[1];if(c[1]>maxY)maxY=c[1]}));
-  const k=Math.cos(((minY+maxY)/2)*Math.PI/180);
-  const sx=(maxX-minX)*k||0.01,sy=(maxY-minY)||0.01;
-  const s=Math.min((W-2*pad)/sx,(H-2*pad)/sy);
-  const ox=(W-sx*s)/2,oy=(H-sy*s)/2;
-  const P=c=>[(ox+(c[0]-minX)*k*s).toFixed(1),(oy+(maxY-c[1])*s).toFixed(1)];
-  const step=Math.max(1,Math.floor(coords.length/1500));
-  const line=(a,b)=>{const out=[];for(let i=a;i<=b;i+=step)out.push(P(coords[i]).join(","));out.push(P(coords[b]).join(","));return out.join(" ")};
-  let g=`<rect width="${W}" height="${H}" fill="var(--bg)"/>`;
-  // grid
-  for(let i=1;i<8;i++)g+=`<line x1="${i*100}" y1="0" x2="${i*100}" y2="${H}" stroke="var(--line)" stroke-width="1"/>`;
-  for(let i=1;i<5;i++)g+=`<line x1="0" y1="${i*84}" x2="${W}" y2="${i*84}" stroke="var(--line)" stroke-width="1"/>`;
-  const lineOf=cs=>{const st=Math.max(1,Math.floor(cs.length/900)),o=[];for(let i=0;i<cs.length;i+=st)o.push(P(cs[i]).join(","));o.push(P(cs[cs.length-1]).join(","));return o.join(" ")};
-  const tag=(cs,n,on)=>{const [x,y]=P(cs[Math.floor(cs.length*0.42)]);return `<circle cx="${x}" cy="${y}" r="9" fill="${on?"var(--ink)":"var(--surface)"}" stroke="var(--ink)" stroke-width="1.5"/><text x="${x}" y="${+y+4}" text-anchor="middle" font-family="Geist Mono, monospace" font-size="11" font-weight="700" fill="${on?"var(--bg)":"var(--ink)"}">${n}</text>`};
-  ALTS.forEach((a,i)=>{if(i===last.altIdx)return;g+=`<polyline points="${lineOf(a.coords)}" fill="none" stroke="var(--muted)" stroke-width="3" stroke-dasharray="7 6" stroke-linejoin="round" stroke-linecap="round" opacity=".8"/>`});
-  g+=`<polyline points="${line(0,coords.length-1)}" fill="none" stroke="var(--route)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>`;
-  tolls.forEach(t=>{g+=`<polyline points="${line(t.a,t.b)}" fill="none" stroke="var(--toll)" stroke-width="7" stroke-linecap="round" opacity=".95"/>`});
-  // state lines
-  sm.bounds.forEach(b=>{const [x,y]=P(coords[b.i]);g+=`<circle cx="${x}" cy="${y}" r="3.5" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/><text x="${+x+6}" y="${+y-6}" font-family="Geist Mono, monospace" font-size="11" font-weight="700" fill="var(--muted)">${esc(b.to)}</text>`});
-  sc.forEach(x=>{const [cx,cy]=P(x.f.geometry.coordinates);const t=`<title>${esc((x.f.properties.poi||{}).name)}</title>`;
-    if(x.kind==="cert")g+=`<circle cx="${cx}" cy="${cy}" r="4" fill="var(--good)" stroke="var(--surface)" stroke-width="1.5">${t}</circle>`;
-    else g+=`<rect x="${cx-4}" y="${cy-4}" width="8" height="8" fill="var(--scale)" stroke="var(--surface)" stroke-width="1.5">${t}</rect>`});
-  (((last&&last.wx)||{}).samples||[]).forEach(s=>{if(!s.sev)return;const [cx,cy]=P(s.pt);
-    g+=`<circle cx="${cx}" cy="${cy}" r="10" fill="none" stroke="${s.sev>=2?"var(--bad)":"var(--warn)"}" stroke-width="3" stroke-dasharray="3 3"><title>${esc(s.reasons.join(", "))} · ${T("at_mi",{n:num(s.mile)})}</title></circle>`});
-  ((last&&last.traffic)||[]).forEach(x=>{const [cx,cy]=P(x.pt);const big=SEV_RANK[x.magnitudeOfDelay]>=3||x.category==="accident"||x.category==="road-closed";
-    g+=`<path d="M${cx} ${cy-7} L${+cx+6.5} ${+cy+5} L${cx-6.5} ${+cy+5} Z" fill="${big?"var(--bad)":"var(--warn)"}" stroke="var(--surface)" stroke-width="1.5"><title>${esc(catLabel(x.category))} · ${T("at_mi",{n:num(x.mi)})}</title></path>`});
-  pts.forEach((p,i)=>{const [x,y]=P(p);const fill=i===0?"var(--sign)":(i===pts.length-1?"var(--ink)":"var(--stop)");const tc=i===pts.length-1?"var(--bg)":(i===0?"var(--sign-ink)":"#fff");
-    g+=`<circle cx="${x}" cy="${y}" r="12" fill="${fill}" stroke="var(--surface)" stroke-width="2.5"/><text x="${x}" y="${+y+4.5}" text-anchor="middle" font-family="Geist Mono, monospace" font-size="12" font-weight="700" fill="${tc}">${i===0?"A":i+1}</text>`});
-  if(ALTS.length>1)ALTS.forEach((a,i)=>{g+=tag(a.coords,i+1,i===last.altIdx)});
-  // scale bar
-  const miPerPx=1/(s/(69.0));const barMi=[10,25,50,100,200,500].find(m=>m/miPerPx>70)||500;const bw=barMi/miPerPx;
-  g+=`<line x1="16" y1="${H-16}" x2="${16+bw}" y2="${H-16}" stroke="var(--ink)" stroke-width="2"/><text x="16" y="${H-22}" font-family="Geist Mono, monospace" font-size="11" fill="var(--muted)">${barMi} ${T("mi")}</text>`;
-  svg.innerHTML=g;
+// ---------- route map (Leaflet, loaded on first use) ----------
+const LJS="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js",LCSS="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";
+const MC={route:"#ff6a1a",casing:"#ffffff",alt:"#6b7280",toll:"#7c3aed",cert:"#17803f",weigh:"#c62a1f",bad:"#c62a1f",warn:"#b45a00",ink:"#111111",stop:"#4a4a48"};
+let leafletP=null,LMAP=null,LLAY=null,LBASE={},LFIT="",mapBase="map";
+try{mapBase=localStorage.getItem("rigora_map")==="sat"?"sat":"map"}catch(e){}
+function loadLeaflet(){
+  if(window.L&&window.L.map)return Promise.resolve(window.L);
+  if(!leafletP)leafletP=new Promise((res,rej)=>{
+    const css=document.createElement("link");css.rel="stylesheet";css.href=LCSS;document.head.appendChild(css);
+    const s=document.createElement("script");s.src=LJS;s.async=true;
+    s.onerror=()=>{leafletP=null;rej(new Error("map"))};
+    s.onload=()=>{let n=0;(function w(){if(window.L&&window.L.map)res(window.L);else if(n++>100){leafletP=null;rej(new Error("map"))}else setTimeout(w,50)})()};
+    document.head.appendChild(s);
+  });
+  return leafletP;
+}
+function setBase(b){
+  mapBase=b==="sat"?"sat":"map";try{localStorage.setItem("rigora_map",mapBase)}catch(e){}
+  document.querySelectorAll("[data-base]").forEach(x=>x.setAttribute("aria-checked",String(x.dataset.base===mapBase)));
+  if(LMAP){Object.values(LBASE).forEach(l=>LMAP.removeLayer(l));LBASE[mapBase].addTo(LMAP)}
+}
+document.querySelectorAll("[data-base]").forEach(x=>x.addEventListener("click",()=>setBase(x.dataset.base)));
+setBase(mapBase);
+async function drawMap(coords,tolls,sc,pts,sm){
+  let L;
+  try{L=await loadLeaflet()}catch(e){$("mapBox").innerHTML=`<p class="note" style="padding:16px">${T("map_err")}</p>`;return}
+  if(!last||last.coords!==coords)return; // a newer route is already on its way
+  if(!LMAP){
+    LMAP=L.map("lmap",{scrollWheelZoom:false,zoomSnap:0.5,attributionControl:true});
+    LBASE.map=L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{subdomains:"abcd",maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'});
+    LBASE.sat=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Imagery &copy; Esri"});
+    LMAP.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
+    LBASE[mapBase].addTo(LMAP);LLAY=L.layerGroup().addTo(LMAP);
+    LMAP.on("focus",()=>LMAP.scrollWheelZoom.enable());LMAP.on("blur",()=>LMAP.scrollWheelZoom.disable());
+  }
+  LMAP.invalidateSize();LLAY.clearLayers();
+  const ll=c=>[c[1],c[0]];
+  const thin=cs=>{const st=Math.max(1,Math.floor(cs.length/2000)),o=[];for(let i=0;i<cs.length;i+=st)o.push(ll(cs[i]));o.push(ll(cs[cs.length-1]));return o};
+  const icon=(html,cls,size)=>L.divIcon({html,className:"mk "+cls,iconSize:[size,size],iconAnchor:[size/2,size/2]});
+  const ALTS=(last&&last.alts)||[];
+  ALTS.forEach((a,i)=>{if(i===last.altIdx)return;const line=thin(a.coords);
+    L.polyline(line,{color:MC.alt,weight:5,opacity:.85,dashArray:"8 8",interactive:false}).addTo(LLAY);
+    L.polyline(line,{color:"#000",weight:22,opacity:0.001}).on("click",()=>pickAlt(i)).bindTooltip(i===0?T("alt_fast"):T("alt_n",{n:i+1}),{sticky:true}).addTo(LLAY)});
+  const main=thin(coords);
+  L.polyline(main,{color:MC.casing,weight:9,opacity:.9,interactive:false}).addTo(LLAY);
+  L.polyline(main,{color:MC.route,weight:5,opacity:1,interactive:false}).addTo(LLAY);
+  tolls.forEach(t=>L.polyline(coords.slice(t.a,t.b+1).map(ll),{color:MC.toll,weight:6,opacity:.95}).bindTooltip(T("toll_pill")+" · "+num(t.mi,1)+" "+T("mi"),{sticky:true}).addTo(LLAY));
+  sm.bounds.forEach(b=>L.marker(ll(coords[b.i]),{icon:icon(esc(b.to),"mk-st",26),keyboard:false}).bindTooltip(stName(b.from)+" → "+stName(b.to)).addTo(LLAY));
+  sc.forEach(x=>{const nm=(x.f.properties.poi||{}).name||"";
+    L.marker(ll(x.f.geometry.coordinates),{icon:icon("",x.kind==="cert"?"mk-cert":"mk-weigh",12),keyboard:false}).bindTooltip(esc(nm)).addTo(LLAY)});
+  (((last&&last.wx)||{}).samples||[]).forEach(s=>{if(!s.sev)return;
+    L.circleMarker(ll(s.pt),{radius:11,color:s.sev>=2?MC.bad:MC.warn,weight:3,dashArray:"3 3",fill:false}).bindTooltip(esc(s.reasons.join(", "))+" · "+T("at_mi",{n:num(s.mile)})).addTo(LLAY)});
+  ((last&&last.traffic)||[]).forEach(x=>{const big=SEV_RANK[x.magnitudeOfDelay]>=3||x.category==="accident"||x.category==="road-closed";
+    L.marker(ll(x.pt),{icon:icon("",big?"mk-tr":"mk-tr mk-tr-warn",16),keyboard:false}).bindTooltip(esc(catLabel(x.category))+" · "+T("at_mi",{n:num(x.mi)})).addTo(LLAY)});
+  pts.forEach((p,i)=>L.marker(ll(p),{icon:icon(i===0?"A":String(i+1),i===0?"mk-stop mk-a":(i===pts.length-1?"mk-stop mk-z":"mk-stop"),26),zIndexOffset:1000}).bindTooltip(esc((last.labels||[])[i]||"")).addTo(LLAY));
+  if(ALTS.length>1)ALTS.forEach((a,i)=>{const c=a.coords[idxAt(a.dist,a.dist[a.dist.length-1]*(0.35+0.2*i))];
+    L.marker(ll(c),{icon:L.divIcon({html:T("map_route",{n:i+1}),className:"mk "+(i===last.altIdx?"mk-alt on":"mk-alt"),iconSize:null,iconAnchor:[30,12]}),zIndexOffset:900,title:i===0?T("alt_fast"):T("alt_n",{n:i+1})}).on("click",()=>pickAlt(i)).addTo(LLAY)});
+  // fit only when the trip changes, so live traffic and weather updates keep the person's zoom
+  const key=pts.map(p=>p.join(",")).join("|")+"#"+ALTS.length;
+  if(key!==LFIT){LFIT=key;let b=L.latLngBounds(main);ALTS.forEach(a=>b.extend(L.latLngBounds(thin(a.coords))));LMAP.fitBounds(b,{padding:[28,28]})}
 }
 
 // ---------- live traffic ----------
@@ -1624,12 +1684,20 @@ function setFull(open,scroll){
 $("fullBtn").addEventListener("click",()=>setFull($("fullWrap").hidden));
 $("tiles").addEventListener("click",e=>{
   const b=e.target.closest(".tile");if(!b)return;const go=b.dataset.go;
-  if(go==="sched"){setFull(true,$("schedCard"));return}
-  if(go==="wx"){setFull(true,$("wxCard"));return}
+  if(go==="sched"){setFold("schedCard",true,true);return}
+  if(go==="wx"){setFold("wxCard",true,true);return}
   const tab=document.querySelector(`.tab[data-tab="${go}"]`);if(tab)tab.click();
   setFull(true,$("detailCard"));
 });
 try{if(localStorage.getItem("planner_full")==="1")setFull(true)}catch(e){}
+
+// ---------- folding cards (Schedule, Weather) ----------
+function setFold(id,open,scroll){
+  const card=$(id),btn=card.querySelector(".fold-btn"),body=$(btn.getAttribute("aria-controls")),t=btn.querySelector(".fold-t");
+  body.hidden=!open;btn.setAttribute("aria-expanded",String(open));t.dataset.pi18n=open?"fold_hide":"fold_show";t.textContent=T(t.dataset.pi18n);
+  if(open&&scroll)card.scrollIntoView({block:"start",behavior:"smooth"});
+}
+document.querySelectorAll(".fold-btn").forEach(b=>b.addEventListener("click",()=>setFold(b.closest("section").id,b.getAttribute("aria-expanded")!=="true")));
 
 // ---------- schedule / HOS ----------
 let hosOn=true,planMode="dep";

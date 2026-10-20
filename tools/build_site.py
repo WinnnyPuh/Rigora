@@ -129,6 +129,7 @@ function useGps(){
 $("hereGps").addEventListener("click",useGps);
 useGps(); // asks the browser for permission on first visit; the person can allow or block
 $("hereForm").addEventListener("submit",""")
+exec((ROOT / "tools" / "map_patch.py").read_text(encoding="utf-8"))
 for L, kv in newtxt.items():
     i = pjs.index(f"\n{L}:{{\n")
     j = pjs.index("\n}", i)
@@ -141,6 +142,8 @@ for L, kv in newtxt.items():
     pjs = pjs[:i] + seg + pjs[j:]
 pjs = pjs.replace('localStorage.getItem("board_lang")', 'localStorage.getItem("rigora_lang")').replace('localStorage.setItem("board_lang",l)', 'localStorage.setItem("rigora_lang",l)')
 
+for k, v in newtxt["en"].items():
+    pmain = re.sub(rf'(data-pi18n="{k}"[^>]*>)[^<]*', lambda m: m.group(1) + v.replace("&", "&amp;").replace("<", "&lt;"), pmain)
 # ---------- check page pieces ----------
 ccss = re.search(r"/\* check page \*/(.*?)</style>", C, re.S).group(1)
 cjs = re.search(r"<script>(.*?)</script>", C, re.S).group(1)
