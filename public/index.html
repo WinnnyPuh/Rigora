@@ -452,6 +452,7 @@ footer.site{border-top:1px solid var(--line);padding-block:20px 32px;color:var(-
 @media (max-width:560px){.big-form{grid-template-columns:1fr}.hero{padding-block:28px 16px}}
 
 .view[hidden]{display:none}
+#hereNote.warn{color:var(--bad,#b42318)}
 #v-plan{padding-top:20px}
 </style>
 </head>
@@ -474,7 +475,7 @@ footer.site{border-top:1px solid var(--line);padding-block:20px 32px;color:var(-
         <form class="here-in" id="hereForm"><input id="hereLoc" type="text" autocomplete="off" aria-label="Your location" placeholder="City, ZIP or address" data-pi18n-ph="here_ph"><button class="btn" type="submit" data-pi18n="check">Check</button><button class="btn" type="button" id="hereGps" data-pi18n="gps_btn">📍 My location</button></form>
         <div id="hereNow" class="here-now"><p class="note" data-pi18n="here_loading">Loading weather for your start location…</p></div>
         <details id="hereWeek"><summary data-pi18n="week">7-day forecast</summary><div class="tblwrap"><table><thead><tr><th data-pi18n="th_day">Day</th><th data-pi18n="th_cond">Conditions</th><th class="n" data-pi18n="th_hilo">High / low</th><th class="n" data-pi18n="th_wind">Wind</th><th class="n" data-pi18n="th_rain">Rain</th></tr></thead><tbody id="tbWeek"></tbody></table></div></details>
-        <p class="note" data-pi18n="here_note">The browser can't share your GPS location with this page, so it uses the start address. Type where you are to change it.</p>
+        <p class="note" id="hereNote" data-pi18n="here_note">The browser can't share your GPS location with this page, so it uses the start address. Type where you are to change it.</p>
       </section>
 
       <section class="card" aria-labelledby="hStops">
@@ -757,8 +758,8 @@ const $=id=>document.getElementById(id);
 // ---------- language ----------
 const I18N={
 en:{
-gps_no:"Location is off for this site. Type a city or ZIP instead.",gps_here:"My location",gps_btn:"📍 My location",length:"Length, ft",height:"Height, ft",alts_h:"Route options",alt_fast:"Fastest",alt_n:"Option {n}",alt_tolls:"{n} toll mi",alt_notolls:"no tolls",alt_fuel:"fuel",alt_loading:"Loading this route…",alt_note:"Fuel for each option is an estimate from distance. Pick an option to get its full breakdown, weather and traffic. Scales and truck stops are listed along the fastest route.",lg_alt:"Other route",app_title:"Truck Route Planner",here_h:"Weather here",here_ph:"City, ZIP or address",check:"Check",here_loading:"Loading weather for your start location…",week:"7-day forecast",
-here_note:"Press My location to use your GPS, or type a city or ZIP. Until then it shows the start address.",
+gps_ok:"Showing weather at your location. Type a city or ZIP to check somewhere else.",gps_no:"Location is off for this site. Type a city or ZIP instead.",gps_here:"My location",gps_btn:"📍 My location",length:"Length, ft",height:"Height, ft",alts_h:"Route options",alt_fast:"Fastest",alt_n:"Option {n}",alt_tolls:"{n} toll mi",alt_notolls:"no tolls",alt_fuel:"fuel",alt_loading:"Loading this route…",alt_note:"Fuel for each option is an estimate from distance. Pick an option to get its full breakdown, weather and traffic. Scales and truck stops are listed along the fastest route.",lg_alt:"Other route",app_title:"Truck Route Planner",here_h:"Weather here",here_ph:"City, ZIP or address",check:"Check",here_loading:"Loading weather for your start location…",week:"7-day forecast",
+here_note:"Allow location to see weather where you are, or type a city or ZIP. Until then it shows the start address.",
 stops_h:"Stops",example:"Example trip",add_stop:"+ Add stop",reverse:"⇅ Reverse",optimize:"Optimize the order of middle stops",avoid_tolls:"Avoid toll roads",
 truck_h:"Truck",tt:"Tractor-trailer",box:"Box truck",box_len:"Box length",axles:"Axles",axles_box:"Box trucks: 2 axles",fuel:"Fuel",diesel:"Diesel",gasoline:"Gasoline",
 weight:"Gross weight, lb",speed:"Governed speed, mph",tank:"Fuel tanks, gal",toll_rate:"Toll rate, $ per toll mile",price_adj:"Fuel price adj., $/gal",
@@ -812,8 +813,8 @@ cs_unavail:"TomTom unavailable here",s_needclaude:"This page needs to be opened 
 trip_est:"Trip estimate",more_settings:"More settings",ov_h:"Trip overview",full_show:"Show full details",full_hide:"Hide full details",ov_weather:"Weather",ov_traffic:"Traffic now",ov_tolls:"Tolls",ov_scales:"Scales",ov_fuel:"Cheapest fuel",v_hos:"with HOS",v_nohos:"no HOS",v_checking:"Checking…",v_clear:"All clear",v_wx_bad:"{n} to watch",v_tr_bad:"{n} serious",v_tr_minor:"{n} minor",v_delay:"~{m} min delay",v_nodelay:"no delays",v_tolls_none:"No tolls",v_toll_mi:"{n} toll mi",v_cert:"{n} certified",v_weigh:"{n} weigh / inspection",v_fuel_sub:"{p}/gal · fuel stops: {n}"
 },
 ru:{
-gps_no:"Геолокация для сайта выключена. Впишите город или ZIP.",gps_here:"Моё местоположение",gps_btn:"📍 Где я",length:"Длина, фт",height:"Высота, фт",alts_h:"Варианты маршрута",alt_fast:"Быстрее всего",alt_n:"Вариант {n}",alt_tolls:"платных миль: {n}",alt_notolls:"без toll",alt_fuel:"топливо",alt_loading:"Загружаю этот маршрут…",alt_note:"Топливо по вариантам — оценка по расстоянию. Выберите вариант, чтобы получить полный расчёт, погоду и пробки по нему. Весовые и стоянки показаны вдоль самого быстрого маршрута.",lg_alt:"Другой маршрут",app_title:"Планировщик рейсов",here_h:"Погода здесь",here_ph:"Город, ZIP или адрес",check:"Показать",here_loading:"Загружаю погоду для стартового адреса…",week:"Прогноз на 7 дней",
-here_note:"Нажмите «Где я», чтобы взять GPS, или впишите город или ZIP. Пока показан стартовый адрес.",
+gps_ok:"Погода по вашему местоположению. Впишите город или ZIP, чтобы посмотреть другое место.",gps_no:"Геолокация для сайта выключена. Впишите город или ZIP.",gps_here:"Моё местоположение",gps_btn:"📍 Где я",length:"Длина, фт",height:"Высота, фт",alts_h:"Варианты маршрута",alt_fast:"Быстрее всего",alt_n:"Вариант {n}",alt_tolls:"платных миль: {n}",alt_notolls:"без toll",alt_fuel:"топливо",alt_loading:"Загружаю этот маршрут…",alt_note:"Топливо по вариантам — оценка по расстоянию. Выберите вариант, чтобы получить полный расчёт, погоду и пробки по нему. Весовые и стоянки показаны вдоль самого быстрого маршрута.",lg_alt:"Другой маршрут",app_title:"Планировщик рейсов",here_h:"Погода здесь",here_ph:"Город, ZIP или адрес",check:"Показать",here_loading:"Загружаю погоду для стартового адреса…",week:"Прогноз на 7 дней",
+here_note:"Разрешите геолокацию, чтобы видеть погоду там, где вы, или впишите город или ZIP. Пока показан стартовый адрес.",
 stops_h:"Остановки",example:"Пример рейса",add_stop:"+ Добавить остановку",reverse:"⇅ Развернуть",optimize:"Оптимизировать порядок промежуточных остановок",avoid_tolls:"Объезжать платные дороги",
 truck_h:"Трак",tt:"Тягач с прицепом",box:"Бокс-трак",box_len:"Длина кузова",axles:"Оси",axles_box:"Бокс-траки: 2 оси",fuel:"Топливо",diesel:"Дизель",gasoline:"Бензин",
 weight:"Полный вес, lb",speed:"Ограничитель скорости, mph",tank:"Баки, gal",toll_rate:"Ставка toll, $ за платную милю",price_adj:"Поправка к цене, $/gal",
@@ -867,8 +868,8 @@ cs_unavail:"TomTom здесь недоступен",s_needclaude:"Откройт
 trip_est:"Расчёт рейса",more_settings:"Дополнительные настройки",ov_h:"Сводка рейса",full_show:"Полный расчёт",full_hide:"Свернуть полный расчёт",ov_weather:"Погода",ov_traffic:"Трафик сейчас",ov_tolls:"Toll",ov_scales:"Весы",ov_fuel:"Дешевле всего топливо",v_hos:"с HOS",v_nohos:"без HOS",v_checking:"Проверяю…",v_clear:"Всё чисто",v_wx_bad:"Опасных участков: {n}",v_tr_bad:"Серьёзных: {n}",v_tr_minor:"Мелких: {n}",v_delay:"задержка ~{m} мин",v_nodelay:"без задержек",v_tolls_none:"Без toll",v_toll_mi:"платных миль: {n}",v_cert:"Сертиф.: {n}",v_weigh:"весовых / инспекций: {n}",v_fuel_sub:"{p}/gal · заправок: {n}"
 },
 es:{
-gps_no:"La ubicación está desactivada para este sitio. Escribe una ciudad o ZIP.",gps_here:"Mi ubicación",gps_btn:"📍 Mi ubicación",length:"Largo, pies",height:"Altura, pies",alts_h:"Opciones de ruta",alt_fast:"La más rápida",alt_n:"Opción {n}",alt_tolls:"{n} mi de peaje",alt_notolls:"sin peajes",alt_fuel:"combustible",alt_loading:"Cargando esta ruta…",alt_note:"El combustible de cada opción es un estimado por distancia. Elige una opción para ver su cálculo completo, clima y tráfico. Las básculas y paradas se muestran a lo largo de la ruta más rápida.",lg_alt:"Otra ruta",app_title:"Planificador de rutas",here_h:"Clima aquí",here_ph:"Ciudad, código postal o dirección",check:"Ver",here_loading:"Cargando el clima del punto de salida…",week:"Pronóstico de 7 días",
-here_note:"Pulsa Mi ubicación para usar tu GPS, o escribe una ciudad o ZIP. Mientras tanto muestra la dirección de salida.",
+gps_ok:"Clima en tu ubicación. Escribe una ciudad o ZIP para ver otro lugar.",gps_no:"La ubicación está desactivada para este sitio. Escribe una ciudad o ZIP.",gps_here:"Mi ubicación",gps_btn:"📍 Mi ubicación",length:"Largo, pies",height:"Altura, pies",alts_h:"Opciones de ruta",alt_fast:"La más rápida",alt_n:"Opción {n}",alt_tolls:"{n} mi de peaje",alt_notolls:"sin peajes",alt_fuel:"combustible",alt_loading:"Cargando esta ruta…",alt_note:"El combustible de cada opción es un estimado por distancia. Elige una opción para ver su cálculo completo, clima y tráfico. Las básculas y paradas se muestran a lo largo de la ruta más rápida.",lg_alt:"Otra ruta",app_title:"Planificador de rutas",here_h:"Clima aquí",here_ph:"Ciudad, código postal o dirección",check:"Ver",here_loading:"Cargando el clima del punto de salida…",week:"Pronóstico de 7 días",
+here_note:"Permite la ubicación para ver el clima donde estás, o escribe una ciudad o ZIP. Mientras tanto muestra la dirección de salida.",
 stops_h:"Paradas",example:"Viaje de ejemplo",add_stop:"+ Agregar parada",reverse:"⇅ Invertir",optimize:"Optimizar el orden de las paradas intermedias",avoid_tolls:"Evitar peajes",
 truck_h:"Camión",tt:"Tractocamión",box:"Camión de caja",box_len:"Largo de la caja",axles:"Ejes",axles_box:"Camiones de caja: 2 ejes",fuel:"Combustible",diesel:"Diésel",gasoline:"Gasolina",
 weight:"Peso bruto, lb",speed:"Velocidad limitada, mph",tank:"Tanques, gal",toll_rate:"Peaje, $ por milla de peaje",price_adj:"Ajuste de precio, $/gal",
@@ -973,9 +974,9 @@ const hrs=s=>{let h=Math.floor(s/3600),m=Math.round((s%3600)/60);if(m===60){h++;
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 let mcp=null, stops=[
-  {q:"Parker, CO",pos:null,label:""},
-  {q:"Kansas City, MO",pos:null,label:""},
-  {q:"Chicago, IL",pos:null,label:""}
+  {q:"New York, NY",pos:null,label:""},
+  {q:"Chicago, IL",pos:null,label:""},
+  {q:"Seattle, WA",pos:null,label:""}
 ], exampleShown=true, last=null;
 
 // ---------- MCP helpers ----------
@@ -1486,13 +1487,14 @@ function renderHere(){
     $("tbWeek").innerHTML=f.map(d=>`<tr><td>${esc(dayFmt(new Date(d.dateTimeISO)))}</td><td>${esc(wxText(d.weather))}</td><td class="n">${d.maxTempF??"—"}° / ${d.minTempF??"—"}°</td><td class="n">${d.windSpeedMaxMPH!=null?d.windSpeedMaxMPH+" mph":"—"}</td><td class="n">${d.pop!=null?d.pop+"%":"—"}</td></tr>`).join("")||`<tr><td colspan="5">${T("no_fc")}</td></tr>`;
   }
 }
-function useGps(quiet){
-  if(!navigator.geolocation){if(!quiet)status(T("gps_no"),{err:true,busy:false});return}
-  navigator.geolocation.getCurrentPosition(p=>{const l=p.coords.latitude.toFixed(4)+","+p.coords.longitude.toFixed(4);$("hereLoc").value="";loadHere(l)},
-    ()=>{if(!quiet)status(T("gps_no"),{err:true,busy:false})},{maximumAge:600000,timeout:10000});
+function gpsNote(k){const n=$("hereNote");n.setAttribute("data-pi18n",k);n.textContent=T(k);n.classList.toggle("warn",k==="gps_no")}
+function useGps(){
+  if(!navigator.geolocation){gpsNote("gps_no");return}
+  navigator.geolocation.getCurrentPosition(p=>{const l=p.coords.latitude.toFixed(4)+","+p.coords.longitude.toFixed(4);$("hereLoc").value="";gpsNote("gps_ok");loadHere(l)},
+    ()=>gpsNote("gps_no"),{maximumAge:600000,timeout:15000});
 }
-$("hereGps").addEventListener("click",()=>useGps(false));
-try{navigator.permissions&&navigator.permissions.query({name:"geolocation"}).then(r=>{if(r.state==="granted")useGps(true)}).catch(()=>{})}catch(e){}
+$("hereGps").addEventListener("click",useGps);
+useGps(); // asks the browser for permission on first visit; the person can allow or block
 $("hereForm").addEventListener("submit",e=>{e.preventDefault();const v=$("hereLoc").value.trim();if(v)loadHere(v)});
 
 let wxMode="eta",wxBusy=false;

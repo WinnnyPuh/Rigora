@@ -24,6 +24,9 @@ pmain = rep(pmain, '<div class="f"><label class="lbl" for="weight" data-pi18n="w
   '<div class="f"><label class="lbl" for="length" data-pi18n="length">Length, ft</label><input id="length" type="number" step="1" min="10" max="120" value="72" inputmode="numeric"></div>'
   '<div class="f"><label class="lbl" for="weight" data-pi18n="weight">Gross weight, lb</label>')
 
+# example trip across the top of the country
+pjs = rep(pjs, '{q:"Parker, CO",pos:null,label:""},\n  {q:"Kansas City, MO",pos:null,label:""},\n  {q:"Chicago, IL",pos:null,label:""}',
+               '{q:"New York, NY",pos:null,label:""},\n  {q:"Chicago, IL",pos:null,label:""},\n  {q:"Seattle, WA",pos:null,label:""}')
 # ---------- planner script: talk to our own API instead of Claude connectors ----------
 adapter = r'''
 // ---------- site API adapter (replaces Claude connectors) ----------
@@ -105,24 +108,26 @@ newtxt = {
             wx_note="Se revisa cada 50 millas y en cada parada. «A mi hora de paso» usa tu horario de arriba: cambia la salida o el HOS y vuelve a pulsar Revisar clima. El pronóstico y las alertas son del National Weather Service (solo EE. UU.). Aún no hay datos del pavimento.",
             cs_ready="Mapas listos", height="Altura, pies", length="Largo, pies")}
 newtxt["en"].update(gps_btn="📍 My location", gps_here="My location", gps_no="Location is off for this site. Type a city or ZIP instead.",
-    here_note="Press My location to use your GPS, or type a city or ZIP. Until then it shows the start address.")
+    here_note="Allow location to see weather where you are, or type a city or ZIP. Until then it shows the start address.", gps_ok="Showing weather at your location. Type a city or ZIP to check somewhere else.")
 newtxt["ru"].update(gps_btn="📍 Где я", gps_here="Моё местоположение", gps_no="Геолокация для сайта выключена. Впишите город или ZIP.",
-    here_note="Нажмите «Где я», чтобы взять GPS, или впишите город или ZIP. Пока показан стартовый адрес.")
+    here_note="Разрешите геолокацию, чтобы видеть погоду там, где вы, или впишите город или ZIP. Пока показан стартовый адрес.", gps_ok="Погода по вашему местоположению. Впишите город или ZIP, чтобы посмотреть другое место.")
 newtxt["es"].update(gps_btn="📍 Mi ubicación", gps_here="Mi ubicación", gps_no="La ubicación está desactivada para este sitio. Escribe una ciudad o ZIP.",
-    here_note="Pulsa Mi ubicación para usar tu GPS, o escribe una ciudad o ZIP. Mientras tanto muestra la dirección de salida.")
+    here_note="Permite la ubicación para ver el clima donde estás, o escribe una ciudad o ZIP. Mientras tanto muestra la dirección de salida.", gps_ok="Clima en tu ubicación. Escribe una ciudad o ZIP para ver otro lugar.")
 
 # real GPS for "Weather here"; hide fields NWS doesn't give
+pmain = rep(pmain, '<p class="note" data-pi18n="here_note">', '<p class="note" id="hereNote" data-pi18n="here_note">')
 pmain = rep(pmain, '<button class="btn" type="submit" data-pi18n="check">Check</button></form>',
   '<button class="btn" type="submit" data-pi18n="check">Check</button><button class="btn" type="button" id="hereGps" data-pi18n="gps_btn">📍 My location</button></form>')
 pjs = rep(pjs, """<span class="meta">${T("feels")} ${w.feelslikeF!=null?Math.round(w.feelslikeF)+"°F":"—"} · ${T("wind")} ${w.windSpeedMPH!=null?Math.round(w.windSpeedMPH):"—"} mph ${esc(w.windDir||"")}${w.windGustMPH?" ("+T("gusts")+" "+Math.round(w.windGustMPH)+")":""} · ${T("humidity")} ${w.humidity??"—"}% · ${T("visibility")} ${w.visibilityMI!=null?Math.round(w.visibilityMI)+" "+T("mi"):"—"}""",
   """<span class="meta">${[w.feelslikeF!=null?T("feels")+" "+Math.round(w.feelslikeF)+"°F":"",w.windSpeedMPH!=null?T("wind")+" "+Math.round(w.windSpeedMPH)+" mph "+esc(w.windDir||"")+(w.windGustMPH?" ("+T("gusts")+" "+Math.round(w.windGustMPH)+")":""):"",w.humidity!=null?T("humidity")+" "+w.humidity+"%":"",w.visibilityMI!=null?T("visibility")+" "+Math.round(w.visibilityMI)+" "+T("mi"):""].filter(Boolean).join(" · ")}""")
-pjs = rep(pjs, '$("hereForm").addEventListener("submit",', """function useGps(quiet){
-  if(!navigator.geolocation){if(!quiet)status(T("gps_no"),{err:true,busy:false});return}
-  navigator.geolocation.getCurrentPosition(p=>{const l=p.coords.latitude.toFixed(4)+","+p.coords.longitude.toFixed(4);$("hereLoc").value="";loadHere(l)},
-    ()=>{if(!quiet)status(T("gps_no"),{err:true,busy:false})},{maximumAge:600000,timeout:10000});
+pjs = rep(pjs, '$("hereForm").addEventListener("submit",', """function gpsNote(k){const n=$("hereNote");n.setAttribute("data-pi18n",k);n.textContent=T(k);n.classList.toggle("warn",k==="gps_no")}
+function useGps(){
+  if(!navigator.geolocation){gpsNote("gps_no");return}
+  navigator.geolocation.getCurrentPosition(p=>{const l=p.coords.latitude.toFixed(4)+","+p.coords.longitude.toFixed(4);$("hereLoc").value="";gpsNote("gps_ok");loadHere(l)},
+    ()=>gpsNote("gps_no"),{maximumAge:600000,timeout:15000});
 }
-$("hereGps").addEventListener("click",()=>useGps(false));
-try{navigator.permissions&&navigator.permissions.query({name:"geolocation"}).then(r=>{if(r.state==="granted")useGps(true)}).catch(()=>{})}catch(e){}
+$("hereGps").addEventListener("click",useGps);
+useGps(); // asks the browser for permission on first visit; the person can allow or block
 $("hereForm").addEventListener("submit",""")
 for L, kv in newtxt.items():
     i = pjs.index(f"\n{L}:{{\n")
@@ -178,6 +183,7 @@ html = '''<!doctype html>
 <style>
 ''' + css + "\n/* check page */" + ccss + '''
 .view[hidden]{display:none}
+#hereNote.warn{color:var(--bad,#b42318)}
 #v-plan{padding-top:20px}
 </style>
 </head>
