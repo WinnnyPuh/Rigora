@@ -29,6 +29,15 @@ export async function search({ q, limit = 6, typeahead = true }, env, fetcher = 
     r.poi ? { name: r.poi.name, phone: r.poi.phone, brands: (r.poi.brands || []).map(b => b.name) } : undefined)) };
 }
 
+// ---------- reverse geocode: GPS point -> street address (for "My location") ----------
+export async function reverse({ lat, lon }, env, fetcher = fetch) {
+  const la = +lat, lo = +lon;
+  if (!isFinite(la) || !isFinite(lo) || Math.abs(la) > 90 || Math.abs(lo) > 180) throw new UpstreamError("bad position", 400);
+  const j = await tt(`/search/2/reverseGeocode/${la.toFixed(5)},${lo.toFixed(5)}.json?language=en-US`, env, fetcher);
+  const a = ((j.addresses || [])[0] || {}).address || {};
+  return { address: { freeformAddress: a.freeformAddress, municipality: a.municipality, countrySubdivision: a.countrySubdivision, postalCode: a.postalCode } };
+}
+
 // ---------- truck route with alternatives ----------
 const num = (v, lo, hi) => { const n = +v; return isFinite(n) && n >= lo && n <= hi ? n : null; };
 export function routeQuery(b) {

@@ -131,6 +131,7 @@ useGps(); // asks the browser for permission on first visit; the person can allo
 $("hereForm").addEventListener("submit",""")
 exec((ROOT / "tools" / "map_patch.py").read_text(encoding="utf-8"))
 exec((ROOT / "tools" / "theme_patch.py").read_text(encoding="utf-8"))
+exec((ROOT / "tools" / "money_patch.py").read_text(encoding="utf-8"))
 for L, kv in newtxt.items():
     i = pjs.index(f"\n{L}:{{\n")
     j = pjs.index("\n}", i)
@@ -201,6 +202,15 @@ html = '''<!doctype html>
 ''' + css + "\n/* check page */" + ccss + '''
 .view[hidden]{display:none}
 #hereNote.warn{color:var(--bad,#b42318)}
+.money-h{font-weight:800;font-size:15px;margin:10px 0 2px}
+.pl{border:2px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:4px;margin-top:8px}
+.pl.plus{border-color:var(--good,#1f7a45)}.pl.minus{border-color:var(--bad,#b42318)}
+.pl .pl-big{font-weight:900;font-size:32px;line-height:1.05;font-variant-numeric:tabular-nums}
+.pl.plus .pl-big{color:var(--good,#1f7a45)}.pl.minus .pl-big{color:var(--bad,#b42318)}
+.pl div{display:flex;justify-content:space-between;gap:10px;font-size:14px;font-variant-numeric:tabular-nums}
+.locmsg{font-size:13px;color:var(--muted)}.locmsg:empty{display:none}.locmsg.err{color:var(--bad,#b42318)}.locmsg.ok{color:var(--good,#1f7a45)}
+.locdiag{display:block;font-size:11px;font-family:var(--mono,monospace);color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
+[aria-busy="true"]{opacity:.6;cursor:progress}
 #v-plan{padding-top:20px}
 </style>
 <meta name="theme-color" content="#ffffff">

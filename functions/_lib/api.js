@@ -1,14 +1,15 @@
 // Router for the planner endpoints. Keys stay on the server.
 //   GET  /api/search?q=&limit=
+//   GET  /api/reverse?lat=&lon=
 //   POST /api/route    {locations:[[lon,lat]...], vehicleWeight(kg), vehicleHeight(m), vehicleLength(m), vehicleMaxSpeed(km/h), avoid:[], maxAlternatives}
 //   POST /api/along    {points:[[lon,lat]...], query, code}
 //   GET  /api/traffic?bbox=minLon,minLat,maxLon,maxLat
 //   GET  /api/wx?kind=current|daily|hourly|alerts&loc=lat,lon|place&at=ISO
 import { json } from "./handler.js";
-import { search, route, along, traffic, UpstreamError } from "./tomtom.js";
+import { search, reverse, route, along, traffic, UpstreamError } from "./tomtom.js";
 import { weather } from "./nws.js";
 
-const CACHE = { search: 3600, traffic: 120, wx: 600 };
+const CACHE = { search: 3600, reverse: 3600, traffic: 120, wx: 600 };
 
 // GET /api/tile/{basic|night|sat|hybrid|hybridnight}/{z}/{x}/{y}
 const TILE = {
@@ -57,11 +58,11 @@ export async function api(request, env, waitUntil = () => {}) {
       }
       return json(out, 200, 0);
     }
-    if (request.method === "GET" && (name === "search" || name === "traffic" || name === "wx")) {
+    if (request.method === "GET" && (name === "search" || name === "reverse" || name === "traffic" || name === "wx")) {
       const cache = typeof caches !== "undefined" ? caches.default : null;
       const key = new Request(url.toString(), { method: "GET" });
       if (cache) { const hit = await cache.match(key); if (hit) return hit; }
-      const out = name === "search" ? await search(q, env) : name === "traffic" ? await traffic(q, env) : await weather(q, env);
+      const out = name === "search" ? await search(q, env) : name === "reverse" ? await reverse(q, env) : name === "traffic" ? await traffic(q, env) : await weather(q, env);
       const res = json(out, 200, CACHE[name]);
       if (cache) waitUntil(cache.put(key, res.clone()));
       return res;
