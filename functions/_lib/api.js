@@ -48,6 +48,10 @@ export async function api(request, env, waitUntil = () => {}) {
       if (env.TOMTOM_KEY) {
         try { await search({ q: "Denver, CO", limit: 1 }, env); out.tomtom = "ok"; }
         catch (e) { out.tomtom = String(e.message || e).replace(env.TOMTOM_KEY, "***").slice(0, 300); }
+        try {
+          const r = await fetch(`https://api.tomtom.com/map/1/tile/basic/main/5/9/12.png?key=${encodeURIComponent(env.TOMTOM_KEY)}`);
+          out.tiles = r.ok ? "ok" : `${r.status} ${(await r.text()).slice(0, 200)}`;
+        } catch (e) { out.tiles = String(e.message || e).slice(0, 200); }
       }
       return json(out, 200, 0);
     }
