@@ -431,7 +431,7 @@ main .wrap{padding-block:20px 48px}
 
 [hidden]{display:none!important}
 /* route map */
-#lmap{height:440px;width:100%;border-radius:12px;z-index:0;background:#e9e9e6}
+#lmap{height:440px;width:100%;border-radius:12px;z-index:0;background:var(--bg)}
 @media (max-width:640px){#lmap{height:340px}}
 .mapbox{border-radius:12px;overflow:hidden}
 #lmap .leaflet-control-attribution{font-size:10px}
@@ -457,6 +457,27 @@ main .wrap{padding-block:20px 48px}
 #wxCard .card-head,#schedCard .card-head{margin-bottom:10px}
 #wxBody>.seg{margin-bottom:12px}
 #fullBtn{margin:4px 0 0}
+
+/* night: warm, dim, low blue light */
+:root[data-theme="night"]{
+  --bg:#17110a; --surface:#211910; --ink:#f2d7a6; --muted:#b39169; --line:#3a2d1c;
+  --sign:#f2d7a6; --sign-ink:#17110a; --amber:#ff8a3d; --amber-ink:#1a0d02; --stripe:#ff8a3d;
+  --good:#b5c76a; --warn:#f0a040; --bad:#ff7d5e; --info:#c9ab82; --route:#f2d7a6; --toll:#ff8a3d; --scale:#ff7d5e; --stop:#6b5638; color-scheme:dark}
+:root[data-theme="night"] img,:root[data-theme="night"] #lmap .leaflet-pane{filter:sepia(.55) saturate(.85) brightness(.8)}
+:root[data-theme="dark"] #lmap .base-map{filter:invert(.92) hue-rotate(180deg) brightness(.9) contrast(.9)}
+:root[data-theme="night"] #lmap .base-map{filter:invert(.92) hue-rotate(180deg) sepia(.7) brightness(.8)}
+:root[data-theme="night"] #lmap .leaflet-tile-pane{filter:none}
+/* theme picker */
+.theme{position:relative}
+.theme-btn{display:flex;align-items:center;gap:6px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font:600 12px var(--mono);cursor:pointer;min-height:30px}
+.theme-btn:focus-visible,.theme-menu button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.theme-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:1000;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px;min-width:190px;box-shadow:0 8px 24px rgba(0,0,0,.18);display:grid;gap:2px}
+.theme-menu button{display:flex;align-items:center;gap:10px;width:100%;background:transparent;color:var(--ink);border:0;border-radius:8px;padding:9px 10px;font:500 14px var(--body);text-align:left;cursor:pointer}
+.theme-menu button:hover{background:var(--bg)}
+.theme-menu button[aria-checked="true"]{background:var(--bg);font-weight:700}
+.theme-menu button[aria-checked="true"]::after{content:"✓";margin-left:auto}
+.theme-menu .sw{width:18px;height:18px;border-radius:50%;border:1px solid var(--line);flex:none}
+.sw-light{background:#fff}.sw-dark{background:#111}.sw-night{background:linear-gradient(135deg,#211910 50%,#ff8a3d 50%)}
 
 /* check page */
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -484,11 +505,22 @@ footer.site{border-top:1px solid var(--line);padding-block:20px 32px;color:var(-
 #hereNote.warn{color:var(--bad,#b42318)}
 #v-plan{padding-top:20px}
 </style>
+<meta name="theme-color" content="#ffffff">
+<script>
+(function(){var t=null;try{t=localStorage.getItem("rigora_theme")}catch(e){}
+if(t!=="light"&&t!=="dark"&&t!=="night")t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";
+document.documentElement.setAttribute("data-theme",t)})();
+</script>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <h1><span class="logo" aria-hidden="true"></span><span data-i18n="app">Rigora</span><span class="tagline" data-i18n="tagline">Verified moving freight</span></h1>
-  <div class="hdr-r"><div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="ru" aria-pressed="false">RU</button><button type="button" data-lang="es" aria-pressed="false">ES</button></div></div>
+  <div class="hdr-r"><div class="theme"><button type="button" class="theme-btn" id="themeBtn" aria-haspopup="true" aria-expanded="false" aria-controls="themeMenu"><span aria-hidden="true" id="themeIco">◐</span><span id="themeTxt">Theme</span></button>
+    <div class="theme-menu" id="themeMenu" role="radiogroup" hidden>
+      <button type="button" role="radio" data-theme-set="light" aria-checked="false"><span class="sw sw-light"></span><span data-tl="light">Light</span></button>
+      <button type="button" role="radio" data-theme-set="dark" aria-checked="false"><span class="sw sw-dark"></span><span data-tl="dark">Dark</span></button>
+      <button type="button" role="radio" data-theme-set="night" aria-checked="false"><span class="sw sw-night"></span><span data-tl="night">Night</span></button>
+    </div></div><div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="ru" aria-pressed="false">RU</button><button type="button" data-lang="es" aria-pressed="false">ES</button></div></div>
 </div></header>
 <nav class="tabs" aria-label="Sections"><div class="wrap" role="tablist">
   <button role="tab" data-view="plan" aria-selected="true" data-i18n="nav_plan">Trip planner</button>
@@ -1408,7 +1440,7 @@ async function drawMap(coords,tolls,sc,pts,sm){
   if(!last||last.coords!==coords)return; // a newer route is already on its way
   if(!LMAP){
     LMAP=L.map("lmap",{scrollWheelZoom:false,zoomSnap:0.5,attributionControl:true});
-    LBASE.map=L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{subdomains:"abcd",maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'});
+    LBASE.map=L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{subdomains:"abcd",maxZoom:19,className:"base-map",attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'});
     LBASE.sat=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Imagery &copy; Esri"});
     LMAP.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
     LBASE[mapBase].addTo(LMAP);LLAY=L.layerGroup().addTo(LMAP);
@@ -2044,6 +2076,35 @@ $("f").addEventListener("submit",e=>{e.preventDefault();check($("q").value)});
 document.addEventListener("click",e=>{const b=e.target.closest("[data-q]");if(b&&b.closest("#v-check"))check(b.dataset.q)});
 applyLang(lang);renderRecent();
 const q0=new URLSearchParams(location.search).get("q");showView(q0||location.hash==="#company"?"check":"plan");if(q0)check(q0);
+})();
+</script>
+<script>
+(function(){
+  const L={en:{theme:"Theme",light:"Light",dark:"Dark",night:"Night · warm"},
+           ru:{theme:"Тема",light:"Светлая",dark:"Тёмная",night:"Ночная · тёплая"},
+           es:{theme:"Tema",light:"Clara",dark:"Oscura",night:"Noche · cálida"}};
+  const ICO={light:"☀",dark:"☾",night:"◐"};
+  const root=document.documentElement,btn=document.getElementById("themeBtn"),menu=document.getElementById("themeMenu");
+  let saved=null;try{saved=localStorage.getItem("rigora_theme")}catch(e){}
+  const lang=()=>{const l=(root.lang||"en").slice(0,2);return L[l]?l:"en"};
+  function paint(){
+    const t=root.getAttribute("data-theme")||"light",d=L[lang()];
+    document.getElementById("themeTxt").textContent=d.theme;document.getElementById("themeIco").textContent=ICO[t]||"◐";
+    btn.setAttribute("aria-label",d.theme+": "+d[t]);
+    menu.querySelectorAll("[data-tl]").forEach(s=>s.textContent=d[s.dataset.tl]);
+    menu.querySelectorAll("[data-theme-set]").forEach(b=>b.setAttribute("aria-checked",String(b.dataset.themeSet===t)));
+    const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=getComputedStyle(root).getPropertyValue("--surface").trim()||"#ffffff";
+  }
+  function set(t){root.setAttribute("data-theme",t);saved=t;try{localStorage.setItem("rigora_theme",t)}catch(e){}paint()}
+  function open(o){menu.hidden=!o;btn.setAttribute("aria-expanded",String(o));if(o)(menu.querySelector('[aria-checked="true"]')||menu.querySelector("button")).focus()}
+  btn.addEventListener("click",e=>{e.stopPropagation();open(menu.hidden)});
+  menu.addEventListener("click",e=>{const b=e.target.closest("[data-theme-set]");if(!b)return;set(b.dataset.themeSet);open(false);btn.focus()});
+  document.addEventListener("click",e=>{if(!menu.hidden&&!e.target.closest(".theme"))open(false)});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!menu.hidden){open(false);btn.focus()}});
+  // follow the phone's light/dark setting until the person picks a theme here
+  try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",e=>{if(!saved){root.setAttribute("data-theme",e.matches?"dark":"light");paint()}})}catch(e){}
+  new MutationObserver(paint).observe(root,{attributes:true,attributeFilter:["lang"]});
+  paint();
 })();
 </script>
 </body>

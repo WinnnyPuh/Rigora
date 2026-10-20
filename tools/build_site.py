@@ -130,6 +130,7 @@ $("hereGps").addEventListener("click",useGps);
 useGps(); // asks the browser for permission on first visit; the person can allow or block
 $("hereForm").addEventListener("submit",""")
 exec((ROOT / "tools" / "map_patch.py").read_text(encoding="utf-8"))
+exec((ROOT / "tools" / "theme_patch.py").read_text(encoding="utf-8"))
 for L, kv in newtxt.items():
     i = pjs.index(f"\n{L}:{{\n")
     j = pjs.index("\n}", i)
@@ -189,11 +190,13 @@ html = '''<!doctype html>
 #hereNote.warn{color:var(--bad,#b42318)}
 #v-plan{padding-top:20px}
 </style>
+<meta name="theme-color" content="#ffffff">
+''' + THEME_HEAD + '''
 </head>
 <body>
 <header class="top"><div class="wrap">
   <h1><span class="logo" aria-hidden="true"></span><span data-i18n="app">Rigora</span><span class="tagline" data-i18n="tagline">Verified moving freight</span></h1>
-  <div class="hdr-r"><div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="ru" aria-pressed="false">RU</button><button type="button" data-lang="es" aria-pressed="false">ES</button></div></div>
+  <div class="hdr-r">''' + THEME_BTN + '''<div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="ru" aria-pressed="false">RU</button><button type="button" data-lang="es" aria-pressed="false">ES</button></div></div>
 </div></header>
 <nav class="tabs" aria-label="Sections"><div class="wrap" role="tablist">
   <button role="tab" data-view="plan" aria-selected="true" data-i18n="nav_plan">Trip planner</button>
@@ -208,6 +211,7 @@ html = '''<!doctype html>
 <script>''' + dp + '''</script>
 <script>''' + pjs + '''</script>
 <script>''' + cjs + '''</script>
+<script>''' + THEME_JS + '''</script>
 </body>
 </html>
 '''

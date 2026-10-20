@@ -87,7 +87,7 @@ async function drawMap(coords,tolls,sc,pts,sm){
   if(!last||last.coords!==coords)return; // a newer route is already on its way
   if(!LMAP){
     LMAP=L.map("lmap",{scrollWheelZoom:false,zoomSnap:0.5,attributionControl:true});
-    LBASE.map=L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{subdomains:"abcd",maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'});
+    LBASE.map=L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{subdomains:"abcd",maxZoom:19,className:"base-map",attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'});
     LBASE.sat=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Imagery &copy; Esri"});
     LMAP.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
     LBASE[mapBase].addTo(LMAP);LLAY=L.layerGroup().addTo(LMAP);
@@ -150,7 +150,7 @@ css = rep(css, "#v-plan .mapbox svg{display:block;width:100%;height:auto}", "")
 css += r'''
 [hidden]{display:none!important}
 /* route map */
-#lmap{height:440px;width:100%;border-radius:12px;z-index:0;background:#e9e9e6}
+#lmap{height:440px;width:100%;border-radius:12px;z-index:0;background:var(--bg)}
 @media (max-width:640px){#lmap{height:340px}}
 .mapbox{border-radius:12px;overflow:hidden}
 #lmap .leaflet-control-attribution{font-size:10px}
