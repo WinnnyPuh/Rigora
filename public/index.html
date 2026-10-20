@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Rigora · Carrier and broker check</title>
-<meta name="description" content="Check any US carrier or broker by USDOT or MC: authority, insurance, bond, BOC-3, safety and crashes from live FMCSA data.">
+<title>Rigora · Truck trip planner and carrier check</title>
+<meta name="description" content="Plan truck trips with fuel by state, tolls, weather, traffic, scales and HOS, and check any US carrier or broker by USDOT or MC.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500;700&display=swap">
@@ -263,6 +263,171 @@ main .wrap{padding-block:20px 48px}
 .dp-foot{display:flex;justify-content:space-between;gap:8px}
 .dp-foot button{background:transparent;border:1px solid var(--line);border-radius:4px;padding:6px 12px;font-weight:700;color:var(--ink)}
 .dp-done{background:var(--amber)!important;color:var(--amber-ink)!important;border-color:var(--amber)!important}
+/* ===== route planner (scoped) ===== */
+#v-plan .lbl{font:700 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+#v-plan input:focus{border-color:var(--sign)}
+#v-plan .conn{font:600 12px var(--mono);display:flex;align-items:center;gap:8px}
+#v-plan .dot{width:9px;height:9px;border-radius:50%;background:var(--stripe)}
+#v-plan .dot.ok{background:#7ee2a8}
+#v-plan .dot.bad{background:#ff8a80}
+#v-plan .pl-grid{display:grid;grid-template-columns:380px 1fr;gap:24px;padding-block:24px 48px;align-items:start}
+#v-plan .col{display:grid;gap:16px;min-width:0}
+#v-plan .card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;display:grid;gap:12px;min-width:0}
+#v-plan .card h2{font-size:22px;font-weight:800}
+#v-plan .card-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+#v-plan .stops{display:grid;gap:8px;list-style:none;margin:0;padding:0}
+#v-plan .stop{display:grid;grid-template-columns:28px 1fr 30px;gap:8px;align-items:start;position:relative}
+#v-plan .badge{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:700 13px var(--mono);background:var(--stop);color:#fff;margin-top:5px}
+#v-plan .stop:first-child .badge{background:var(--sign)}
+#v-plan .stop:last-child .badge{background:var(--ink);color:var(--bg)}
+#v-plan .addr{display:grid;gap:3px;min-width:0;position:relative}
+#v-plan .resolved{font-size:12px;color:var(--muted);min-height:16px;overflow-wrap:anywhere}
+#v-plan .resolved.ok{color:var(--good)}
+#v-plan .resolved.err{color:var(--bad)}
+#v-plan .rm{height:38px;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:4px;font-size:18px}
+#v-plan .rm:hover{color:var(--ink);border-color:var(--ink)}
+#v-plan .sugg{position:absolute;top:42px;left:0;right:0;z-index:20;background:var(--surface);border:1px solid var(--ink);border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,.18);display:grid;max-height:260px;overflow:auto}
+#v-plan .sugg button{text-align:left;background:transparent;border:0;border-bottom:1px solid var(--line);padding:9px 11px;color:var(--ink);font-size:14px}
+#v-plan .sugg button:hover,#v-plan .sugg button:focus{background:var(--bg)}
+#v-plan .sugg small{display:block;color:var(--muted);font-size:12px}
+#v-plan .row-btns{display:flex;gap:8px;flex-wrap:wrap}
+#v-plan .btn{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:4px;padding:8px 12px;font-weight:700;font-size:14px}
+#v-plan .btn:hover{border-color:var(--ink)}
+#v-plan .btn-go{background:var(--amber);color:var(--amber-ink);border-color:var(--amber);font-size:17px;padding:13px 18px;width:100%;font-weight:800;letter-spacing:.02em}
+#v-plan .btn-go:disabled{opacity:.6;cursor:progress}
+#v-plan .example{font:600 11px var(--mono);background:var(--amber);color:var(--amber-ink);padding:2px 7px;border-radius:3px}
+#v-plan .seg{display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--ink);border-radius:6px;overflow:hidden}
+#v-plan .segb{border:0;background:transparent;color:var(--ink);padding:10px 8px;font-weight:800;font-size:14px}
+#v-plan .segb+.segb{border-left:2px solid var(--ink)}
+#v-plan .segb[aria-checked="true"]{background:var(--ink);color:var(--bg)}
+#v-plan .sizes{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+#v-plan .sz{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:8px 2px;font:700 14px var(--mono);display:grid;gap:1px;justify-items:center}
+#v-plan .sz small{font:600 10px var(--body);color:var(--muted)}
+#v-plan .sz[aria-checked="true"]{border-color:var(--sign);background:var(--sign);color:var(--sign-ink)}
+#v-plan .sz[aria-checked="true"] small{color:var(--sign-ink);opacity:.85}
+#v-plan .seg-sm .segb{padding:7px 12px;font-size:13px}
+#v-plan .seg-sm{min-width:220px}
+#v-plan .sched-in{display:grid;grid-template-columns:auto 1fr 150px;gap:12px;align-items:end}
+#v-plan .answer{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:2px solid var(--ink);border-radius:6px;overflow:hidden}
+#v-plan .answer>div{padding:12px 14px;display:grid;gap:2px;min-width:0}
+#v-plan .answer>div+div{border-left:1px dashed var(--line)}
+#v-plan .answer b{font:800 22px var(--display);letter-spacing:.02em;font-variant-numeric:tabular-nums}
+#v-plan .answer .hl{background:var(--amber);color:var(--amber-ink)}
+#v-plan .answer .hl .lbl{color:var(--amber-ink)}
+#v-plan .answer .late{background:var(--bad);color:#fff}
+#v-plan .answer .late .lbl{color:#fff}
+#v-plan tr.ev-rest td{color:var(--muted)}
+#v-plan tr.ev-stop td:nth-child(2){font-weight:700}
+#v-plan .alertbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-radius:6px;border:2px solid var(--bad);font-weight:700;font-size:14px}
+#v-plan .alertbar.calm{border-color:var(--good);font-weight:600}
+#v-plan .alertbar button{margin-left:auto}
+#v-plan .sev{display:inline-block;font:700 11px var(--mono);padding:2px 7px;border-radius:10px;white-space:nowrap;margin-right:6px}
+#v-plan .sev.major,#v-plan .sev.indefinite{background:var(--bad);color:#fff}
+#v-plan .sev.moderate{background:var(--amber);color:var(--amber-ink)}
+#v-plan .sev.minor,#v-plan .sev.unknown{border:1px solid var(--line);color:var(--muted)}
+#v-plan details.more{border-top:1px dashed var(--line);padding-top:4px}
+#v-plan details.more>summary,#v-plan .more-btn{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;font-weight:800;font-size:14px;padding:8px 0;color:var(--ink)}
+#v-plan details.more>summary::-webkit-details-marker{display:none}
+#v-plan details.more[open]>summary .chev,#v-plan .more-btn[aria-expanded="true"] .chev{transform:rotate(180deg)}
+#v-plan details.more>.grid2{margin-block:6px 10px}
+#v-plan details.more>.note{margin-bottom:8px}
+#v-plan .chev{display:inline-block;transition:transform .2s}
+#v-plan .more-btn{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 14px}
+#v-plan .more-btn:hover{border-color:var(--ink)}
+#v-plan .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#v-plan .tile{text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:grid;gap:2px;align-content:start;color:var(--ink);min-width:0;font-family:var(--body)}
+#v-plan .tile:hover{border-color:var(--ink)}
+#v-plan .tile .tl{display:flex;align-items:center;gap:6px;font:700 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+#v-plan .tile .tl i{width:8px;height:8px;border-radius:50%;background:var(--line);flex:none}
+#v-plan .tile.ok .tl i{background:var(--good)}
+#v-plan .tile.warn .tl i{background:var(--amber)}
+#v-plan .tile.bad .tl i{background:var(--bad)}
+#v-plan .tile b{font:800 19px var(--display);letter-spacing:.02em;line-height:1.15;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#v-plan .tile.bad b{color:var(--bad)}
+#v-plan .tile small{font-size:12px;color:var(--muted);line-height:1.35;overflow-wrap:anywhere}
+@media (max-width:640px){#v-plan .tiles{grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion:reduce){#v-plan .chev{transition:none}}
+#v-plan .seg-3{grid-template-columns:repeat(3,1fr);min-width:280px}
+#v-plan .seg-3 .segb{padding:7px 10px;font-size:13px}
+#v-plan .seg-3 .segb+.segb{border-left:2px solid var(--ink)}
+#v-plan .here-in{display:grid;grid-template-columns:1fr auto;gap:8px}
+#v-plan .here-now{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:center}
+#v-plan .here-now .tmp{font:900 54px var(--display);line-height:.9;grid-row:span 2;font-variant-numeric:tabular-nums}
+#v-plan .here-now .cond{font-weight:800;font-size:16px}
+#v-plan .here-now .meta{font-size:13px;color:var(--muted)}
+#v-plan .here-now .alerts{grid-column:1/-1;display:grid;gap:4px}
+#v-plan .wxalert{border-left:3px solid var(--bad);padding:4px 8px;font-size:13px;font-weight:700;color:var(--bad);background:var(--bg)}
+#v-plan details summary{cursor:pointer;font-weight:800;font-size:14px;padding:6px 0}
+#v-plan tr.wx-bad td{background:color-mix(in srgb,var(--bad) 10%,transparent)}
+#v-plan tr.wx-warn td{background:color-mix(in srgb,var(--amber) 14%,transparent)}
+#v-plan .road{display:inline-block;font:700 11px var(--mono);padding:2px 7px;border-radius:10px;white-space:nowrap}
+#v-plan .road.g{border:1px solid var(--good);color:var(--good)}
+#v-plan .road.y{background:var(--amber);color:var(--amber-ink)}
+#v-plan .road.r{background:var(--bad);color:#fff}
+#v-plan .road.na{border:1px solid var(--line);color:var(--muted)}
+#v-plan .maplinks{display:flex;gap:8px;flex-wrap:wrap}
+#v-plan a.btn{text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+#v-plan a.sat{font:600 12px var(--body);color:var(--stop);white-space:nowrap}
+#v-plan .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#v-plan .f{display:grid;gap:4px;min-width:0}
+#v-plan .check{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600;cursor:pointer}
+#v-plan .check input{width:17px;height:17px;accent-color:var(--sign)}
+#v-plan .note{font-size:12px;color:var(--muted)}
+#v-plan .note b{color:var(--ink)}
+#v-plan .status{display:flex;gap:10px;align-items:center;font-size:14px;padding:10px 12px;border-radius:6px;background:var(--bg);border:1px solid var(--line)}
+#v-plan .status.err{border-color:var(--bad);color:var(--bad)}
+#v-plan .spin{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--sign);border-radius:50%;animation:sp 1s linear infinite;flex:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#v-plan .spin{animation:none}}
+#v-plan .prog{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+#v-plan .prog i{display:block;height:100%;background:var(--sign);width:0}
+#v-plan .ticket{background:var(--surface);border:2px solid var(--ink);border-radius:8px;overflow:hidden;min-width:0}
+#v-plan .t-top{background:var(--ink);color:var(--bg);padding:12px 16px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#v-plan .t-top .lbl{color:inherit;opacity:.8}
+#v-plan .t-main{display:grid;grid-template-columns:1.2fr 1fr;gap:0}
+#v-plan .t-total{padding:18px 16px;border-right:1px dashed var(--line);display:grid;gap:6px;align-content:start}
+#v-plan .big{font:900 clamp(48px,6vw,72px) var(--display);line-height:.9;font-variant-numeric:tabular-nums}
+#v-plan .split{display:grid;gap:4px;font-size:14px}
+#v-plan .split div{display:flex;justify-content:space-between;gap:10px;font-variant-numeric:tabular-nums}
+#v-plan .split b{font-family:var(--mono)}
+#v-plan .t-stats{display:grid;grid-template-columns:1fr 1fr}
+#v-plan .st{padding:12px 14px;display:grid;gap:2px;border-bottom:1px dashed var(--line)}
+#v-plan .st:nth-child(odd){border-right:1px dashed var(--line)}
+#v-plan .st:nth-last-child(-n+2){border-bottom:0}
+#v-plan .st b{font:700 19px var(--mono);font-variant-numeric:tabular-nums}
+#v-plan .empty{padding:28px 16px;color:var(--muted);display:grid;gap:6px}
+#v-plan .empty strong{color:var(--ink);font-size:16px}
+#v-plan .mapbox{background:var(--bg);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+#v-plan .mapbox svg{display:block;width:100%;height:auto}
+#v-plan .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+#v-plan .legend span{display:flex;align-items:center;gap:6px}
+#v-plan .legend i{display:inline-block;width:16px;height:4px;border-radius:2px}
+#v-plan .tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:2px solid var(--ink)}
+#v-plan .tab{border:0;background:transparent;padding:9px 12px;font:700 13px var(--body);color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px}
+#v-plan .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--amber)}
+#v-plan .tab .cnt{font-family:var(--mono);font-size:11px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:0 6px;margin-left:4px}
+#v-plan .tblwrap{overflow-x:auto}
+#v-plan table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:14px}
+#v-plan th,#v-plan td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+#v-plan th{font:700 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+#v-plan td.n,#v-plan th.n{text-align:right;font-family:var(--mono)}
+#v-plan td small{display:block;color:var(--muted);font-size:12px}
+#v-plan tfoot td{font-weight:700;border-bottom:0}
+#v-plan .pill{display:inline-block;font:700 11px var(--mono);padding:2px 7px;border-radius:10px;border:1px solid currentColor;white-space:nowrap}
+#v-plan .pill.state{color:var(--bad)}
+#v-plan .pill.cert{color:var(--stop)}
+#v-plan .pill.toll{color:var(--warn)}
+#v-plan .mile{font:700 13px var(--mono);color:var(--muted);white-space:nowrap}
+#v-plan .panel[hidden]{display:none}
+#v-plan .caveat{border-left:3px solid var(--amber);padding:8px 12px;background:var(--bg);font-size:13px;color:var(--muted)}
+#v-plan .caveat b{color:var(--ink)}
+@media (max-width:960px){#v-plan .pl-grid{grid-template-columns:1fr}}
+@media (max-width:720px){#v-plan .sched-in{grid-template-columns:1fr 1fr}#v-plan .sched-in .seg{grid-column:1/-1}}
+@media (max-width:560px){#v-plan .answer{grid-template-columns:1fr}#v-plan .answer>div+div{border-left:0;border-top:1px dashed var(--line)}#v-plan .seg-sm{min-width:0}#v-plan .t-main{grid-template-columns:1fr}#v-plan .t-total{border-right:0;border-bottom:1px dashed var(--line)}#v-plan .grid2{grid-template-columns:1fr}}
+#v-plan .pl-grid{padding-block:0 8px}
+#v-plan .pl-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+#v-plan .conn{color:var(--muted)}
+#v-plan .dot{background:var(--amber)}#v-plan .dot.ok{background:var(--good)}#v-plan .dot.bad{background:var(--bad)}
 
 /* check page */
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -285,6 +450,9 @@ body{margin:0}
 .rp-actions{display:flex;gap:8px;justify-content:flex-end}
 footer.site{border-top:1px solid var(--line);padding-block:20px 32px;color:var(--muted);font-size:13px;display:grid;gap:4px}
 @media (max-width:560px){.big-form{grid-template-columns:1fr}.hero{padding-block:28px 16px}}
+
+.view[hidden]{display:none}
+#v-plan{padding-top:20px}
 </style>
 </head>
 <body>
@@ -292,8 +460,182 @@ footer.site{border-top:1px solid var(--line);padding-block:20px 32px;color:var(-
   <h1><span class="logo" aria-hidden="true"></span><span data-i18n="app">Rigora</span><span class="tagline" data-i18n="tagline">Verified moving freight</span></h1>
   <div class="hdr-r"><div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="ru" aria-pressed="false">RU</button><button type="button" data-lang="es" aria-pressed="false">ES</button></div></div>
 </div></header>
+<nav class="tabs" aria-label="Sections"><div class="wrap" role="tablist">
+  <button role="tab" data-view="plan" aria-selected="true" data-i18n="nav_plan">Trip planner</button>
+  <button role="tab" data-view="check" aria-selected="false" data-i18n="nav_check">Check a company</button>
+</div></nav>
 <main><div class="wrap">
-  <section class="hero">
+<section class="view" id="v-plan">
+<div class="pl-bar"><div class="conn" id="conn"><span class="dot" id="connDot"></span><span id="connTxt">Connecting to TomTom…</span></div><span class="note" id="plTrip"></span></div>
+<div class="pl-grid">
+    <div class="col">
+      <section class="card wx-here" aria-labelledby="hHere">
+        <div class="card-head"><h2 id="hHere" data-pi18n="here_h">Weather here</h2><span class="note" id="hereAt"></span></div>
+        <form class="here-in" id="hereForm"><input id="hereLoc" type="text" autocomplete="off" aria-label="Your location" placeholder="City, ZIP or address" data-pi18n-ph="here_ph"><button class="btn" type="submit" data-pi18n="check">Check</button><button class="btn" type="button" id="hereGps" data-pi18n="gps_btn">📍 My location</button></form>
+        <div id="hereNow" class="here-now"><p class="note" data-pi18n="here_loading">Loading weather for your start location…</p></div>
+        <details id="hereWeek"><summary data-pi18n="week">7-day forecast</summary><div class="tblwrap"><table><thead><tr><th data-pi18n="th_day">Day</th><th data-pi18n="th_cond">Conditions</th><th class="n" data-pi18n="th_hilo">High / low</th><th class="n" data-pi18n="th_wind">Wind</th><th class="n" data-pi18n="th_rain">Rain</th></tr></thead><tbody id="tbWeek"></tbody></table></div></details>
+        <p class="note" data-pi18n="here_note">The browser can't share your GPS location with this page, so it uses the start address. Type where you are to change it.</p>
+      </section>
+
+      <section class="card" aria-labelledby="hStops">
+        <div class="card-head"><h2 id="hStops" data-pi18n="stops_h">Stops</h2><span class="example" id="exTag" data-pi18n="example">Example trip</span></div>
+        <ol class="stops" id="stops"></ol>
+        <div class="row-btns">
+          <button class="btn" id="addStop" type="button" data-pi18n="add_stop">+ Add stop</button>
+          <button class="btn" id="reverse" type="button" data-pi18n="reverse">⇅ Reverse</button>
+        </div>
+        <label class="check"><input type="checkbox" id="optimize" checked> <span data-pi18n="optimize">Optimize the order of middle stops</span></label>
+        <label class="check"><input type="checkbox" id="avoidTolls"> <span data-pi18n="avoid_tolls">Avoid toll roads</span></label>
+      </section>
+
+      <section class="card" aria-labelledby="hTruck">
+        <h2 id="hTruck" data-pi18n="truck_h">Truck</h2>
+        <div class="seg" role="radiogroup" aria-label="Truck type">
+          <button type="button" role="radio" class="segb" id="typeTT" aria-checked="true" data-pi18n="tt">Tractor-trailer</button>
+          <button type="button" role="radio" class="segb" id="typeBox" aria-checked="false" data-pi18n="box">Box truck</button>
+        </div>
+        <div class="f" id="boxSizeWrap" hidden>
+          <span class="lbl" data-pi18n="box_len">Box length</span>
+          <div class="sizes" role="radiogroup" aria-label="Box truck length" id="sizes"></div>
+        </div>
+        <div class="grid2">
+          <div class="f"><label class="lbl" for="fuelType" data-pi18n="fuel">Fuel</label><select id="fuelType"><option value="diesel" selected data-pi18n="diesel">Diesel</option><option value="gas" data-pi18n="gasoline">Gasoline</option></select></div>
+          <div class="f"><label class="lbl" for="mpg">MPG</label><input id="mpg" type="number" step="0.1" min="2" max="25" value="6.5" inputmode="decimal"></div>
+        </div>
+        <details class="more" id="truckMore">
+        <summary><span data-pi18n="more_settings">More settings</span><span class="chev" aria-hidden="true">▾</span></summary>
+        <div class="grid2">
+          <div class="f"><label class="lbl" for="axles" data-pi18n="axles">Axles</label><select id="axles"><option>3</option><option>4</option><option selected>5</option><option>6</option></select><span class="note" id="axleFixed" hidden data-pi18n="axles_box">Box trucks: 2 axles</span></div>
+          <div class="f"><label class="lbl" for="height" data-pi18n="height">Height, ft</label><input id="height" type="number" step="0.25" min="7" max="15" value="13.5" inputmode="decimal"></div><div class="f"><label class="lbl" for="length" data-pi18n="length">Length, ft</label><input id="length" type="number" step="1" min="10" max="120" value="72" inputmode="numeric"></div><div class="f"><label class="lbl" for="weight" data-pi18n="weight">Gross weight, lb</label><input id="weight" type="number" step="500" min="5000" max="140000" value="80000" inputmode="numeric"></div>
+          <div class="f"><label class="lbl" for="speed" data-pi18n="speed">Governed speed, mph</label><input id="speed" type="number" step="1" min="45" max="80" value="65" inputmode="numeric"></div>
+          <div class="f"><label class="lbl" for="tank" data-pi18n="tank">Fuel tanks, gal</label><input id="tank" type="number" step="10" min="50" max="400" value="200" inputmode="numeric"></div>
+          <div class="f"><label class="lbl" for="tollRate" data-pi18n="toll_rate">Toll rate, $ per toll mile</label><input id="tollRate" type="number" step="0.01" min="0" value="0.35" inputmode="decimal"></div>
+          <div class="f"><label class="lbl" for="priceAdj" data-pi18n="price_adj">Fuel price adj., $/gal</label><input id="priceAdj" type="number" step="0.01" value="0.00" inputmode="decimal"></div>
+        </div>
+        <p class="note" id="scaleRule"></p>
+        <p class="note" data-pi18n="truck_note">Picking a truck fills in typical values, and you can change any of them. The toll rate follows the axle count and varies a lot by toll road. Price adjustment adds to every state's average (for example, −0.30 for a fuel card discount).</p>
+        </details>
+      </section>
+
+      <button class="btn btn-go" id="plan" type="button" data-pi18n="plan">Plan route</button>
+      <div id="statusBox" hidden>
+        <div class="status" id="status"><span class="spin" id="spin"></span><span id="statusTxt"></span></div>
+        <div class="prog" style="margin-top:6px"><i id="progBar"></i></div>
+      </div>
+    </div>
+
+    <div class="col">
+      <section class="ticket" aria-live="polite">
+        <div class="t-top"><span class="lbl" id="tTitle">Trip estimate</span><span class="lbl" id="tWhen">EIA diesel prices · week of Oct 12, 2026</span></div>
+        <div id="tEmpty" class="empty">
+          <strong data-pi18n="no_route">No route yet</strong>
+          <p data-pi18n="no_route_p">Enter a start and at least one more stop, then press Plan route. You'll get miles by state, fuel cost, toll estimate, and the weigh stations and truck stops along the way.</p>
+        </div>
+        <div id="tFull" hidden>
+          <div class="t-main">
+            <div class="t-total">
+              <span class="lbl" data-pi18n="fuel_tolls">Fuel + tolls</span>
+              <div class="big" id="grand">$0</div>
+              <div class="split">
+                <div><span id="fuelLbl">Diesel</span><b id="fuelCost">$0</b></div>
+                <div><span data-pi18n="tolls_est">Tolls (est.)</span><b id="tollCost">$0</b></div>
+                <div><span data-pi18n="cpm">Cost per mile</span><b id="cpm">$0.00</b></div>
+              </div>
+            </div>
+            <div class="t-stats">
+              <div class="st"><span class="lbl" data-pi18n="miles">Miles</span><b id="sMiles">0</b></div>
+              <div class="st"><span class="lbl" data-pi18n="drive_time">Drive time</span><b id="sDrive">0h</b></div>
+              <div class="st"><span class="lbl" data-pi18n="gallons">Gallons</span><b id="sGal">0</b></div>
+              <div class="st"><span class="lbl" data-pi18n="avg_gal">Avg $/gal</span><b id="sAvg">$0</b></div>
+              <div class="st"><span class="lbl" id="sHosLbl">Trip time, HOS</span><b id="sHos">0h</b></div>
+              <div class="st"><span class="lbl" data-pi18n="fuel_stops">Fuel stops</span><b id="sStops">0</b></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="ovCard" hidden aria-labelledby="hOv">
+        <div class="card-head"><h2 id="hOv" data-pi18n="ov_h">Trip overview</h2>
+          <div class="seg seg-sm" role="radiogroup" aria-label="Hours of service">
+            <button type="button" role="radio" class="segb" id="hosOn" aria-checked="true" data-pi18n="hos_on">With HOS</button>
+            <button type="button" role="radio" class="segb" id="hosOff" aria-checked="false" data-pi18n="hos_off">No HOS</button>
+          </div>
+        </div>
+        <div class="sched-in">
+          <div class="seg seg-sm" role="radiogroup" aria-label="Plan by">
+            <button type="button" role="radio" class="segb" id="modeDep" aria-checked="true" data-pi18n="dep_at">Depart at</button>
+            <button type="button" role="radio" class="segb" id="modeArr" aria-checked="false" data-pi18n="arr_by">Arrive by</button>
+          </div>
+          <div class="f"><label class="lbl" for="when" id="whenLbl">Departure, your local time</label><input id="when" type="datetime-local"></div>
+          <div class="f"><label class="lbl" for="dwell" data-pi18n="dwell">Time at each stop, h</label><input id="dwell" type="number" min="0" max="12" step="0.25" value="1" inputmode="decimal"></div>
+        </div>
+        <div class="alts" id="alts" hidden></div>
+        <div class="tiles" id="tiles"></div>
+        <button class="more-btn" type="button" id="fullBtn" aria-expanded="false" aria-controls="fullWrap"><span id="fullBtnTxt" data-pi18n="full_show">Show full details</span><span class="chev" aria-hidden="true">▾</span></button>
+      </section>
+
+      <div id="fullWrap" class="col" hidden>
+      <section class="card" id="schedCard" hidden aria-labelledby="hSched">
+        <div class="card-head"><h2 id="hSched" data-pi18n="sched_h">Schedule</h2></div>
+        <div class="answer" id="answer"></div>
+        <div class="tblwrap"><table><thead><tr><th data-pi18n="th_when">When</th><th data-pi18n="th_event">Event</th><th class="n" data-pi18n="th_mile">Mile</th></tr></thead><tbody id="tbSched"></tbody></table></div>
+        <p class="note" id="hosNote"></p>
+      </section>
+
+      <section class="card" id="wxCard" hidden aria-labelledby="hWx">
+        <div class="card-head"><h2 id="hWx" data-pi18n="wx_h">Weather on the route</h2>
+          <div class="seg seg-3" role="radiogroup" aria-label="Weather time">
+            <button type="button" role="radio" class="segb" data-wx="eta" aria-checked="true" data-pi18n="wx_eta">At my ETA</button>
+            <button type="button" role="radio" class="segb" data-wx="now" aria-checked="false" data-pi18n="wx_now">Right now</button>
+            <button type="button" role="radio" class="segb" data-wx="p24" aria-checked="false" data-pi18n="wx_24">In 24 h</button>
+          </div>
+        </div>
+        <div class="alertbar calm" id="wxBar">Weather not checked yet.</div>
+        <div class="row-btns"><button class="btn" type="button" id="wxGo" data-pi18n="wx_go">↻ Check weather</button><span class="note" id="wxMeta"></span></div>
+        <div class="tblwrap"><table><thead><tr><th data-pi18n="th_when">When</th><th data-pi18n="th_where">Where</th><th data-pi18n="th_weather">Weather</th><th class="n" data-pi18n="th_temp">Temp</th><th class="n" data-pi18n="th_wind">Wind</th><th class="n" data-pi18n="th_rain">Rain</th><th data-pi18n="th_road">Road</th></tr></thead><tbody id="tbWx"></tbody></table></div>
+        <p class="note" data-pi18n="wx_note">Checked every 50 miles and at each stop. "At my ETA" uses your schedule above, so change the departure time or HOS and press Check weather again. Road surface forecasts reach 24 hours ahead. Alerts are the official watches and warnings in effect now.</p>
+      </section>
+
+      <section class="card" id="mapCard" hidden>
+        <div class="card-head"><h2 data-pi18n="sketch_h">Route sketch</h2>
+          <div class="maplinks"><a class="btn" id="gmMap" href="#" target="_blank" rel="noopener" data-pi18n="open_map">Open map ↗</a><a class="btn" id="gmSat" href="#" target="_blank" rel="noopener" data-pi18n="open_sat">Open satellite ↗</a></div>
+        </div>
+        <div class="legend"><span><i style="background:var(--route)"></i><span data-pi18n="lg_route">Route</span></span><span><i style="background:transparent;border-top:3px dashed var(--muted);height:0"></i><span data-pi18n="lg_alt">Other route</span></span><span><i style="background:var(--toll)"></i><span data-pi18n="lg_toll">Toll road</span></span><span><i style="background:var(--scale);width:8px;height:8px"></i><span data-pi18n="lg_weigh">Weigh / inspection</span></span><span><i style="background:var(--good);width:8px;height:8px;border-radius:50%"></i><span data-pi18n="lg_cert">Certified scale</span></span><span><i style="background:var(--stop);width:8px;height:8px;border-radius:50%"></i><span data-pi18n="lg_stop">Stop</span></span><span><i style="background:var(--bad);width:9px;height:8px;clip-path:polygon(50% 0,100% 100%,0 100%)"></i><span data-pi18n="lg_traffic">Traffic incident</span></span><span><i style="width:10px;height:10px;border:2px dashed var(--warn);border-radius:50%;background:transparent"></i><span data-pi18n="lg_wx">Weather to watch</span></span></div>
+        <div class="mapbox"><svg id="map" viewBox="0 0 800 420" role="img" aria-label="Route sketch"></svg></div>
+        <p class="note" id="gmNote">The buttons open this route in Google Maps, where you can switch between the regular map and satellite view.</p>
+      </section>
+
+      <section class="card" id="detailCard" hidden>
+        <div class="alertbar" id="alertbar" hidden></div>
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" aria-selected="true" data-tab="states"><span data-pi18n="tab_states">Miles by state</span><span class="cnt" id="cStates">0</span></button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="traffic"><span data-pi18n="tab_traffic">Traffic now</span><span class="cnt" id="cTraffic">…</span></button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="legs"><span data-pi18n="tab_legs">Legs</span><span class="cnt" id="cLegs">0</span></button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="tolls"><span data-pi18n="tab_tolls">Tolls</span><span class="cnt" id="cTolls">0</span></button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="cert"><span data-pi18n="tab_cert">Certified scales</span><span class="cnt" id="cCert">0</span></button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="scales"><span data-pi18n="tab_scales">Weigh stations &amp; inspections</span><span class="cnt" id="cScales">0</span></button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="tstops"><span data-pi18n="tab_tstops">Truck stops</span><span class="cnt" id="cTstops">0</span></button>
+        </div>
+        <div class="panel" id="p-states"><div class="tblwrap"><table><thead><tr><th data-pi18n="th_state">State</th><th class="n" data-pi18n="miles">Miles</th><th class="n" data-pi18n="th_pgal">$/gal</th><th class="n" data-pi18n="gallons">Gallons</th><th class="n" data-pi18n="th_fuel">Fuel $</th></tr></thead><tbody id="tbStates"></tbody><tfoot id="tfStates"></tfoot></table></div></div>
+        <div class="panel" id="p-traffic" hidden>
+          <div class="card-head" style="margin-block:4px 8px"><span class="note" id="trafficAt">Not loaded yet</span><button class="btn" type="button" id="trafficRefresh" data-pi18n="tr_refresh">↻ Refresh traffic</button></div>
+          <div class="tblwrap"><table><thead><tr><th data-pi18n="th_atmile">At mile</th><th data-pi18n="th_what">What's happening</th><th class="n" data-pi18n="th_delay">Delay</th></tr></thead><tbody id="tbTraffic"></tbody></table></div>
+          <p class="note" data-pi18n="tr_note">Live incidents from TomTom on the roads your route uses: accidents, closures, lane closures, jams, and hazards like ice, fog, flooding or high wind. This shows what's happening right now. Conditions hours ahead will need the weather connection.</p>
+        </div>
+        <div class="panel" id="p-legs" hidden><div class="tblwrap"><table><thead><tr><th data-pi18n="th_leg">Leg</th><th class="n" data-pi18n="miles">Miles</th><th class="n" data-pi18n="th_drive">Drive</th><th class="n" data-pi18n="th_tdelay">Traffic delay</th></tr></thead><tbody id="tbLegs"></tbody></table></div></div>
+        <div class="panel" id="p-tolls" hidden><div class="tblwrap"><table><thead><tr><th data-pi18n="th_atmile">At mile</th><th data-pi18n="th_tstretch">Toll stretch</th><th class="n" data-pi18n="th_tmiles">Toll miles</th><th class="n" data-pi18n="th_est">Est. $</th></tr></thead><tbody id="tbTolls"></tbody></table></div><p class="note" id="tollNote"></p></div>
+        <div class="panel" id="p-cert" hidden><div class="tblwrap"><table><thead><tr><th data-pi18n="th_atmile">At mile</th><th data-pi18n="th_scale">Scale</th><th data-pi18n="th_phone">Phone</th><th></th></tr></thead><tbody id="tbCert"></tbody></table></div><p class="note" data-pi18n="cert_note">CAT Scales and other certified or guaranteed scales, mostly at truck stops. Weigh here before a state scale to check your axle weights.</p></div>
+        <div class="panel" id="p-scales" hidden><div class="tblwrap"><table><thead><tr><th data-pi18n="th_atmile">At mile</th><th data-pi18n="th_loc">Location</th><th data-pi18n="th_type">Type</th><th></th></tr></thead><tbody id="tbScales"></tbody></table></div><p class="note" data-pi18n="scales_note">State weigh stations, ports of entry and agricultural inspection stations from TomTom map data, within about a quarter mile of the route. Open or closed status isn't available, and mobile DOT checks aren't on any map, so this list may miss some.</p></div>
+        <div class="panel" id="p-tstops" hidden><div class="tblwrap"><table><thead><tr><th data-pi18n="th_atmile">At mile</th><th data-pi18n="th_tstop">Truck stop</th><th data-pi18n="th_phone">Phone</th><th></th></tr></thead><tbody id="tbTstops"></tbody></table></div></div>
+      </section>
+      </div>
+
+      <div class="caveat"><b data-pi18n="cav_b">About this route.</b> <span data-pi18n="cav">The route is calculated by TomTom with your truck's weight and speed, but this connection doesn't support truck height, length or hazmat restrictions. Check low bridges and restricted roads before you dispatch. State miles come from sampling the route every 25 miles and pinning down each state line.</span></div>
+    </div>
+</div>
+  </section>
+  <section class="view" id="v-check" hidden>
+<section class="hero">
     <h1 data-i18n="h_title">Check a carrier or broker before you work with them</h1>
     <p data-i18n="h_sub">Enter a USDOT or MC number.</p>
     <form class="big-form" id="f" novalidate>
@@ -304,14 +646,1127 @@ footer.site{border-top:1px solid var(--line);padding-block:20px 32px;color:var(-
     <div class="tries" id="recentRow" hidden><span data-i18n="recent">Recent checks</span><span id="recent" class="tries"></span></div>
   </section>
   <section id="result" aria-live="polite"></section>
-  <footer class="site"><span data-i18n="foot">Data from FMCSA.</span><span data-i18n="soon"></span></footer>
+    </section>
+  <footer class="site"><span data-i18n="foot">Data from FMCSA.</span></footer>
 </div></main>
+<script>
+// ---------- language-aware date picker (replaces the browser's own date fields, which follow the OS language) ----------
+(function(){
+  const LOCS={en:"en-US",ru:"ru-RU",es:"es-US"};
+  const W={en:{empty:"Select a date",emptyT:"Select date and time",today:"Today",done:"Done",time:"Time",prev:"Previous month",next:"Next month"},
+           ru:{empty:"Выберите дату",emptyT:"Выберите дату и время",today:"Сегодня",done:"Готово",time:"Время",prev:"Предыдущий месяц",next:"Следующий месяц"},
+           es:{empty:"Elige una fecha",emptyT:"Elige fecha y hora",today:"Hoy",done:"Listo",time:"Hora",prev:"Mes anterior",next:"Mes siguiente"}};
+  const lang=()=>{const l=(document.documentElement.lang||"en").slice(0,2);return W[l]?l:"en"};
+  const loc=()=>LOCS[lang()];const w=k=>W[lang()][k];
+  const pad=n=>String(n).padStart(2,"0");
+  const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+  const proto=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value");
+  const all=[];let open=null;
+  function parse(v,time){if(!v)return null;const d=new Date(time?v:v+"T12:00:00");return isNaN(d)?null:d}
+  function label(p){const v=proto.get.call(p.input);const d=parse(v,p.time);
+    if(!d){p.btn.textContent=w(p.time?"emptyT":"empty");p.btn.classList.add("dp-empty");return}
+    p.btn.classList.remove("dp-empty");
+    p.btn.textContent=p.time?d.toLocaleString(loc(),{weekday:"short",month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"})
+                           :d.toLocaleDateString(loc(),{weekday:"short",month:"short",day:"numeric",year:"numeric"});}
+  function setVal(p,v){proto.set.call(p.input,v);label(p);p.input.dispatchEvent(new Event("input",{bubbles:true}));p.input.dispatchEvent(new Event("change",{bubbles:true}))}
+  function close(){if(open){open.pop.remove();open.btn.setAttribute("aria-expanded","false");open=null}}
+  function build(p){
+    close();
+    const cur=parse(proto.get.call(p.input),p.time)||new Date();
+    let vy=cur.getFullYear(),vm=cur.getMonth();
+    const pop=document.createElement("div");pop.className="dp-pop";pop.setAttribute("role","dialog");
+    const startMon=lang()!=="en";
+    function draw(){
+      const sel=parse(proto.get.call(p.input),p.time);
+      const first=new Date(vy,vm,1),title=first.toLocaleDateString(loc(),{month:"long",year:"numeric"});
+      const wd=[];for(let i=0;i<7;i++){const d=new Date(2024,0,(startMon?1:7)+i);wd.push(d.toLocaleDateString(loc(),{weekday:"short"}))}
+      const lead=(first.getDay()-(startMon?1:0)+7)%7,days=new Date(vy,vm+1,0).getDate(),today=ymd(new Date());
+      let cells="";for(let i=0;i<lead;i++)cells+="<span></span>";
+      for(let d=1;d<=days;d++){const k=vy+"-"+pad(vm+1)+"-"+pad(d);
+        cells+=`<button type="button" class="dp-d${sel&&ymd(sel)===k?" on":""}${k===today?" now":""}" data-k="${k}">${d}</button>`}
+      let timeRow="";
+      if(p.time){const h=sel?sel.getHours():(cur.getHours()),m=sel?sel.getMinutes():0;
+        const hs=[...Array(24).keys()].map(x=>`<option value="${x}"${x===h?" selected":""}>${new Date(2024,0,1,x).toLocaleTimeString(loc(),{hour:"numeric"})}</option>`).join("");
+        const ms=[0,15,30,45].concat(m%15?[m]:[]).sort((a,b)=>a-b).map(x=>`<option value="${x}"${x===m?" selected":""}>${pad(x)}</option>`).join("");
+        timeRow=`<div class="dp-time"><span class="lbl">${w("time")}</span><select class="dp-h" aria-label="${w("time")}">${hs}</select><span>:</span><select class="dp-m" aria-label="${w("time")}">${ms}</select></div>`}
+      pop.innerHTML=`<div class="dp-head"><button type="button" class="dp-nav" data-n="-1" aria-label="${w("prev")}">‹</button><b>${title.charAt(0).toUpperCase()+title.slice(1)}</b><button type="button" class="dp-nav" data-n="1" aria-label="${w("next")}">›</button></div>
+        <div class="dp-grid">${wd.map(x=>`<span class="dp-wd">${x}</span>`).join("")}${cells}</div>${timeRow}
+        <div class="dp-foot"><button type="button" class="dp-today">${w("today")}</button>${p.time?`<button type="button" class="dp-done">${w("done")}</button>`:""}</div>`;
+    }
+    function pick(k){const sel=parse(proto.get.call(p.input),p.time);
+      if(p.time){const h=+pop.querySelector(".dp-h").value,m=+pop.querySelector(".dp-m").value;setVal(p,k+"T"+pad(h)+":"+pad(m))}
+      else{setVal(p,k);close();p.btn.focus();return}
+      draw();}
+    pop.addEventListener("click",e=>{
+      const n=e.target.closest(".dp-nav");if(n){vm+=+n.dataset.n;if(vm<0){vm=11;vy--}if(vm>11){vm=0;vy++}draw();return}
+      const d=e.target.closest(".dp-d");if(d){pick(d.dataset.k);return}
+      if(e.target.closest(".dp-today")){const t=new Date();vy=t.getFullYear();vm=t.getMonth();pick(ymd(t));return}
+      if(e.target.closest(".dp-done")){close();p.btn.focus()}
+    });
+    pop.addEventListener("change",e=>{if(e.target.matches(".dp-h,.dp-m")){const sel=parse(proto.get.call(p.input),true)||new Date();pick(ymd(sel))}});
+    pop.addEventListener("keydown",e=>{if(e.key==="Escape"){close();p.btn.focus()}});
+    draw();p.wrap.appendChild(pop);p.btn.setAttribute("aria-expanded","true");open={pop,btn:p.btn};
+    (pop.querySelector(".dp-d.on")||pop.querySelector(".dp-d.now")||pop.querySelector(".dp-d")).focus();
+  }
+  function attach(input,time){
+    if(!input||input.dataset.dp)return;input.dataset.dp="1";
+    const v=proto.get.call(input);input.type="hidden";proto.set.call(input,v);
+    const wrap=document.createElement("div");wrap.className="dp-wrap";
+    const btn=document.createElement("button");btn.type="button";btn.className="dp-btn";btn.id=input.id+"_dp";btn.setAttribute("aria-haspopup","dialog");btn.setAttribute("aria-expanded","false");
+    input.parentNode.insertBefore(wrap,input);wrap.appendChild(btn);wrap.appendChild(input);
+    const lab=document.querySelector(`label[for="${input.id}"]`);if(lab)lab.htmlFor=btn.id;
+    const p={input,btn,wrap,time};all.push(p);
+    Object.defineProperty(input,"value",{configurable:true,get(){return proto.get.call(input)},set(x){proto.set.call(input,x);label(p)}});
+    btn.addEventListener("click",()=>{if(open&&open.btn===btn)close();else build(p)});
+    const form=input.form;if(form)form.addEventListener("reset",()=>setTimeout(()=>label(p),0));
+    label(p);
+  }
+  document.addEventListener("click",e=>{if(open&&!e.target.closest(".dp-wrap"))close()});
+  window.LocalDate={attach,refresh:()=>{all.forEach(label);if(open)close()}};
+  ["pPick","pPick2","pDel"].forEach(id=>attach(document.getElementById(id),false));
+  attach(document.getElementById("when"),true);
+})();
+</script>
+<script>
+(function(){
+const SERVER="TomTom Maps";
+// EIA weekly retail prices, week of Oct 12, 2026 ($/gal)
+const PRICES={
+  diesel:{"1A":6.441,"1B":6.471,"1C":5.645,"2":6.259,"3":5.809,"4":6.302,"5x":6.503,"CA":8.091,US:6.179},
+  gas:{"1A":4.291,"1B":4.347,"1C":3.929,"2":4.145,"3":3.851,"4":4.439,"5x":5.071,"CA":6.104,US:4.331}
+};
+// Typical values; the driver can change any of them
+const TRUCKS={
+  tt:{weight:80000,mpg:6.5,tank:200,speed:65,fuel:"diesel",h:13.5,len:72},
+  box:{
+    10:{weight:9000,mpg:13,tank:25,speed:70,fuel:"gas",h:10,len:18,gvwr:"~9,500 GVWR"},
+    12:{weight:11000,mpg:11,tank:35,speed:70,fuel:"gas",h:10.5,len:21,gvwr:"~12,000 GVWR"},
+    16:{weight:14000,mpg:10,tank:40,speed:70,fuel:"gas",h:11.5,len:26,gvwr:"~14,500 GVWR"},
+    20:{weight:19000,mpg:9,tank:50,speed:70,fuel:"diesel",h:12,len:31,gvwr:"~19,500 GVWR"},
+    26:{weight:25000,mpg:8,tank:50,speed:70,fuel:"diesel",h:12.5,len:36,gvwr:"25,999 GVWR"}
+  }
+};
+const TOLL_PER_AXLE=0.07;
+const CERT_RE=/cat scale|love'?s|pilot|flying j|travel cent|petro|\bta\b|sapp|certified|guaranteed|fairbanks|247 scale|truck stop|travel plaza|travel stop|truck plaza/i;
+const AG_RE=/agricultur|inspection station|plant protection|border protection|\bag\b.*station/i;
+const POE_RE=/port of entry|\bpoe\b/i;
+const REG={CT:"1A",ME:"1A",MA:"1A",NH:"1A",RI:"1A",VT:"1A",DE:"1B",DC:"1B",MD:"1B",NJ:"1B",NY:"1B",PA:"1B",FL:"1C",GA:"1C",NC:"1C",SC:"1C",VA:"1C",WV:"1C",IL:"2",IN:"2",IA:"2",KS:"2",KY:"2",MI:"2",MN:"2",MO:"2",NE:"2",ND:"2",SD:"2",OH:"2",OK:"2",TN:"2",WI:"2",AL:"3",AR:"3",LA:"3",MS:"3",NM:"3",TX:"3",CO:"4",ID:"4",MT:"4",UT:"4",WY:"4",AK:"5x",AZ:"5x",HI:"5x",NV:"5x",OR:"5x",WA:"5x",CA:"CA"};
+const NAMES={AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",CO:"Colorado",CT:"Connecticut",DE:"Delaware",DC:"District of Columbia",FL:"Florida",GA:"Georgia",HI:"Hawaii",ID:"Idaho",IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",KY:"Kentucky",LA:"Louisiana",ME:"Maine",MD:"Maryland",MA:"Massachusetts",MI:"Michigan",MN:"Minnesota",MS:"Mississippi",MO:"Missouri",MT:"Montana",NE:"Nebraska",NV:"Nevada",NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",NY:"New York",NC:"North Carolina",ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",OR:"Oregon",PA:"Pennsylvania",RI:"Rhode Island",SC:"South Carolina",SD:"South Dakota",TN:"Tennessee",TX:"Texas",UT:"Utah",VT:"Vermont",VA:"Virginia",WA:"Washington",WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming"};
+
+const $=id=>document.getElementById(id);
+// ---------- language ----------
+const I18N={
+en:{
+gps_no:"Location is off for this site. Type a city or ZIP instead.",gps_here:"My location",gps_btn:"📍 My location",length:"Length, ft",height:"Height, ft",alts_h:"Route options",alt_fast:"Fastest",alt_n:"Option {n}",alt_tolls:"{n} toll mi",alt_notolls:"no tolls",alt_fuel:"fuel",alt_loading:"Loading this route…",alt_note:"Fuel for each option is an estimate from distance. Pick an option to get its full breakdown, weather and traffic. Scales and truck stops are listed along the fastest route.",lg_alt:"Other route",app_title:"Truck Route Planner",here_h:"Weather here",here_ph:"City, ZIP or address",check:"Check",here_loading:"Loading weather for your start location…",week:"7-day forecast",
+here_note:"Press My location to use your GPS, or type a city or ZIP. Until then it shows the start address.",
+stops_h:"Stops",example:"Example trip",add_stop:"+ Add stop",reverse:"⇅ Reverse",optimize:"Optimize the order of middle stops",avoid_tolls:"Avoid toll roads",
+truck_h:"Truck",tt:"Tractor-trailer",box:"Box truck",box_len:"Box length",axles:"Axles",axles_box:"Box trucks: 2 axles",fuel:"Fuel",diesel:"Diesel",gasoline:"Gasoline",
+weight:"Gross weight, lb",speed:"Governed speed, mph",tank:"Fuel tanks, gal",toll_rate:"Toll rate, $ per toll mile",price_adj:"Fuel price adj., $/gal",
+truck_note:"Picking a truck fills in typical values, and you can change any of them. The toll rate follows the axle count and varies a lot by toll road. Price adjustment adds to every state's average (for example, −0.30 for a fuel card discount).",
+plan:"Plan route",no_route:"No route yet",no_route_p:"Enter a start and at least one more stop, then press Plan route. You'll get miles by state, fuel cost, toll estimate, and the weigh stations and truck stops along the way.",
+fuel_tolls:"Fuel + tolls",tolls_est:"Tolls (est.)",cpm:"Cost per mile",miles:"Miles",drive_time:"Drive time",gallons:"Gallons",avg_gal:"Avg $/gal",fuel_stops:"Fuel stops",
+sched_h:"Schedule",hos_on:"With HOS",hos_off:"No HOS",dep_at:"Depart at",arr_by:"Arrive by",dwell:"Time at each stop, h",
+wx_h:"Weather on the route",wx_eta:"At my ETA",wx_now:"Right now",wx_24:"In 24 h",wx_go:"↻ Check weather",
+wx_note:"Checked every 50 miles and at each stop. \"At my ETA\" uses your schedule above, so change the departure time or HOS and press Check weather again. Forecasts and alerts come from the National Weather Service (US only). Road-surface data isn't available yet.",
+sketch_h:"Route sketch",open_map:"Open map ↗",open_sat:"Open satellite ↗",
+lg_route:"Route",lg_toll:"Toll road",lg_weigh:"Weigh / inspection",lg_cert:"Certified scale",lg_stop:"Stop",lg_traffic:"Traffic incident",lg_wx:"Weather to watch",
+tab_states:"Miles by state",tab_traffic:"Traffic now",tab_legs:"Legs",tab_tolls:"Tolls",tab_cert:"Certified scales",tab_scales:"Weigh stations & inspections",tab_tstops:"Truck stops",
+tr_refresh:"↻ Refresh traffic",tr_note:"Live incidents from TomTom on the roads your route uses: accidents, closures, lane closures, jams, and hazards like ice, fog, flooding or high wind. This shows what's happening right now.",
+cert_note:"CAT Scales and other certified or guaranteed scales, mostly at truck stops. Weigh here before a state scale to check your axle weights.",
+scales_note:"State weigh stations, ports of entry and agricultural inspection stations from TomTom map data, within about a quarter mile of the route. Open or closed status isn't available, and mobile DOT checks aren't on any map, so this list may miss some.",
+cav_b:"About this route.",cav:"Routes are calculated for your truck's height, length, weight and speed, so low bridges and truck-restricted roads are avoided. Always follow posted signs. Miles by state are measured along the route from state boundaries.",
+th_day:"Day",th_cond:"Conditions",th_hilo:"High / low",th_wind:"Wind",th_rain:"Rain",th_when:"When",th_event:"Event",th_mile:"Mile",th_where:"Where",th_weather:"Weather",th_temp:"Temp",th_road:"Road",
+th_state:"State",th_pgal:"$/gal",th_fuel:"Fuel $",th_atmile:"At mile",th_what:"What's happening",th_delay:"Delay",th_leg:"Leg",th_drive:"Drive",th_tdelay:"Traffic delay",
+th_tstretch:"Toll stretch",th_tmiles:"Toll miles",th_est:"Est. $",th_scale:"Scale",th_phone:"Phone",th_loc:"Location",th_type:"Type",th_tstop:"Truck stop",
+hm:"{h}h {m}m",
+e_conn:"{n} isn't connected for you. Add it in claude.ai Settings → Connectors, then try again.",e_reauth:"Your {s} sign-in expired. Reconnect {n} in claude.ai Settings → Connectors.",
+e_ok:"This page needs your OK to use {n}. Try again and choose Allow when asked.",e_policy:"Your organization blocks {n} for this page.",e_tool:"{s} couldn't do that:",
+e_down:"{s} isn't answering right now. Wait a moment and try again.",e_other:"Something went wrong talking to {s} ({c}). Try again.",
+r_start:"Start address",r_final:"Final stop address",r_stop:"Stop {n} address",ph_start:"Start address or city",ph_stop:"Address, city or ZIP",remove:"Remove",no_match:"No match yet, keep typing",
+s_need2:"Add at least a start and one more stop.",s_find:"Finding addresses…",not_found:"Couldn't find this address. Try adding the city and state.",s_notfound:"Stop {n} wasn't found. Fix it and try again.",
+s_route:"Calculating the route…",s_noroute:"TomTom didn't return a route between these stops. Check the addresses.",s_states:"Measuring miles in each state…",s_pois:"Looking up weigh stations and truck stops…",
+s_poierr:"Route is ready. Weigh stations couldn't be loaded:",
+t_box:"{n}′ box truck",t_tt:"{n}-axle tractor-trailer",t_stops:"stops: {n}",mi:"mi",trip_hos:"Trip time, HOS",trip_nohos:"Trip time, no HOS",none:"None",us_avg:"US average price used",total:"Total",min:"min",
+at_mi:"mi {n}",toll_pill:"TOLL",no_tolls:"No toll roads on this route.",toll_note:"Estimated at {r} per toll mile. TomTom marks where the toll roads are but doesn't give prices, so check the toll authority's truck rates for an exact figure.",
+load_err:"Couldn't load this list.",none_found:"None found along this route.",sat:"Satellite ↗",k_state:"Weigh station",k_poe:"Port of entry",k_ag:"Ag inspection",
+gm_many:"Google Maps links take up to 9 middle stops, so stops after the 10th are left out of the link.",gm_note:"The buttons open this route in Google Maps, where you can switch between the regular map and satellite view. Each scale and truck stop also has a satellite link.",
+c_accident:"Accident",c_road_closed:"Road closed",c_lane_closed:"Lane closed",c_jam:"Traffic jam",c_broken_down_vehicle:"Broken-down vehicle",c_danger:"Hazard",c_flooding:"Flooding",c_fog:"Fog",c_frost:"Ice / frost",c_wind:"High wind",c_rain:"Heavy rain",c_roadworks:"Road work",c_other:"Incident",
+sev_major:"major",sev_moderate:"moderate",sev_minor:"minor",sev_unknown:"unknown",sev_indefinite:"closed",
+tr_checking:"Checking live traffic along the route…",tr_err:"Couldn't load traffic",updated:"Updated {t}",mi_long:"{n} mi long",tr_none:"No incidents on your route right now.",
+tr_bad:"Serious incidents on your route now: {n}",tr_delay:"(about {m} min of delays)",tr_first:"First at mile {n}",tr_see:"See traffic",
+tr_minor:"Traffic: {n} minor items on your route, nothing serious right now.",tr_clear:"Traffic: no incidents on your route right now.",tr_not:"Not loaded yet",
+wx_alert:"Weather alert",here_checking:"Checking the weather for {l}…",feels:"Feels",wind:"Wind",gusts:"gusts",humidity:"Humidity",visibility:"Visibility",no_fc:"No forecast returned.",
+wx_stale:"Your schedule changed. Press Check weather to update.",r_wind:"wind {n} mph",r_ice:"ice risk at {n}°F",r_road:"road {c}",
+wx_checking:"Checking the weather along the route…",wx_prog:"Checking the weather along the route… {d} of {n} points",wm_eta:"For your schedule",wm_now:"Conditions right now",wm_24:"24 hours from now",
+checked:"checked {t}",wm_err:"some points didn't answer",wb_eta:"No bad weather expected along the route at your ETA.",wb_now:"No bad weather on the route right now.",wb_24:"No bad weather on the route 24 hours from now.",
+wb_str:"Stretches to watch: {n}.",wb_poor:"poor conditions",wb_more:"and more below.",wx_not:"Weather not checked yet.",
+late:"Not enough time",leave_by:"Leave by",late_ago:"That was {t} ago.",late_team:"Try No HOS only if you have a team driver.",depart:"Depart",arrive_final:"Arrive at final stop",trip_time:"Trip time",
+hos_count:"{r} × 10 h reset, {b} × 30 min break",drive_only:"Driving and stop time only",ev_dep:"Depart from A",ev_stop:"Arrive at stop {n}",ev_dwell:"{h} h at the stop",ev_break:"30-minute break",near:"near",ev_reset:"10-hour reset",ev_back:"Back on the road",
+hos_note:"HOS uses the property-carrying rules: 11 hours of driving, a 14-hour on-duty window, a 30-minute break after 8 hours of driving, and 10 hours off to reset. The 70-hour/8-day limit isn't checked. Times are in your device's time zone, and drive times come from TomTom with typical traffic.",
+nohos_note:"No HOS: continuous driving with only the time at each stop, as for a team or a short local run. Times are in your device's time zone.",
+when_dep:"Departure, your local time",when_arr:"Must arrive at final stop by",
+ws_b:"Weigh stations:",ws_under:"at {w} lb you're under 10,001 lb, so most states don't require you to stop. Ag inspection stations still apply to everyone.",
+ws_over:"at {w} lb you must stop at open scales in most states (the line is 10,001 lb; a few states use 26,001 lb).",
+eia_gas:"EIA gasoline prices · week of Oct 12, 2026",eia_diesel:"EIA diesel prices · week of Oct 12, 2026",
+cs_unavail:"TomTom unavailable here",s_needclaude:"This page needs to be opened in Claude with the TomTom Maps connector added.",cs_notconn:"TomTom not connected",cs_reauth:"TomTom sign-in expired",cs_ready:"Maps ready",cs_connecting:"Connecting to TomTom…",
+trip_est:"Trip estimate",more_settings:"More settings",ov_h:"Trip overview",full_show:"Show full details",full_hide:"Hide full details",ov_weather:"Weather",ov_traffic:"Traffic now",ov_tolls:"Tolls",ov_scales:"Scales",ov_fuel:"Cheapest fuel",v_hos:"with HOS",v_nohos:"no HOS",v_checking:"Checking…",v_clear:"All clear",v_wx_bad:"{n} to watch",v_tr_bad:"{n} serious",v_tr_minor:"{n} minor",v_delay:"~{m} min delay",v_nodelay:"no delays",v_tolls_none:"No tolls",v_toll_mi:"{n} toll mi",v_cert:"{n} certified",v_weigh:"{n} weigh / inspection",v_fuel_sub:"{p}/gal · fuel stops: {n}"
+},
+ru:{
+gps_no:"Геолокация для сайта выключена. Впишите город или ZIP.",gps_here:"Моё местоположение",gps_btn:"📍 Где я",length:"Длина, фт",height:"Высота, фт",alts_h:"Варианты маршрута",alt_fast:"Быстрее всего",alt_n:"Вариант {n}",alt_tolls:"платных миль: {n}",alt_notolls:"без toll",alt_fuel:"топливо",alt_loading:"Загружаю этот маршрут…",alt_note:"Топливо по вариантам — оценка по расстоянию. Выберите вариант, чтобы получить полный расчёт, погоду и пробки по нему. Весовые и стоянки показаны вдоль самого быстрого маршрута.",lg_alt:"Другой маршрут",app_title:"Планировщик рейсов",here_h:"Погода здесь",here_ph:"Город, ZIP или адрес",check:"Показать",here_loading:"Загружаю погоду для стартового адреса…",week:"Прогноз на 7 дней",
+here_note:"Нажмите «Где я», чтобы взять GPS, или впишите город или ZIP. Пока показан стартовый адрес.",
+stops_h:"Остановки",example:"Пример рейса",add_stop:"+ Добавить остановку",reverse:"⇅ Развернуть",optimize:"Оптимизировать порядок промежуточных остановок",avoid_tolls:"Объезжать платные дороги",
+truck_h:"Трак",tt:"Тягач с прицепом",box:"Бокс-трак",box_len:"Длина кузова",axles:"Оси",axles_box:"Бокс-траки: 2 оси",fuel:"Топливо",diesel:"Дизель",gasoline:"Бензин",
+weight:"Полный вес, lb",speed:"Ограничитель скорости, mph",tank:"Баки, gal",toll_rate:"Ставка toll, $ за платную милю",price_adj:"Поправка к цене, $/gal",
+truck_note:"При выборе трака подставляются типичные значения, любое можно изменить. Ставка toll зависит от числа осей и сильно отличается по дорогам. Поправка прибавляется к средней цене каждого штата (например, −0.30 за скидку по топливной карте).",
+plan:"Построить маршрут",no_route:"Маршрута пока нет",no_route_p:"Введите старт и хотя бы ещё одну остановку и нажмите «Построить маршрут». Вы получите мили по штатам, стоимость топлива, оценку toll, весовые и траковые стоянки по пути.",
+fuel_tolls:"Топливо + toll",tolls_est:"Toll (оценка)",cpm:"Цена за милю",miles:"Мили",drive_time:"За рулём",gallons:"Галлоны",avg_gal:"Средн. $/gal",fuel_stops:"Заправки",
+sched_h:"Расписание",hos_on:"С HOS",hos_off:"Без HOS",dep_at:"Выезд в",arr_by:"Прибыть к",dwell:"Время на остановке, ч",
+wx_h:"Погода на маршруте",wx_eta:"На моё время",wx_now:"Сейчас",wx_24:"Через 24 ч",wx_go:"↻ Проверить погоду",
+wx_note:"Проверка каждые 50 миль и на каждой остановке. «На моё время» берёт расписание выше: измените выезд или HOS и снова нажмите «Проверить погоду». Прогноз и предупреждения — от National Weather Service (только США). Данных о покрытии дороги пока нет.",
+sketch_h:"Схема маршрута",open_map:"Открыть карту ↗",open_sat:"Открыть спутник ↗",
+lg_route:"Маршрут",lg_toll:"Платная дорога",lg_weigh:"Весовая / инспекция",lg_cert:"Сертиф. весы",lg_stop:"Остановка",lg_traffic:"ДТП / пробка",lg_wx:"Опасная погода",
+tab_states:"Мили по штатам",tab_traffic:"Трафик сейчас",tab_legs:"Участки",tab_tolls:"Toll",tab_cert:"Сертифицированные весы",tab_scales:"Весовые и инспекции",tab_tstops:"Траковые стоянки",
+tr_refresh:"↻ Обновить трафик",tr_note:"Живые события TomTom на дорогах вашего маршрута: аварии, перекрытия, закрытые полосы, пробки и опасности вроде гололёда, тумана, подтоплений или сильного ветра. Это то, что происходит прямо сейчас.",
+cert_note:"CAT Scales и другие сертифицированные (guaranteed) весы, в основном на траковых стоянках. Взвесьтесь здесь до государственной весовой, чтобы проверить нагрузку на оси.",
+scales_note:"Государственные весовые, порты въезда (Port of Entry) и сельхоз-инспекции из карт TomTom, примерно в четверти мили от маршрута. Статус «открыто/закрыто» недоступен, а мобильных DOT-проверок нет ни на одной карте, поэтому список может быть неполным.",
+cav_b:"О маршруте.",cav:"Маршрут считается под высоту, длину, вес и скорость вашего трака, поэтому низкие мосты и запрещённые для траков дороги обходятся. Всегда следуйте дорожным знакам. Мили по штатам считаются вдоль маршрута по границам штатов.",
+th_day:"День",th_cond:"Погода",th_hilo:"Макс / мин",th_wind:"Ветер",th_rain:"Осадки",th_when:"Когда",th_event:"Событие",th_mile:"Миля",th_where:"Где",th_weather:"Погода",th_temp:"Темп.",th_road:"Дорога",
+th_state:"Штат",th_pgal:"$/gal",th_fuel:"Топливо $",th_atmile:"Миля",th_what:"Что происходит",th_delay:"Задержка",th_leg:"Участок",th_drive:"В пути",th_tdelay:"Пробки",
+th_tstretch:"Платный участок",th_tmiles:"Платные мили",th_est:"Оценка $",th_scale:"Весы",th_phone:"Телефон",th_loc:"Место",th_type:"Тип",th_tstop:"Стоянка",
+hm:"{h} ч {m} мин",
+e_conn:"{n} у вас не подключён. Добавьте его в claude.ai: Settings → Connectors, и попробуйте снова.",e_reauth:"Вход в {s} истёк. Переподключите {n} в claude.ai: Settings → Connectors.",
+e_ok:"Странице нужно ваше разрешение на {n}. Попробуйте снова и нажмите Allow.",e_policy:"Ваша организация запрещает {n} для этой страницы.",e_tool:"{s} не смог выполнить запрос:",
+e_down:"{s} сейчас не отвечает. Подождите немного и попробуйте снова.",e_other:"Ошибка связи с {s} ({c}). Попробуйте снова.",
+r_start:"Адрес старта",r_final:"Адрес финиша",r_stop:"Адрес остановки {n}",ph_start:"Адрес или город старта",ph_stop:"Адрес, город или ZIP",remove:"Удалить",no_match:"Пока не найдено, продолжайте вводить",
+s_need2:"Добавьте старт и хотя бы ещё одну остановку.",s_find:"Ищу адреса…",not_found:"Адрес не найден. Добавьте город и штат.",s_notfound:"Остановка {n} не найдена. Исправьте и попробуйте снова.",
+s_route:"Строю маршрут…",s_noroute:"TomTom не построил маршрут между этими остановками. Проверьте адреса.",s_states:"Считаю мили по штатам…",s_pois:"Ищу весовые и траковые стоянки…",
+s_poierr:"Маршрут готов, но весовые не загрузились:",
+t_box:"Бокс-трак {n}′",t_tt:"Тягач, {n} осей",t_stops:"остановок: {n}",mi:"ми",trip_hos:"В пути, с HOS",trip_nohos:"В пути, без HOS",none:"Не нужно",us_avg:"взята средняя цена по США",total:"Итого",min:"мин",
+at_mi:"миля {n}",toll_pill:"TOLL",no_tolls:"Платных дорог на маршруте нет.",toll_note:"Оценка по {r} за платную милю. TomTom показывает, где платные дороги, но не цены — точную сумму для трака смотрите у оператора дороги.",
+load_err:"Не удалось загрузить список.",none_found:"По маршруту ничего не найдено.",sat:"Спутник ↗",k_state:"Весовая",k_poe:"Port of Entry",k_ag:"Сельхоз-инспекция",
+gm_many:"Ссылка Google Maps вмещает до 9 промежуточных остановок, остановки после 10-й в неё не попали.",gm_note:"Кнопки открывают маршрут в Google Maps, там можно переключаться между картой и спутником. У каждых весов и стоянки тоже есть ссылка на спутник.",
+c_accident:"Авария",c_road_closed:"Дорога перекрыта",c_lane_closed:"Закрыта полоса",c_jam:"Пробка",c_broken_down_vehicle:"Сломанная машина",c_danger:"Опасность",c_flooding:"Подтопление",c_fog:"Туман",c_frost:"Гололёд",c_wind:"Сильный ветер",c_rain:"Ливень",c_roadworks:"Ремонт",c_other:"Происшествие",
+sev_major:"серьёзно",sev_moderate:"средне",sev_minor:"слабо",sev_unknown:"нет данных",sev_indefinite:"перекрыто",
+tr_checking:"Проверяю трафик по маршруту…",tr_err:"Трафик не загрузился",updated:"Обновлено {t}",mi_long:"длина {n} ми",tr_none:"Сейчас на маршруте происшествий нет.",
+tr_bad:"Серьёзных происшествий на маршруте сейчас: {n}",tr_delay:"(задержки около {m} мин)",tr_first:"Первое на миле {n}",tr_see:"Смотреть трафик",
+tr_minor:"Трафик: мелких событий на маршруте — {n}, серьёзного ничего.",tr_clear:"Трафик: на маршруте сейчас чисто.",tr_not:"Ещё не загружено",
+wx_alert:"Погодное предупреждение",here_checking:"Узнаю погоду: {l}…",feels:"Ощущается",wind:"Ветер",gusts:"порывы",humidity:"Влажность",visibility:"Видимость",no_fc:"Прогноз не получен.",
+wx_stale:"Расписание изменилось. Нажмите «Проверить погоду».",r_wind:"ветер {n} mph",r_ice:"риск гололёда при {n}°F",r_road:"дорога: {c}",
+wx_checking:"Проверяю погоду по маршруту…",wx_prog:"Проверяю погоду по маршруту… {d} из {n} точек",wm_eta:"По вашему расписанию",wm_now:"Погода сейчас",wm_24:"Через 24 часа",
+checked:"проверено в {t}",wm_err:"часть точек не ответила",wb_eta:"К вашему времени плохой погоды на маршруте не ожидается.",wb_now:"Сейчас на маршруте плохой погоды нет.",wb_24:"Через 24 часа плохой погоды на маршруте не ожидается.",
+wb_str:"Опасных участков: {n}.",wb_poor:"плохие условия",wb_more:"остальные ниже.",wx_not:"Погода ещё не проверена.",
+late:"Не успеваете",leave_by:"Выехать до",late_ago:"Это было {t} назад.",late_team:"«Без HOS» — только если едете в команде.",depart:"Выезд",arrive_final:"Прибытие на финиш",trip_time:"Время в пути",
+hos_count:"отдых 10 ч × {r}, перерыв 30 мин × {b}",drive_only:"Только вождение и остановки",ev_dep:"Выезд из A",ev_stop:"Прибытие на остановку {n}",ev_dwell:"{h} ч на остановке",ev_break:"Перерыв 30 минут",near:"около",ev_reset:"Отдых 10 часов",ev_back:"Снова в путь",
+hos_note:"HOS по правилам для грузов: 11 часов вождения, 14-часовое рабочее окно, перерыв 30 минут после 8 часов вождения и 10 часов отдыха. Лимит 70 часов / 8 дней не проверяется. Время — в часовом поясе устройства, время в пути — от TomTom с обычным трафиком.",
+nohos_note:"Без HOS: непрерывное вождение, только время на остановках — для команды или короткого локального рейса. Время — в часовом поясе устройства.",
+when_dep:"Выезд, ваше местное время",when_arr:"Нужно быть на финише к",
+ws_b:"Весовые:",ws_under:"при {w} lb вы легче 10,001 lb, и в большинстве штатов заезжать не нужно. Сельхоз-инспекции обязательны для всех.",
+ws_over:"при {w} lb в большинстве штатов нужно заезжать на открытые весовые (порог 10,001 lb; в нескольких штатах 26,001 lb).",
+eia_gas:"Цены EIA на бензин · неделя 12 окт. 2026",eia_diesel:"Цены EIA на дизель · неделя 12 окт. 2026",
+cs_unavail:"TomTom здесь недоступен",s_needclaude:"Откройте эту страницу в Claude с подключённым TomTom Maps.",cs_notconn:"TomTom не подключён",cs_reauth:"Вход в TomTom истёк",cs_ready:"Карты готовы",cs_connecting:"Подключаюсь к TomTom…",
+trip_est:"Расчёт рейса",more_settings:"Дополнительные настройки",ov_h:"Сводка рейса",full_show:"Полный расчёт",full_hide:"Свернуть полный расчёт",ov_weather:"Погода",ov_traffic:"Трафик сейчас",ov_tolls:"Toll",ov_scales:"Весы",ov_fuel:"Дешевле всего топливо",v_hos:"с HOS",v_nohos:"без HOS",v_checking:"Проверяю…",v_clear:"Всё чисто",v_wx_bad:"Опасных участков: {n}",v_tr_bad:"Серьёзных: {n}",v_tr_minor:"Мелких: {n}",v_delay:"задержка ~{m} мин",v_nodelay:"без задержек",v_tolls_none:"Без toll",v_toll_mi:"платных миль: {n}",v_cert:"Сертиф.: {n}",v_weigh:"весовых / инспекций: {n}",v_fuel_sub:"{p}/gal · заправок: {n}"
+},
+es:{
+gps_no:"La ubicación está desactivada para este sitio. Escribe una ciudad o ZIP.",gps_here:"Mi ubicación",gps_btn:"📍 Mi ubicación",length:"Largo, pies",height:"Altura, pies",alts_h:"Opciones de ruta",alt_fast:"La más rápida",alt_n:"Opción {n}",alt_tolls:"{n} mi de peaje",alt_notolls:"sin peajes",alt_fuel:"combustible",alt_loading:"Cargando esta ruta…",alt_note:"El combustible de cada opción es un estimado por distancia. Elige una opción para ver su cálculo completo, clima y tráfico. Las básculas y paradas se muestran a lo largo de la ruta más rápida.",lg_alt:"Otra ruta",app_title:"Planificador de rutas",here_h:"Clima aquí",here_ph:"Ciudad, código postal o dirección",check:"Ver",here_loading:"Cargando el clima del punto de salida…",week:"Pronóstico de 7 días",
+here_note:"Pulsa Mi ubicación para usar tu GPS, o escribe una ciudad o ZIP. Mientras tanto muestra la dirección de salida.",
+stops_h:"Paradas",example:"Viaje de ejemplo",add_stop:"+ Agregar parada",reverse:"⇅ Invertir",optimize:"Optimizar el orden de las paradas intermedias",avoid_tolls:"Evitar peajes",
+truck_h:"Camión",tt:"Tractocamión",box:"Camión de caja",box_len:"Largo de la caja",axles:"Ejes",axles_box:"Camiones de caja: 2 ejes",fuel:"Combustible",diesel:"Diésel",gasoline:"Gasolina",
+weight:"Peso bruto, lb",speed:"Velocidad limitada, mph",tank:"Tanques, gal",toll_rate:"Peaje, $ por milla de peaje",price_adj:"Ajuste de precio, $/gal",
+truck_note:"Al elegir un camión se llenan valores típicos y puedes cambiar cualquiera. El peaje depende del número de ejes y varía mucho según la autopista. El ajuste se suma al promedio de cada estado (por ejemplo, −0.30 por el descuento de tu tarjeta de combustible).",
+plan:"Calcular ruta",no_route:"Aún no hay ruta",no_route_p:"Escribe la salida y al menos otra parada, y pulsa Calcular ruta. Verás millas por estado, costo de combustible, peajes estimados, básculas y paradas de camiones en el camino.",
+fuel_tolls:"Combustible + peajes",tolls_est:"Peajes (est.)",cpm:"Costo por milla",miles:"Millas",drive_time:"Manejo",gallons:"Galones",avg_gal:"Prom. $/gal",fuel_stops:"Cargas de combustible",
+sched_h:"Horario",hos_on:"Con HOS",hos_off:"Sin HOS",dep_at:"Salir a las",arr_by:"Llegar antes de",dwell:"Tiempo en cada parada, h",
+wx_h:"Clima en la ruta",wx_eta:"A mi hora de paso",wx_now:"Ahora",wx_24:"En 24 h",wx_go:"↻ Revisar clima",
+wx_note:"Se revisa cada 50 millas y en cada parada. «A mi hora de paso» usa tu horario de arriba: cambia la salida o el HOS y vuelve a pulsar Revisar clima. El pronóstico y las alertas son del National Weather Service (solo EE. UU.). Aún no hay datos del pavimento.",
+sketch_h:"Esquema de la ruta",open_map:"Abrir mapa ↗",open_sat:"Abrir satélite ↗",
+lg_route:"Ruta",lg_toll:"Peaje",lg_weigh:"Báscula / inspección",lg_cert:"Báscula certificada",lg_stop:"Parada",lg_traffic:"Incidente vial",lg_wx:"Clima a vigilar",
+tab_states:"Millas por estado",tab_traffic:"Tráfico ahora",tab_legs:"Tramos",tab_tolls:"Peajes",tab_cert:"Básculas certificadas",tab_scales:"Básculas e inspecciones",tab_tstops:"Paradas de camiones",
+tr_refresh:"↻ Actualizar tráfico",tr_note:"Incidentes en vivo de TomTom en las vías de tu ruta: accidentes, cierres, carriles cerrados, embotellamientos y peligros como hielo, niebla, inundaciones o viento fuerte. Muestra lo que pasa ahora mismo.",
+cert_note:"CAT Scales y otras básculas certificadas o garantizadas, casi siempre en paradas de camiones. Pésate aquí antes de una báscula estatal para revisar el peso por eje.",
+scales_note:"Básculas estatales, puertos de entrada e inspecciones agrícolas según los mapas de TomTom, a un cuarto de milla de la ruta. No se sabe si están abiertas o cerradas, y los retenes móviles del DOT no aparecen en ningún mapa, así que la lista puede estar incompleta.",
+cav_b:"Sobre esta ruta.",cav:"La ruta se calcula para la altura, largo, peso y velocidad de tu camión, así que evita puentes bajos y vías restringidas para camiones. Sigue siempre las señales. Las millas por estado se miden a lo largo de la ruta con los límites estatales.",
+th_day:"Día",th_cond:"Clima",th_hilo:"Máx / mín",th_wind:"Viento",th_rain:"Lluvia",th_when:"Cuándo",th_event:"Evento",th_mile:"Milla",th_where:"Dónde",th_weather:"Clima",th_temp:"Temp.",th_road:"Pavimento",
+th_state:"Estado",th_pgal:"$/gal",th_fuel:"Combustible $",th_atmile:"Milla",th_what:"Qué pasa",th_delay:"Demora",th_leg:"Tramo",th_drive:"Manejo",th_tdelay:"Demora por tráfico",
+th_tstretch:"Tramo de peaje",th_tmiles:"Millas de peaje",th_est:"Est. $",th_scale:"Báscula",th_phone:"Teléfono",th_loc:"Lugar",th_type:"Tipo",th_tstop:"Parada de camiones",
+hm:"{h} h {m} min",
+e_conn:"{n} no está conectado. Agrégalo en claude.ai, Settings → Connectors, y vuelve a intentar.",e_reauth:"Tu sesión de {s} venció. Vuelve a conectar {n} en claude.ai, Settings → Connectors.",
+e_ok:"Esta página necesita tu permiso para usar {n}. Vuelve a intentar y elige Allow.",e_policy:"Tu organización bloquea {n} en esta página.",e_tool:"{s} no pudo hacerlo:",
+e_down:"{s} no responde ahora. Espera un momento y vuelve a intentar.",e_other:"Hubo un problema con {s} ({c}). Vuelve a intentar.",
+r_start:"Dirección de salida",r_final:"Dirección de la última parada",r_stop:"Dirección de la parada {n}",ph_start:"Dirección o ciudad de salida",ph_stop:"Dirección, ciudad o código postal",remove:"Quitar",no_match:"Sin resultados aún, sigue escribiendo",
+s_need2:"Agrega la salida y al menos otra parada.",s_find:"Buscando direcciones…",not_found:"No se encontró la dirección. Agrega la ciudad y el estado.",s_notfound:"No se encontró la parada {n}. Corrígela y vuelve a intentar.",
+s_route:"Calculando la ruta…",s_noroute:"TomTom no encontró una ruta entre estas paradas. Revisa las direcciones.",s_states:"Midiendo las millas por estado…",s_pois:"Buscando básculas y paradas de camiones…",
+s_poierr:"La ruta está lista, pero no se cargaron las básculas:",
+t_box:"Camión de caja de {n}′",t_tt:"Tractocamión de {n} ejes",t_stops:"paradas: {n}",mi:"mi",trip_hos:"Viaje, con HOS",trip_nohos:"Viaje, sin HOS",none:"Ninguna",us_avg:"se usó el promedio de EE. UU.",total:"Total",min:"min",
+at_mi:"milla {n}",toll_pill:"PEAJE",no_tolls:"No hay peajes en esta ruta.",toll_note:"Estimado a {r} por milla de peaje. TomTom marca dónde están los peajes pero no da precios; revisa la tarifa para camiones con el operador de la autopista.",
+load_err:"No se pudo cargar esta lista.",none_found:"No se encontró nada en la ruta.",sat:"Satélite ↗",k_state:"Báscula estatal",k_poe:"Puerto de entrada",k_ag:"Inspección agrícola",
+gm_many:"Los enlaces de Google Maps admiten hasta 9 paradas intermedias, así que las paradas después de la 10.ª no aparecen.",gm_note:"Los botones abren la ruta en Google Maps, donde puedes cambiar entre mapa y satélite. Cada báscula y parada también tiene un enlace al satélite.",
+c_accident:"Accidente",c_road_closed:"Vía cerrada",c_lane_closed:"Carril cerrado",c_jam:"Embotellamiento",c_broken_down_vehicle:"Vehículo averiado",c_danger:"Peligro",c_flooding:"Inundación",c_fog:"Niebla",c_frost:"Hielo",c_wind:"Viento fuerte",c_rain:"Lluvia fuerte",c_roadworks:"Obras",c_other:"Incidente",
+sev_major:"grave",sev_moderate:"moderado",sev_minor:"leve",sev_unknown:"sin datos",sev_indefinite:"cerrado",
+tr_checking:"Revisando el tráfico en la ruta…",tr_err:"No se pudo cargar el tráfico",updated:"Actualizado {t}",mi_long:"{n} mi de largo",tr_none:"No hay incidentes en tu ruta ahora.",
+tr_bad:"Incidentes graves en tu ruta ahora: {n}",tr_delay:"(unos {m} min de demora)",tr_first:"El primero en la milla {n}",tr_see:"Ver tráfico",
+tr_minor:"Tráfico: {n} incidentes leves en tu ruta, nada grave ahora.",tr_clear:"Tráfico: sin incidentes en tu ruta ahora.",tr_not:"Aún no cargado",
+wx_alert:"Alerta del clima",here_checking:"Revisando el clima de {l}…",feels:"Sensación",wind:"Viento",gusts:"ráfagas",humidity:"Humedad",visibility:"Visibilidad",no_fc:"No llegó el pronóstico.",
+wx_stale:"Tu horario cambió. Pulsa Revisar clima para actualizar.",r_wind:"viento de {n} mph",r_ice:"riesgo de hielo a {n}°F",r_road:"pavimento: {c}",
+wx_checking:"Revisando el clima en la ruta…",wx_prog:"Revisando el clima en la ruta… {d} de {n} puntos",wm_eta:"Según tu horario",wm_now:"Clima ahora",wm_24:"En 24 horas",
+checked:"revisado a las {t}",wm_err:"algunos puntos no respondieron",wb_eta:"No se espera mal clima en la ruta a tu hora de paso.",wb_now:"No hay mal clima en la ruta ahora.",wb_24:"No se espera mal clima en la ruta dentro de 24 horas.",
+wb_str:"Tramos a vigilar: {n}.",wb_poor:"malas condiciones",wb_more:"y más abajo.",wx_not:"Aún no se revisa el clima.",
+late:"No alcanza el tiempo",leave_by:"Salir antes de",late_ago:"Eso fue hace {t}.",late_team:"Usa Sin HOS solo si manejas en equipo.",depart:"Salida",arrive_final:"Llegada a la última parada",trip_time:"Tiempo de viaje",
+hos_count:"{r} × descanso de 10 h, {b} × pausa de 30 min",drive_only:"Solo manejo y paradas",ev_dep:"Salida de A",ev_stop:"Llegada a la parada {n}",ev_dwell:"{h} h en la parada",ev_break:"Pausa de 30 minutos",near:"cerca de",ev_reset:"Descanso de 10 horas",ev_back:"De vuelta en la carretera",
+hos_note:"El HOS usa las reglas de carga: 11 horas de manejo, ventana de 14 horas en servicio, pausa de 30 minutos tras 8 horas de manejo y 10 horas libres para reiniciar. No se revisa el límite de 70 horas / 8 días. Las horas están en la zona horaria de tu dispositivo y el tiempo de manejo viene de TomTom con tráfico típico.",
+nohos_note:"Sin HOS: manejo continuo, solo con el tiempo en cada parada, como en equipo o en un viaje local corto. Las horas están en la zona horaria de tu dispositivo.",
+when_dep:"Salida, tu hora local",when_arr:"Debes llegar a la última parada antes de",
+ws_b:"Básculas:",ws_under:"con {w} lb estás por debajo de 10,001 lb, así que en la mayoría de los estados no tienes que entrar. Las inspecciones agrícolas aplican a todos.",
+ws_over:"con {w} lb debes entrar a las básculas abiertas en la mayoría de los estados (el límite es 10,001 lb; algunos estados usan 26,001 lb).",
+eia_gas:"Precios EIA de gasolina · semana del 12 oct. 2026",eia_diesel:"Precios EIA de diésel · semana del 12 oct. 2026",
+cs_unavail:"TomTom no disponible aquí",s_needclaude:"Abre esta página en Claude con el conector TomTom Maps agregado.",cs_notconn:"TomTom no conectado",cs_reauth:"Venció la sesión de TomTom",cs_ready:"Mapas listos",cs_connecting:"Conectando con TomTom…",
+trip_est:"Estimado del viaje",more_settings:"Más ajustes",ov_h:"Resumen del viaje",full_show:"Ver detalle completo",full_hide:"Ocultar detalle completo",ov_weather:"Clima",ov_traffic:"Tráfico ahora",ov_tolls:"Peajes",ov_scales:"Básculas",ov_fuel:"Combustible más barato",v_hos:"con HOS",v_nohos:"sin HOS",v_checking:"Revisando…",v_clear:"Todo bien",v_wx_bad:"{n} a vigilar",v_tr_bad:"{n} graves",v_tr_minor:"{n} leves",v_delay:"~{m} min de demora",v_nodelay:"sin demoras",v_tolls_none:"Sin peajes",v_toll_mi:"{n} mi de peaje",v_cert:"{n} certificadas",v_weigh:"{n} básculas / inspecciones",v_fuel_sub:"{p}/gal · cargas: {n}"
+}};
+const LOCALES={en:"en-US",ru:"ru-RU",es:"es-US"};
+let lang=(()=>{try{const v=localStorage.getItem("rigora_lang");if(v&&I18N[v])return v}catch(e){}const n=(navigator.language||"en").slice(0,2);return I18N[n]?n:"en"})();
+let connState="connecting";
+const LOC=()=>LOCALES[lang]||"en-US";
+function T(k,v){let s=(I18N[lang]&&I18N[lang][k]!=null)?I18N[lang][k]:(I18N.en[k]!=null?I18N.en[k]:k);if(v)for(const x in v)s=s.split("{"+x+"}").join(String(v[x]));return s}
+// weather phrases from Xweather (English) → current language
+const WXP={
+ru:{"clear":"Ясно","mostly clear":"Преимущественно ясно","sunny":"Солнечно","mostly sunny":"Преимущественно солнечно","partly cloudy":"Переменная облачность","mostly cloudy":"Преимущественно облачно","cloudy":"Облачно","overcast":"Пасмурно",
+"rain":"Дождь","light rain":"Небольшой дождь","heavy rain":"Сильный дождь","showers":"Ливни","scattered showers":"Местами ливни","isolated showers":"Кое-где ливни","light showers":"Небольшие ливни","drizzle":"Морось","freezing rain":"Ледяной дождь","freezing drizzle":"Ледяная морось",
+"snow":"Снег","light snow":"Небольшой снег","heavy snow":"Сильный снег","snow showers":"Снегопады","blowing snow":"Метель","flurries":"Снежинки","sleet":"Мокрый снег","wintry mix":"Снег с дождём","rain and snow":"Дождь со снегом",
+"thunderstorms":"Грозы","scattered thunderstorms":"Местами грозы","isolated thunderstorms":"Кое-где грозы","t-storms":"Грозы","fog":"Туман","patchy fog":"Местами туман","dense fog":"Густой туман","haze":"Дымка","smoke":"Дым","windy":"Ветрено","breezy":"Свежий ветер","dust":"Пыль","hail":"Град"},
+es:{"clear":"Despejado","mostly clear":"Mayormente despejado","sunny":"Soleado","mostly sunny":"Mayormente soleado","partly cloudy":"Parcialmente nublado","mostly cloudy":"Mayormente nublado","cloudy":"Nublado","overcast":"Cubierto",
+"rain":"Lluvia","light rain":"Lluvia ligera","heavy rain":"Lluvia fuerte","showers":"Chubascos","scattered showers":"Chubascos dispersos","isolated showers":"Chubascos aislados","light showers":"Chubascos ligeros","drizzle":"Llovizna","freezing rain":"Lluvia helada","freezing drizzle":"Llovizna helada",
+"snow":"Nieve","light snow":"Nieve ligera","heavy snow":"Nevada fuerte","snow showers":"Nevadas","blowing snow":"Ventisca","flurries":"Copos de nieve","sleet":"Aguanieve","wintry mix":"Mezcla invernal","rain and snow":"Lluvia y nieve",
+"thunderstorms":"Tormentas","scattered thunderstorms":"Tormentas dispersas","isolated thunderstorms":"Tormentas aisladas","t-storms":"Tormentas","fog":"Niebla","patchy fog":"Niebla en partes","dense fog":"Niebla densa","haze":"Bruma","smoke":"Humo","windy":"Ventoso","breezy":"Brisa","dust":"Polvo","hail":"Granizo"}};
+function wxText(s){
+  if(!s)return "";const m=WXP[lang];if(!m)return s;
+  const part=p=>{const k=p.trim().toLowerCase();return m[k]||p.trim()};
+  const sep=lang==="ru"?", ":" con ";
+  return String(s).split(/ with /i).map((p,i)=>{const t=part(p);return i?t.charAt(0).toLowerCase()+t.slice(1):t}).join(sep);
+}
+const ROADP={ru:{dry:"сухо",wet:"мокро",moist:"влажно",ice:"лёд",icy:"лёд",snow:"снег",frost:"иней",slush:"слякоть",green:"норма",yellow:"осторожно",red:"опасно"},
+             es:{dry:"seco",wet:"mojado",moist:"húmedo",ice:"hielo",icy:"hielo",snow:"nieve",frost:"escarcha",slush:"aguanieve",green:"normal",yellow:"precaución",red:"peligro"}};
+function roadText(c){const k=String(c||"").toLowerCase();return (ROADP[lang]&&ROADP[lang][k])||k}
+function applyLang(l,initial){
+  if(!I18N[l])l="en";lang=l;
+  try{localStorage.setItem("rigora_lang",l)}catch(e){}
+  document.documentElement.lang=l;
+  document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===l)));
+  document.querySelectorAll("[data-pi18n]").forEach(el=>{el.textContent=T(el.dataset.pi18n)});
+  document.querySelectorAll("[data-pi18n-ph]").forEach(el=>{el.placeholder=T(el.dataset.pi18nPh)});
+  $("connTxt").textContent=T("cs_"+connState);
+  if(!last){$("tTitle").textContent=T("trip_est");$("trafficAt").textContent=T("tr_not")}
+  if(!last||!last.wx){if(!wxBusyNow())$("wxBar").textContent=T("wx_not")}
+  document.querySelectorAll(".sz").forEach(b=>b.setAttribute("aria-label",T("t_box",{n:b.dataset.size})+", "+TRUCKS.box[b.dataset.size].gvwr));
+  $("whenLbl").textContent=planMode==="arr"?T("when_arr"):T("when_dep");
+  updateTruckNotes();
+  if(initial)return;
+  renderStops();
+  renderHere();
+  if(last){render();renderRouteWx();renderOverview();}
+}
+function wxBusyNow(){try{return wxBusy}catch(e){return false}}
+document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>applyLang(b.dataset.lang)));
+
+const M_PER_MI=1609.344;
+const usd=(n,d=0)=>"$"+(n||0).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+const num=(n,d=0)=>(n||0).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+const hrs=s=>{let h=Math.floor(s/3600),m=Math.round((s%3600)/60);if(m===60){h++;m=0}return T("hm",{h,m:String(m).padStart(2,"0")})};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+let mcp=null, stops=[
+  {q:"Parker, CO",pos:null,label:""},
+  {q:"Kansas City, MO",pos:null,label:""},
+  {q:"Chicago, IL",pos:null,label:""}
+], exampleShown=true, last=null;
+
+// ---------- MCP helpers ----------
+const WX="Vaisala Xweather";
+function errText(e,srv){
+  const c=e&&e.code,n=srv||SERVER,short=n===WX?"Xweather":"TomTom";
+  if(c==="server_not_connected"||c==="selection_required") return T("e_conn",{n});
+  if(c==="needs_reauth") return T("e_reauth",{s:short,n});
+  if(c==="not_in_manifest"||c==="approval_required"||c==="consent_required") return T("e_ok",{n});
+  if(c==="blocked_by_policy") return T("e_policy",{n});
+  if(c==="tool_error") return T("e_tool",{s:short})+" "+String(e.message||"").slice(0,160);
+  if(c==="server_unavailable") return T("e_down",{s:short});
+  return T("e_other",{s:short,c:c||"unknown"});
+}
+async function call(tool,input,{cache=true,server=SERVER}={}){
+  if(!mcp) throw {code:"capability_disabled"};
+  const opts=cache?{cache:{staleTime:300000,gcTime:3600000}}:{cache:false};
+  try{ const r=await mcp.callTool(server,tool,input,opts); return r.payload; }
+  catch(e){
+    if(e&&e.retryable){ await new Promise(r=>setTimeout(r,(e.retryAfterMs||800)+Math.random()*400)); const r=await mcp.callTool(server,tool,input,opts); return r.payload; }
+    throw e;
+  }
+}
+const xcall=(tool,input,o={})=>call(tool,input,{...o,server:WX});
+async function pool(items,n,fn,onEach){
+  const out=new Array(items.length);let i=0,done=0;
+  async function w(){while(i<items.length){const k=i++;try{out[k]=await fn(items[k],k)}catch(e){out[k]={__err:e}}done++;onEach&&onEach(done,items.length)}}
+  await Promise.all(Array.from({length:Math.min(n,items.length)},w));
+  return out;
+}
+
+// ---------- site API adapter (replaces Claude connectors) ----------
+async function apiGet(path){const r=await fetch(path);return apiOut(r)}
+async function apiPost(path,body){const r=await fetch(path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});return apiOut(r)}
+async function apiOut(r){let j=null;try{j=await r.json()}catch(e){}
+  if(r.ok&&j&&!j.error)return j;
+  throw {code:r.status===400?"tool_error":"server_unavailable",message:(j&&(j.detail||j.error))||("HTTP "+r.status),retryable:r.status>=500};}
+const enc=encodeURIComponent;
+const SITE={
+  "tomtom-fuzzy-search":i=>apiGet(`/api/search?q=${enc(i.query)}&limit=${i.limit||6}&typeahead=${i.typeahead?1:0}`),
+  "tomtom-routing":i=>apiPost("/api/route",i),
+  "tomtom-traffic":i=>apiGet(`/api/traffic?bbox=${enc((i.bbox||[]).join(","))}`),
+  "tomtom-reverse-geocode":()=>Promise.resolve({}),
+  "xweather_get_current_weather":i=>apiGet(`/api/wx?kind=current&loc=${enc(i.location)}`),
+  "xweather_get_forecast_weather":i=>apiGet(`/api/wx?kind=${i.forecast_filter==="day"?"daily":"hourly"}&loc=${enc(i.location)}&at=${enc(i.start_datetime||"")}`),
+  "xweather_get_current_active_weather_alerts":i=>apiGet(`/api/wx?kind=alerts&loc=${enc(i.location)}`),
+  "xweather_get_roadweather":()=>Promise.resolve({roadweather:[]})
+};
+const siteMcp={callTool:async(server,tool,input)=>{const f=SITE[tool];if(!f)throw {code:"tool_error",message:"unknown "+tool};return {payload:await f(input||{})}}};
+// state miles come back with the route, computed on the server from state boundaries
+function smFromSpans(spans,dist){
+  const total=dist[dist.length-1];
+  if(!spans||!spans.length)spans=[{st:"US",i0:0,i1:dist.length-1}];
+  const segs=spans.map(s=>({st:s.st,m:dist[s.i1]-dist[s.i0],i0:s.i0,i1:s.i1}));
+  const bounds=spans.slice(1).map((s,k)=>({i:s.i0,from:spans[k].st,to:s.st}));
+  const per={};segs.forEach(s=>{if(s.m>0)per[s.st]=(per[s.st]||0)+s.m});
+  const order=[];segs.forEach(s=>{if(s.m>0&&!order.includes(s.st))order.push(s.st)});
+  if(!order.length){per[spans[0].st]=total;order.push(spans[0].st)}
+  return {per,order,segs,bounds};
+}
+
+// ---------- status ----------
+function status(msg,{err=false,busy=true,prog=null}={}){
+  $("statusBox").hidden=!msg;
+  $("status").classList.toggle("err",err);
+  $("spin").hidden=!busy;
+  $("statusTxt").textContent=msg||"";
+  $("progBar").style.width=(prog==null?0:Math.round(prog*100))+"%";
+}
+
+// ---------- stops UI ----------
+function hideExample(){ if(exampleShown){exampleShown=false;$("exTag").hidden=true} }
+function renderStops(){
+  const ol=$("stops");ol.innerHTML="";
+  stops.forEach((s,i)=>{
+    const li=document.createElement("li");li.className="stop";
+    const role=i===0?T("r_start"):(i===stops.length-1?T("r_final"):T("r_stop",{n:i+1}));
+    li.innerHTML=`<span class="badge" aria-hidden="true">${i===0?"A":i+1}</span>
+      <div class="addr"><input id="stop${i}" type="text" autocomplete="off" aria-label="${esc(role)}" placeholder="${i===0?T("ph_start"):T("ph_stop")}">
+      <span class="resolved ${s.pos?"ok":""}" id="res${i}">${s.pos?"✓ "+esc(s.label):""}</span></div>
+      <button class="rm" type="button" aria-label="${T("remove")} ${esc(role)}" ${stops.length<=2?"disabled":""}>×</button>`;
+    const inp=li.querySelector("input");inp.value=s.q;
+    let t=null;
+    inp.addEventListener("input",()=>{hideExample();s.q=inp.value;s.pos=null;s.label="";setRes(i,"");clearTimeout(t);
+      if(inp.value.trim().length>=4) t=setTimeout(()=>suggest(i,inp),450); else closeSugg();});
+    inp.addEventListener("keydown",e=>{if(e.key==="Escape")closeSugg(); if(e.key==="ArrowDown"){const b=document.querySelector(".sugg button");if(b){e.preventDefault();b.focus()}}});
+    li.querySelector(".rm").addEventListener("click",()=>{hideExample();stops.splice(i,1);renderStops()});
+    ol.appendChild(li);
+  });
+}
+function setRes(i,txt,cls){const r=$("res"+i);if(!r)return;r.textContent=txt;r.className="resolved "+(cls||"")}
+function closeSugg(){document.querySelectorAll(".sugg").forEach(x=>x.remove())}
+function fmtFeature(f){const a=f.properties.address||{},p=f.properties.poi;
+  const main=p?p.name:(a.freeformAddress||"");
+  const sub=p?(a.freeformAddress||""):[a.municipality,a.countrySubdivision,a.postalCode].filter(Boolean).join(", ");
+  return {main,sub,label:(p?p.name+", ":"")+(a.freeformAddress||main),state:a.countrySubdivision,pos:f.geometry.coordinates};}
+async function search(q,limit){
+  const pay=await call("tomtom-fuzzy-search",{query:q,countries:["US","CA","MX"],limit,typeahead:true,language:"en-US"});
+  return ((pay&&pay.features)||[]).filter(f=>f.geometry&&f.geometry.coordinates).map(fmtFeature);
+}
+async function suggest(i,inp){
+  if(!mcp)return;
+  try{
+    const res=await search(inp.value.trim(),6);
+    if(document.activeElement!==inp && !document.querySelector(".sugg"))return;
+    closeSugg(); if(!res.length){setRes(i,T("no_match"),"err");return}
+    const box=document.createElement("div");box.className="sugg";box.setAttribute("role","listbox");
+    res.forEach(r=>{const b=document.createElement("button");b.type="button";b.innerHTML=`${esc(r.main)}<small>${esc(r.sub)}</small>`;
+      b.addEventListener("click",()=>{const s=stops[i];s.q=r.main+(r.sub&&!r.main.includes(r.sub)?", "+r.sub:"");s.pos=r.pos;s.label=r.label;inp.value=s.q;setRes(i,"✓ "+r.label,"ok");closeSugg()});
+      b.addEventListener("keydown",e=>{if(e.key==="ArrowDown"){e.preventDefault();(b.nextElementSibling||b).focus()}if(e.key==="ArrowUp"){e.preventDefault();(b.previousElementSibling||inp).focus()}if(e.key==="Escape"){closeSugg();inp.focus()}});
+      box.appendChild(b)});
+    inp.parentElement.appendChild(box);
+  }catch(e){setRes(i,errText(e),"err")}
+}
+document.addEventListener("click",e=>{if(!e.target.closest(".addr"))closeSugg()});
+$("addStop").addEventListener("click",()=>{hideExample();stops.push({q:"",pos:null,label:""});renderStops();$("stop"+(stops.length-1)).focus()});
+$("reverse").addEventListener("click",()=>{hideExample();stops.reverse();renderStops()});
+
+// ---------- geometry ----------
+function hav(a,b){const R=6371008.8,toR=Math.PI/180;const dLa=(b[1]-a[1])*toR,dLo=(b[0]-a[0])*toR;const x=Math.sin(dLa/2)**2+Math.cos(a[1]*toR)*Math.cos(b[1]*toR)*Math.sin(dLo/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
+function cumDist(c){const d=new Float64Array(c.length);for(let i=1;i<c.length;i++)d[i]=d[i-1]+hav(c[i-1],c[i]);return d}
+function idxAt(d,target){let lo=0,hi=d.length-1;while(lo<hi){const m=(lo+hi)>>1;if(d[m]<target)lo=m+1;else hi=m}return lo}
+function nearestIdx(c,p,step){let best=0,bd=Infinity;for(let i=0;i<c.length;i+=step){const dx=(c[i][0]-p[0])*Math.cos(p[1]*Math.PI/180),dy=c[i][1]-p[1],dd=dx*dx+dy*dy;if(dd<bd){bd=dd;best=i}}
+  const lo=Math.max(0,best-step),hi=Math.min(c.length-1,best+step);for(let i=lo;i<=hi;i++){const dx=(c[i][0]-p[0])*Math.cos(p[1]*Math.PI/180),dy=c[i][1]-p[1],dd=dx*dx+dy*dy;if(dd<bd){bd=dd;best=i}}
+  return {i:best,km:Math.sqrt(bd)*111}}
+
+// optimize middle stops by straight-line distance (brute force up to 7 middle stops, else nearest neighbour)
+function optimizeOrder(pts){
+  if(pts.length<4)return pts.map((_,i)=>i);
+  const mid=pts.slice(1,-1).map((_,k)=>k+1),first=0,lastI=pts.length-1;
+  const D=(a,b)=>hav(pts[a],pts[b]);
+  let best=null,bestD=Infinity;
+  if(mid.length<=7){
+    const perm=(arr,l)=>{if(l===arr.length){let t=D(first,arr[0]);for(let k=1;k<arr.length;k++)t+=D(arr[k-1],arr[k]);t+=D(arr[arr.length-1],lastI);if(t<bestD){bestD=t;best=arr.slice()}return}
+      for(let k=l;k<arr.length;k++){[arr[l],arr[k]]=[arr[k],arr[l]];perm(arr,l+1);[arr[l],arr[k]]=[arr[k],arr[l]]}};
+    perm(mid.slice(),0);
+  }else{const left=mid.slice();best=[];let cur=first;while(left.length){let bi=0;left.forEach((x,k)=>{if(D(cur,x)<D(cur,left[bi]))bi=k});cur=left.splice(bi,1)[0];best.push(cur)}}
+  return [first,...best,lastI];
+}
+
+// ---------- state miles ----------
+async function stateAt(p,cache){
+  const k=p[0].toFixed(3)+","+p[1].toFixed(3);if(cache.has(k))return cache.get(k);
+  let st=null;
+  try{const pay=await call("tomtom-reverse-geocode",{position:[+p[0].toFixed(5),+p[1].toFixed(5)],entityType:"CountrySubdivision",radius:2000});
+    const a=pay&&pay.properties&&pay.properties.address; if(a) st=(a.countryCode==="US"?"":a.countryCode+"-")+(a.countrySubdivision||"");
+  }catch(e){ if(e&&["server_not_connected","needs_reauth","not_in_manifest","approval_required","blocked_by_policy"].includes(e.code)) throw e; }
+  cache.set(k,st);return st;
+}
+async function stateMiles(coords,dist,onProg){
+  const total=dist[dist.length-1],STEP=25*M_PER_MI,cache=new Map();
+  const idx=[0];for(let t=STEP;t<total;t+=STEP)idx.push(idxAt(dist,t));idx.push(coords.length-1);
+  const uniq=[...new Set(idx)];
+  let doneCalls=0;const est=uniq.length*1.25;
+  const sts=await pool(uniq,6,i=>stateAt(coords[i],cache),()=>{doneCalls++;onProg(Math.min(.95,doneCalls/est))});
+  sts.forEach((s,k)=>{if(s&&s.__err)throw s.__err});
+  // fill gaps
+  for(let k=0;k<sts.length;k++) if(!sts[k]) sts[k]=sts[k-1]||sts.find(Boolean)||"??";
+  // boundaries by bisection
+  const bounds=[];// {i, from, to}
+  const pairs=[];for(let k=1;k<uniq.length;k++) if(sts[k]!==sts[k-1]) pairs.push(k);
+  await pool(pairs,4,async k=>{
+    let lo=uniq[k-1],hi=uniq[k],sLo=sts[k-1],sHi=sts[k];
+    for(let it=0;it<5 && hi-lo>1 && dist[hi]-dist[lo]>2*M_PER_MI;it++){
+      const m=(lo+hi)>>1;const s=(await stateAt(coords[m],cache))||sLo;doneCalls++;onProg(Math.min(.98,doneCalls/est));
+      if(s===sLo)lo=m;else if(s===sHi)hi=m;else{ // a third state in between: split there
+        bounds.push({i:m,from:sLo,to:s,mid:true});sLo=s;lo=m;}
+    }
+    bounds.push({i:(lo+hi)>>1,from:sLo,to:sHi});
+  });
+  bounds.sort((a,b)=>a.i-b.i);
+  const segs=[];let cur=sts[0],start=0;
+  bounds.forEach(b=>{segs.push({st:cur,m:dist[b.i]-dist[start],i0:start,i1:b.i});cur=b.to;start=b.i});
+  segs.push({st:cur,m:total-dist[start],i0:start,i1:coords.length-1});
+  const per={};segs.forEach(s=>{if(s.m>0)per[s.st]=(per[s.st]||0)+s.m});
+  const order=[];segs.forEach(s=>{if(!order.includes(s.st)&&s.m>0)order.push(s.st)});
+  return {per,order,segs,bounds};
+}
+function stateOfIndex(segs,i){for(const s of segs)if(i>=s.i0&&i<=s.i1)return s.st;return segs.length?segs[segs.length-1].st:""}
+function priceOf(st){const adj=parseFloat($("priceAdj").value)||0;const t=PRICES[$("fuelType").value]||PRICES.diesel;const r=REG[st];return (r?t[r]:t.US)+adj}
+function stName(st){return NAMES[st]||(st&&st.includes("-")?st.replace("-"," "):st||"Unknown")}
+
+// ---------- POIs ----------
+async function poisAlong(coords,cat,q){
+  const dist=cumDist(coords),pts=[coords[0]];let next=3000;
+  for(let i=1;i<coords.length;i++){if(dist[i]>=next){pts.push(coords[i]);next=dist[i]+3000}}
+  pts.push(coords[coords.length-1]);
+  try{const j=await apiPost("/api/along",{points:pts.slice(0,1500),query:q,code:cat||null});return ((j.pois||{}).features)||[]}
+  catch(e){if(e&&e.code!=="tool_error")throw e;return []}
+}
+
+// ---------- main ----------
+async function plan(){
+  closeSugg();
+  const filled=stops.filter(s=>s.q.trim()||s.pos);
+  if(filled.length<2){status(T("s_need2"),{err:true,busy:false});return}
+  stops=filled;renderStops();
+  $("plan").disabled=true;
+  try{
+    // 1. geocode
+    status(T("s_find"),{prog:.05});
+    for(let i=0;i<stops.length;i++){
+      const s=stops[i];if(s.pos)continue;
+      const r=await search(s.q.trim(),1);
+      if(!r.length){setRes(i,T("not_found"),"err");throw {code:"__msg",msg:T("s_notfound",{n:i+1})}}
+      s.pos=r[0].pos;s.label=r[0].label;setRes(i,"✓ "+s.label,"ok");
+    }
+    // 2. order
+    let order=stops.map((_,i)=>i);
+    if($("optimize").checked&&stops.length>=4){order=optimizeOrder(stops.map(s=>s.pos));
+      if(order.some((v,i)=>v!==i)){stops=order.map(i=>stops[i]);renderStops();stops.forEach((s,i)=>setRes(i,"✓ "+s.label,"ok"))}}
+    const pts=stops.map(s=>s.pos);
+    // 3. route
+    status(T("s_route"),{prog:.12});
+    const lb=parseFloat($("weight").value)||80000,mph=parseFloat($("speed").value)||65;
+    const ftIn=id=>{const v=parseFloat($(id).value);return v>0?+(v*0.3048).toFixed(2):null};
+    const rin={locations:pts,vehicleWeight:Math.round(lb*0.453592),vehicleHeight:ftIn("height"),vehicleLength:ftIn("length"),vehicleMaxSpeed:Math.round(mph*1.609344)};
+    if($("avoidTolls").checked)rin.avoid=["tollRoads"];
+    rin.maxAlternatives=2;
+    const route=await call("tomtom-routing",rin,{cache:false});
+    const feats=((route&&route.features)||[]).filter(f=>f&&f.geometry&&f.geometry.coordinates&&f.geometry.coordinates.length>1&&f.properties&&f.properties.summary);
+    if(!feats.length) throw {code:"__msg",msg:T("s_noroute")};
+    const alts=feats.slice(0,3).map(f=>{const c=f.geometry.coordinates,d=cumDist(c),sc=f.properties.sections||{};const tl=(sc.toll&&sc.toll.length?sc.toll:sc.tollRoad)||[];
+      return {coords:c,dist:d,spans:f.properties.stateSpans,sum:f.properties.summary,secs:sc,tollMi:tl.reduce((x,t)=>x+Math.max(0,d[t.endPointIndex]-d[t.startPointIndex])/M_PER_MI,0),sm:null}});
+    const A0=alts[0],coords=A0.coords,dist=A0.dist,sum=A0.sum,secs=A0.secs;
+    // 4. states
+    status(T("s_states"),{prog:.2});
+    const sm=smFromSpans(A0.spans,dist);A0.sm=sm;
+    // 5. pois
+    status(T("s_pois"),{prog:.8});
+    let scales=[],tstops=[],poiErr=null;
+    try{
+      const [ws,ag,ts]=await Promise.all([
+        poisAlong(coords,"WEIGH_STATION","weigh station"),
+        poisAlong(coords,null,"inspection station"),
+        poisAlong(coords,"TRUCK_STOP","truck stop")]);
+      const seen=new Set(ws.map(f=>f.id));
+      scales=ws.concat(ag.filter(f=>!seen.has(f.id)&&AG_RE.test(((f.properties||{}).poi||{}).name||"")));
+      tstops=ts;
+    }catch(e){poiErr=e}
+    last={coords,dist,sum,secs,sm,scales,tstops,poiErr,pts,labels:stops.map(s=>s.label),alts,altIdx:0};
+    $("alertbar").hidden=true;$("cTraffic").textContent="…";$("tbTraffic").innerHTML="";
+    render();
+    loadTraffic();
+    loadRouteWx();
+    if(!$("hereLoc").value.trim()){ $("hereLoc").value=stops[0].q; loadHere(llStr(stops[0].pos)); }
+    status(poiErr?T("s_poierr")+" "+errText(poiErr):"",{busy:false,err:!!poiErr});
+  }catch(e){
+    status(e&&e.code==="__msg"?e.msg:errText(e),{err:true,busy:false});
+  }finally{$("plan").disabled=false}
+}
+
+function render(){
+  if(!last)return;
+  const {coords,dist,sum,secs,sm,scales,tstops,pts,labels}=last;
+  const mpg=parseFloat($("mpg").value)||6.5,tank=parseFloat($("tank").value)||200,rate=parseFloat($("tollRate").value)||0;
+  const totalMi=dist[dist.length-1]/M_PER_MI;
+  // fuel by state
+  let gal=0,fuel=0;const rows=[];
+  sm.order.forEach(st=>{const mi=sm.per[st]/M_PER_MI,g=mi/mpg,p=priceOf(st),c=g*p;gal+=g;fuel+=c;rows.push({st,mi,g,p,c})});
+  // tolls
+  const tollSecs=(secs.toll&&secs.toll.length?secs.toll:secs.tollRoad)||[];
+  const tolls=tollSecs.map(t=>{const a=t.startPointIndex,b=t.endPointIndex;return {a,b,mi:(dist[b]-dist[a])/M_PER_MI,at:dist[a]/M_PER_MI,st:stateOfIndex(sm.segs,(a+b)>>1)}}).filter(t=>t.mi>0.05);
+  const tollMi=tolls.reduce((s,t)=>s+t.mi,0),tollCost=tollMi*rate;
+  const driveS=sum.travelTimeInSeconds||0,driveH=driveS/3600;
+  const sim=simulate(secs.leg||[],parseFloat($("dwell").value)||0,hosOn);
+  const fuelStops=Math.max(0,Math.ceil(gal/(tank*0.75))-1);
+
+  $("tEmpty").hidden=true;$("tFull").hidden=false;
+  $("tTitle").textContent=(truckType==="box"?T("t_box",{n:boxSize}):T("t_tt",{n:axleCount()}))+" · "+T("t_stops",{n:labels.length})+" · "+num(totalMi)+" "+T("mi");
+  $("grand").textContent=usd(fuel+tollCost);
+  $("fuelCost").textContent=usd(fuel);$("tollCost").textContent=tollMi?usd(tollCost):"$0";
+  $("cpm").textContent=usd(totalMi?(fuel+tollCost)/totalMi:0,2);
+  $("sMiles").textContent=num(totalMi);$("sDrive").textContent=hrs(driveS);
+  $("sGal").textContent=num(gal);$("sAvg").textContent=usd(gal?fuel/gal:0,3);
+  $("sHos").textContent=hrs(sim.total);$("sHosLbl").textContent=hosOn?T("trip_hos"):T("trip_nohos");
+  renderSchedule(sim,dist,sm,labels);$("sStops").textContent=fuelStops?("~"+fuelStops):T("none");
+
+  // states table
+  $("tbStates").innerHTML=rows.map(r=>`<tr><td>${esc(stName(r.st))}${REG[r.st]?"":"<small>"+T("us_avg")+"</small>"}</td><td class="n">${num(r.mi)}</td><td class="n">${usd(r.p,3)}</td><td class="n">${num(r.g)}</td><td class="n">${usd(r.c)}</td></tr>`).join("");
+  $("tfStates").innerHTML=`<tr><td>${T("total")}</td><td class="n">${num(totalMi)}</td><td class="n">${usd(gal?fuel/gal:0,3)}</td><td class="n">${num(gal)}</td><td class="n">${usd(fuel)}</td></tr>`;
+  $("cStates").textContent=rows.length;
+  // legs
+  const legs=secs.leg||[];
+  $("tbLegs").innerHTML=legs.map((l,k)=>{const s=l.summary||{};return `<tr><td>${k===0?"A":k+1} → ${k+2}<small>${esc(short(labels[k]))} → ${esc(short(labels[k+1]))}</small></td><td class="n">${num((s.lengthInMeters||0)/M_PER_MI)}</td><td class="n">${hrs(s.travelTimeInSeconds||0)}</td><td class="n">${s.trafficDelayInSeconds?Math.round(s.trafficDelayInSeconds/60)+" "+T("min"):"—"}</td></tr>`}).join("");
+  $("cLegs").textContent=legs.length;
+  // tolls
+  $("tbTolls").innerHTML=tolls.length?tolls.map(t=>`<tr><td class="mile">${T("at_mi",{n:num(t.at)})}</td><td><span class="pill toll">${T("toll_pill")}</span> ${esc(stName(t.st))}</td><td class="n">${num(t.mi,1)}</td><td class="n">${usd(t.mi*rate,2)}</td></tr>`).join(""):`<tr><td colspan="4">${T("no_tolls")}</td></tr>`;
+  $("tollNote").textContent=tolls.length?T("toll_note",{r:usd(rate,2)}):"";
+  $("cTolls").textContent=tolls.length;
+  // pois
+  const step=Math.max(1,Math.floor(coords.length/3000));
+  const place=f=>{const n=nearestIdx(coords,f.geometry.coordinates,step);return {f,mi:dist[n.i]/M_PER_MI,off:n.km}};
+  const all=scales.map(place).filter(x=>x.off<1.5).sort((a,b)=>a.mi-b.mi);
+  all.forEach(x=>{x.kind=classify(x.f)});
+  const cert=all.filter(x=>x.kind==="cert"),enf=all.filter(x=>x.kind!=="cert");
+  const ts=tstops.map(place).filter(x=>x.off<1.5).sort((a,b)=>a.mi-b.mi);
+  const none=(n,what)=>`<tr><td colspan="${n}">${last.poiErr?T("load_err"):T("none_found")}</td></tr>`;
+  const nm=x=>((x.f.properties.poi||{}).name)||"";
+  const addr=x=>(x.f.properties.address||{}).freeformAddress||"";
+  const phone=x=>((x.f.properties.poi||{}).phone)||"—";
+  const sat=x=>`<a class="sat" href="${satUrl(x.f.geometry.coordinates)}" target="_blank" rel="noopener">${T("sat")}</a>`;
+  $("tbCert").innerHTML=cert.length?cert.map(x=>`<tr><td class="mile">${T("at_mi",{n:num(x.mi)})}</td><td>${esc(nm(x)||T("th_scale"))}<small>${esc(addr(x))}</small></td><td><span style="user-select:all">${esc(phone(x))}</span></td><td>${sat(x)}</td></tr>`).join(""):none(4,"certified scales");
+  $("cCert").textContent=cert.length;
+  const KIND={state:[T("k_state"),"state"],poe:[T("k_poe"),"state"],ag:[T("k_ag"),"toll"]};
+  $("tbScales").innerHTML=enf.length?enf.map(x=>{const k=KIND[x.kind]||KIND.state;return `<tr><td class="mile">${T("at_mi",{n:num(x.mi)})}</td><td>${esc(nm(x)||T("k_state"))}<small>${esc(addr(x))}</small></td><td><span class="pill ${k[1]}">${k[0]}</span></td><td>${sat(x)}</td></tr>`}).join(""):none(4,"weigh stations");
+  $("cScales").textContent=enf.length;
+  $("tbTstops").innerHTML=ts.length?ts.map(x=>`<tr><td class="mile">${T("at_mi",{n:num(x.mi)})}</td><td>${esc(nm(x)||T("th_tstop"))}<small>${esc(addr(x))}</small></td><td><span style="user-select:all">${esc(phone(x))}</span></td><td>${sat(x)}</td></tr>`).join(""):none(4,"truck stops");
+  $("cTstops").textContent=ts.length;
+
+  // Google Maps links (max 9 waypoints in a link)
+  const ll=p=>p[1].toFixed(5)+","+p[0].toFixed(5);
+  const way=pts.slice(1,-1);
+  const gmPts=[pts[0],...way.slice(0,9),pts[pts.length-1]];
+  const gm="https://www.google.com/maps/dir/"+gmPts.map(ll).join("/");
+  $("gmMap").href=gm+"/data=!4m2!4m1!3e0";
+  $("gmSat").href=gm+"/data=!3m1!1e3!4m2!4m1!3e0";
+  $("gmNote").textContent=way.length>9?T("gm_many"):T("gm_note");
+
+  last.tolls=tolls;last.allPois=all;last.avgPrice=gal?fuel/gal:0;renderAlts();
+  last.ov={rows,fuelStops,tollN:tolls.length,tollMi,tollCost,certN:cert.length,enfN:enf.length};
+  $("ovCard").hidden=false;
+  renderTraffic();
+  drawMap(coords,tolls,all,pts,sm);
+  $("mapCard").hidden=false;$("detailCard").hidden=false;$("schedCard").hidden=false;$("wxCard").hidden=false;
+}
+function classify(f){
+  const p=(f.properties||{}).poi||{},n=p.name||"";
+  if(AG_RE.test(n)&&!CERT_RE.test(n))return "ag";
+  if(POE_RE.test(n))return "poe";
+  if(CERT_RE.test(n)||(p.brands||[]).length)return "cert";
+  return "state";
+}
+function satUrl(c){return "https://www.google.com/maps/@?api=1&map_action=map&basemap=satellite&zoom=18&center="+c[1].toFixed(6)+","+c[0].toFixed(6)}
+function short(l){return String(l||"").split(",").slice(-2).join(",").trim()||l}
+// ---------- alternative routes ----------
+let altBusy=false;
+async function pickAlt(i){
+  if(!last||!last.alts||!last.alts[i]||altBusy||i===last.altIdx)return;
+  altBusy=true;renderAlts();
+  const A=last.alts[i];
+  try{
+    if(!A.sm)A.sm=smFromSpans(A.spans,A.dist);
+    Object.assign(last,{coords:A.coords,dist:A.dist,sum:A.sum,secs:A.secs,sm:A.sm,altIdx:i,grid:null,traffic:null,trafficErr:null,wx:null});
+    status("",{busy:false});
+    $("alertbar").hidden=true;$("cTraffic").textContent="…";$("tbTraffic").innerHTML="";
+    altBusy=false;render();loadTraffic();loadRouteWx();
+  }catch(e){altBusy=false;status(errText(e),{err:true,busy:false});renderAlts()}
+}
+function renderAlts(){
+  const el=$("alts");if(!el)return;const L=last;
+  if(!L||!L.alts||L.alts.length<2){el.hidden=true;el.innerHTML="";return}
+  el.hidden=false;
+  const mpg=parseFloat($("mpg").value)||6.5,avg=L.avgPrice||0,b=L.alts[0];
+  const bMi=b.dist[b.dist.length-1]/M_PER_MI,bT=b.sum.travelTimeInSeconds||0;
+  el.innerHTML=`<span class="lbl">${T("alts_h")}</span><div class="alt-list">`+L.alts.map((a,i)=>{
+    const mi=a.dist[a.dist.length-1]/M_PER_MI,t=a.sum.travelTimeInSeconds||0,dm=mi-bMi,dt=t-bT;
+    const diff=i===0?"":`${dm>=0?"+":"−"}${num(Math.abs(dm))} ${T("mi")}, ${dt>=0?"+":"−"}${hrs(Math.abs(dt))} · `;
+    return `<button type="button" class="alt" data-alt="${i}" aria-pressed="${i===L.altIdx}"${altBusy?" disabled":""}>
+      <span class="alt-t"><i>${i+1}</i>${i===0?T("alt_fast"):T("alt_n",{n:i+1})}</span>
+      <b>${num(mi)} ${T("mi")} · ${hrs(t)}</b>
+      <small>${diff}${a.tollMi>0.1?T("alt_tolls",{n:num(a.tollMi)}):T("alt_notolls")}${avg?" · ≈"+usd(mi/mpg*avg)+" "+T("alt_fuel"):""}</small></button>`}).join("")+`</div><p class="note">${T("alt_note")}</p>`;
+  el.querySelectorAll("[data-alt]").forEach(x=>x.addEventListener("click",()=>pickAlt(+x.dataset.alt)));
+}
+
+function drawMap(coords,tolls,sc,pts,sm){
+  const svg=$("map");const W=800,H=420,pad=36;
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  const ALTS=((last&&last.alts)||[]);
+  [coords].concat(ALTS.map(a=>a.coords)).forEach(cs=>cs.forEach(c=>{if(c[0]<minX)minX=c[0];if(c[0]>maxX)maxX=c[0];if(c[1]<minY)minY=c[1];if(c[1]>maxY)maxY=c[1]}));
+  const k=Math.cos(((minY+maxY)/2)*Math.PI/180);
+  const sx=(maxX-minX)*k||0.01,sy=(maxY-minY)||0.01;
+  const s=Math.min((W-2*pad)/sx,(H-2*pad)/sy);
+  const ox=(W-sx*s)/2,oy=(H-sy*s)/2;
+  const P=c=>[(ox+(c[0]-minX)*k*s).toFixed(1),(oy+(maxY-c[1])*s).toFixed(1)];
+  const step=Math.max(1,Math.floor(coords.length/1500));
+  const line=(a,b)=>{const out=[];for(let i=a;i<=b;i+=step)out.push(P(coords[i]).join(","));out.push(P(coords[b]).join(","));return out.join(" ")};
+  let g=`<rect width="${W}" height="${H}" fill="var(--bg)"/>`;
+  // grid
+  for(let i=1;i<8;i++)g+=`<line x1="${i*100}" y1="0" x2="${i*100}" y2="${H}" stroke="var(--line)" stroke-width="1"/>`;
+  for(let i=1;i<5;i++)g+=`<line x1="0" y1="${i*84}" x2="${W}" y2="${i*84}" stroke="var(--line)" stroke-width="1"/>`;
+  const lineOf=cs=>{const st=Math.max(1,Math.floor(cs.length/900)),o=[];for(let i=0;i<cs.length;i+=st)o.push(P(cs[i]).join(","));o.push(P(cs[cs.length-1]).join(","));return o.join(" ")};
+  const tag=(cs,n,on)=>{const [x,y]=P(cs[Math.floor(cs.length*0.42)]);return `<circle cx="${x}" cy="${y}" r="9" fill="${on?"var(--ink)":"var(--surface)"}" stroke="var(--ink)" stroke-width="1.5"/><text x="${x}" y="${+y+4}" text-anchor="middle" font-family="Geist Mono, monospace" font-size="11" font-weight="700" fill="${on?"var(--bg)":"var(--ink)"}">${n}</text>`};
+  ALTS.forEach((a,i)=>{if(i===last.altIdx)return;g+=`<polyline points="${lineOf(a.coords)}" fill="none" stroke="var(--muted)" stroke-width="3" stroke-dasharray="7 6" stroke-linejoin="round" stroke-linecap="round" opacity=".8"/>`});
+  g+=`<polyline points="${line(0,coords.length-1)}" fill="none" stroke="var(--route)" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>`;
+  tolls.forEach(t=>{g+=`<polyline points="${line(t.a,t.b)}" fill="none" stroke="var(--toll)" stroke-width="7" stroke-linecap="round" opacity=".95"/>`});
+  // state lines
+  sm.bounds.forEach(b=>{const [x,y]=P(coords[b.i]);g+=`<circle cx="${x}" cy="${y}" r="3.5" fill="var(--surface)" stroke="var(--ink)" stroke-width="1.5"/><text x="${+x+6}" y="${+y-6}" font-family="Geist Mono, monospace" font-size="11" font-weight="700" fill="var(--muted)">${esc(b.to)}</text>`});
+  sc.forEach(x=>{const [cx,cy]=P(x.f.geometry.coordinates);const t=`<title>${esc((x.f.properties.poi||{}).name)}</title>`;
+    if(x.kind==="cert")g+=`<circle cx="${cx}" cy="${cy}" r="4" fill="var(--good)" stroke="var(--surface)" stroke-width="1.5">${t}</circle>`;
+    else g+=`<rect x="${cx-4}" y="${cy-4}" width="8" height="8" fill="var(--scale)" stroke="var(--surface)" stroke-width="1.5">${t}</rect>`});
+  (((last&&last.wx)||{}).samples||[]).forEach(s=>{if(!s.sev)return;const [cx,cy]=P(s.pt);
+    g+=`<circle cx="${cx}" cy="${cy}" r="10" fill="none" stroke="${s.sev>=2?"var(--bad)":"var(--warn)"}" stroke-width="3" stroke-dasharray="3 3"><title>${esc(s.reasons.join(", "))} · ${T("at_mi",{n:num(s.mile)})}</title></circle>`});
+  ((last&&last.traffic)||[]).forEach(x=>{const [cx,cy]=P(x.pt);const big=SEV_RANK[x.magnitudeOfDelay]>=3||x.category==="accident"||x.category==="road-closed";
+    g+=`<path d="M${cx} ${cy-7} L${+cx+6.5} ${+cy+5} L${cx-6.5} ${+cy+5} Z" fill="${big?"var(--bad)":"var(--warn)"}" stroke="var(--surface)" stroke-width="1.5"><title>${esc(catLabel(x.category))} · ${T("at_mi",{n:num(x.mi)})}</title></path>`});
+  pts.forEach((p,i)=>{const [x,y]=P(p);const fill=i===0?"var(--sign)":(i===pts.length-1?"var(--ink)":"var(--stop)");const tc=i===pts.length-1?"var(--bg)":(i===0?"var(--sign-ink)":"#fff");
+    g+=`<circle cx="${x}" cy="${y}" r="12" fill="${fill}" stroke="var(--surface)" stroke-width="2.5"/><text x="${x}" y="${+y+4.5}" text-anchor="middle" font-family="Geist Mono, monospace" font-size="12" font-weight="700" fill="${tc}">${i===0?"A":i+1}</text>`});
+  if(ALTS.length>1)ALTS.forEach((a,i)=>{g+=tag(a.coords,i+1,i===last.altIdx)});
+  // scale bar
+  const miPerPx=1/(s/(69.0));const barMi=[10,25,50,100,200,500].find(m=>m/miPerPx>70)||500;const bw=barMi/miPerPx;
+  g+=`<line x1="16" y1="${H-16}" x2="${16+bw}" y2="${H-16}" stroke="var(--ink)" stroke-width="2"/><text x="16" y="${H-22}" font-family="Geist Mono, monospace" font-size="11" fill="var(--muted)">${barMi} ${T("mi")}</text>`;
+  svg.innerHTML=g;
+}
+
+// ---------- live traffic ----------
+const TRAFFIC_CATS=["accident","road-closed","lane-closed","jam","broken-down-vehicle","danger","flooding","fog","frost","wind","rain","roadworks"];
+const catLabel=c=>T("c_"+String(c||"other").replace(/-/g,"_"));
+const SEV_RANK={indefinite:4,major:3,moderate:2,minor:1,unknown:0};
+let trafficBusy=false;
+function routeGrid(coords){
+  // densify every ~80 m so long straight highway segments still match nearby incidents
+  const G=new Map(),C=0.005;
+  const put=(x,y,i)=>{const k=Math.floor(x/C)+","+Math.floor(y/C);let a=G.get(k);if(!a)G.set(k,a=[]);a.push([x,y,i])};
+  for(let i=0;i<coords.length;i++){
+    const a=coords[i];put(a[0],a[1],i);
+    if(i+1<coords.length){const b=coords[i+1],d=hav(a,b),n=Math.floor(d/80);
+      for(let s=1;s<n;s++){const f=s/n;put(a[0]+(b[0]-a[0])*f,a[1]+(b[1]-a[1])*f,i)}}
+  }
+  return {G,C};
+}
+function nearRoute(grid,coords,p,maxM){
+  const {G,C}=grid,gx=Math.floor(p[0]/C),gy=Math.floor(p[1]/C);let best=-1,bd=Infinity;
+  for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){const a=G.get((gx+dx)+","+(gy+dy));if(!a)continue;
+    for(const q of a){const d=hav(q,p);if(d<bd){bd=d;best=q[2]}}}
+  return bd<=maxM?best:-1;
+}
+async function loadTraffic(){
+  if(!last||trafficBusy)return;
+  trafficBusy=true;$("trafficRefresh").disabled=true;$("trafficAt").textContent=T("tr_checking");
+  const {coords,dist}=last;
+  if(!last.grid)last.grid=routeGrid(coords);
+  const total=dist[dist.length-1],STEP=40*M_PER_MI,chunks=[];
+  for(let a=0;a<total;a+=STEP){const i0=idxAt(dist,a),i1=idxAt(dist,Math.min(total,a+STEP));
+    let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;for(let i=i0;i<=i1;i++){const c=coords[i];if(c[0]<x0)x0=c[0];if(c[0]>x1)x1=c[0];if(c[1]<y0)y0=c[1];if(c[1]>y1)y1=c[1]}
+    const pd=0.01;chunks.push([+(x0-pd).toFixed(4),+(y0-pd).toFixed(4),+(x1+pd).toFixed(4),+(y1+pd).toFixed(4)]);}
+  let err=null;const found=new Map();
+  const res=await pool(chunks,4,bbox=>call("tomtom-traffic",{bbox,categoryFilter:TRAFFIC_CATS,maxResults:200,response_detail:"geometry",language:lang==="es"?"es-ES":"en-GB",timeValidityFilter:["present"]},{cache:false}));
+  res.forEach(pay=>{
+    if(!pay)return; if(pay.__err){err=err||pay.__err;return}
+    const inc=pay.incidents||[],feats=((pay.geometry||{}).features)||[];
+    feats.forEach(f=>{
+      const k=(f.properties||{}).incident,it=inc[k];if(!it||!f.geometry)return;
+      const g=f.geometry,pts=g.type==="Point"?[g.coordinates]:(g.type==="LineString"?g.coordinates:[].concat(...(g.coordinates||[])));
+      if(!pts.length)return;
+      const sample=pts.length>20?pts.filter((_,j)=>j%Math.ceil(pts.length/20)===0):pts;
+      const hits=sample.map(p=>nearRoute(last.grid,coords,p,120)).filter(i=>i>=0);
+      if(!hits.length||hits.length/sample.length<0.6)return; // keep only incidents that run along our road
+      hits.sort((a,b)=>a-b);const at=hits[0];
+      const key=it.category+"|"+(it.from||"")+"|"+(it.to||"")+"|"+Math.round(dist[at]/1609);
+      if(!found.has(key))found.set(key,{...it,i:at,mi:dist[at]/M_PER_MI,pt:coords[at]});
+    });
+  });
+  last.traffic=[...found.values()].sort((a,b)=>a.mi-b.mi);
+  last.trafficErr=err&&!last.traffic.length?err:null;
+  last.trafficAt=new Date();
+  trafficBusy=false;$("trafficRefresh").disabled=false;
+  renderTraffic();drawMap(coords,last.tolls||[],last.allPois||[],last.pts,last.sm);
+}
+function renderTraffic(){renderTrafficList();renderOverview()}
+function renderTrafficList(){
+  if(!last)return;
+  const t=last.traffic;
+  if(!t){$("cTraffic").textContent="…";return}
+  if(last.trafficErr){$("tbTraffic").innerHTML=`<tr><td colspan="3">${esc(errText(last.trafficErr))}</td></tr>`;$("trafficAt").textContent=T("tr_err");$("cTraffic").textContent="!";$("alertbar").hidden=true;return}
+  $("trafficAt").textContent=T("updated",{t:last.trafficAt.toLocaleTimeString(LOC(),{hour:"numeric",minute:"2-digit"})});
+  $("cTraffic").textContent=t.length;
+  $("tbTraffic").innerHTML=t.length?t.map(x=>{
+    const sev=x.magnitudeOfDelay||"unknown",road=(x.roadNumbers||[]).join(", ");
+    const what=(x.events||[]).join(", ");
+    return `<tr><td class="mile">${T("at_mi",{n:num(x.mi)})}</td><td><span class="sev ${esc(sev)}">${esc(T("sev_"+sev))}</span><b>${esc(catLabel(x.category))}</b>${road?" · "+esc(road):""}<small>${esc(what)}${x.from?" · "+esc(x.from)+(x.to?" → "+esc(x.to):""):""}${x.lengthInMeters?" · "+T("mi_long",{n:num(x.lengthInMeters/M_PER_MI,1)}):""}</small></td><td class="n">${x.delayInSeconds?Math.round(x.delayInSeconds/60)+" "+T("min"):"—"}</td></tr>`}).join("")
+    :`<tr><td colspan="3">${T("tr_none")}</td></tr>`;
+  const bad=t.filter(x=>SEV_RANK[x.magnitudeOfDelay]>=3||["accident","road-closed","flooding","frost","fog","wind","danger"].includes(x.category));
+  const delay=t.reduce((s,x)=>s+(x.delayInSeconds||0),0);
+  const ab=$("alertbar");ab.hidden=false;
+  if(bad.length){ab.className="alertbar";ab.innerHTML=`⚠ ${T("tr_bad",{n:bad.length})}${delay?" "+T("tr_delay",{m:Math.round(delay/60)}):""}. ${T("tr_first",{n:num(bad[0].mi)})}: ${esc(catLabel(bad[0].category))}${(bad[0].roadNumbers||[]).length?" · "+esc(bad[0].roadNumbers[0]):""}. <button class="btn" type="button" id="goTraffic">${T("tr_see")}</button>`;
+    $("goTraffic").addEventListener("click",()=>document.querySelector('.tab[data-tab="traffic"]').click());}
+  else{ab.className="alertbar calm";ab.textContent=t.length?T("tr_minor",{n:t.length}):T("tr_clear");}
+}
+
+// ---------- weather ----------
+const AUTH_CODES=["server_not_connected","needs_reauth","not_in_manifest","approval_required","blocked_by_policy","selection_required","consent_required"];
+const llStr=p=>p[1].toFixed(4)+","+p[0].toFixed(4);
+const dayFmt=d=>d.toLocaleDateString(LOC(),{weekday:"short",month:"short",day:"numeric"});
+const tFmt=d=>d.toLocaleString(LOC(),{weekday:"short",hour:"numeric",minute:"2-digit"});
+function alertName(a){return (a&&(a.details&&a.details.name||a.name||a.title||a.event||a.type))||T("wx_alert")}
+async function loadHere(loc){
+  if(!mcp||!loc)return;
+  $("hereNow").innerHTML=`<p class="note">${T("here_checking",{l:esc(loc)})}</p>`;$("tbWeek").innerHTML="";
+  try{
+    const [cur,fc]=await Promise.all([
+      xcall("xweather_get_current_weather",{location:loc}),
+      xcall("xweather_get_forecast_weather",{location:loc,forecast_filter:"day",limit:7,fields:["datetime_local","max_temp_f","min_temp_f","max_wind_speed_mph","precip_probability_percent","weather_primary"]})]);
+    hereData={cur,fc};renderHere();
+  }catch(e){hereData=null;$("hereNow").innerHTML=`<p class="note" style="color:var(--bad)">${esc(errText(e,WX))}</p>`}
+}
+let hereData=null;
+function renderHere(){
+  if(!hereData)return;
+  const {cur,fc}=hereData;{
+    const w=(cur&&cur.weather)||{},pl=(cur&&cur.place)||{};
+    const al=(cur&&cur.alerts)||[];
+    $("hereAt").textContent=[pl.city,pl.state].filter(Boolean).join(", ");
+    $("hereNow").innerHTML=`<span class="tmp">${w.tempF!=null?Math.round(w.tempF)+"°":"—"}</span>
+      <span class="cond">${esc(wxText(w.weather))}</span>
+      <span class="meta">${[w.feelslikeF!=null?T("feels")+" "+Math.round(w.feelslikeF)+"°F":"",w.windSpeedMPH!=null?T("wind")+" "+Math.round(w.windSpeedMPH)+" mph "+esc(w.windDir||"")+(w.windGustMPH?" ("+T("gusts")+" "+Math.round(w.windGustMPH)+")":""):"",w.humidity!=null?T("humidity")+" "+w.humidity+"%":"",w.visibilityMI!=null?T("visibility")+" "+Math.round(w.visibilityMI)+" "+T("mi"):""].filter(Boolean).join(" · ")}</span>
+      <div class="alerts">${al.map(a=>`<div class="wxalert">⚠ ${esc(alertName(a))}</div>`).join("")}</div>`;
+    const f=(fc&&fc.forecasts)||[];
+    $("tbWeek").innerHTML=f.map(d=>`<tr><td>${esc(dayFmt(new Date(d.dateTimeISO)))}</td><td>${esc(wxText(d.weather))}</td><td class="n">${d.maxTempF??"—"}° / ${d.minTempF??"—"}°</td><td class="n">${d.windSpeedMaxMPH!=null?d.windSpeedMaxMPH+" mph":"—"}</td><td class="n">${d.pop!=null?d.pop+"%":"—"}</td></tr>`).join("")||`<tr><td colspan="5">${T("no_fc")}</td></tr>`;
+  }
+}
+function useGps(quiet){
+  if(!navigator.geolocation){if(!quiet)status(T("gps_no"),{err:true,busy:false});return}
+  navigator.geolocation.getCurrentPosition(p=>{const l=p.coords.latitude.toFixed(4)+","+p.coords.longitude.toFixed(4);$("hereLoc").value="";loadHere(l)},
+    ()=>{if(!quiet)status(T("gps_no"),{err:true,busy:false})},{maximumAge:600000,timeout:10000});
+}
+$("hereGps").addEventListener("click",()=>useGps(false));
+try{navigator.permissions&&navigator.permissions.query({name:"geolocation"}).then(r=>{if(r.state==="granted")useGps(true)}).catch(()=>{})}catch(e){}
+$("hereForm").addEventListener("submit",e=>{e.preventDefault();const v=$("hereLoc").value.trim();if(v)loadHere(v)});
+
+let wxMode="eta",wxBusy=false;
+function wxKey(){return wxMode==="eta"&&last&&last.depart&&last.sim?("eta|"+last.depart.getTime()+"|"+Math.round(last.sim.total)):wxMode}
+function markWxStale(){
+  if(!last||!last.wx||wxBusy)return;
+  if(last.wx.key!==wxKey()){$("wxMeta").textContent=T("wx_stale");$("wxGo").classList.add("btn-go");$("wxGo").style.width="auto"}
+}
+function judge(s){
+  const r=[];let sev=0;const up=v=>{if(v>sev)sev=v};
+  const f=s.fc||{},txt=String(f.weather||"").toLowerCase();
+  if(/snow|sleet|freezing|ice|blizzard|hail/.test(txt)){up(2);r.push(wxText(f.weather))}
+  else if(/thunder|t-storm|storm/.test(txt)){up(2);r.push(wxText(f.weather))}
+  else if(/fog/.test(txt)){up(1);r.push(wxText(f.weather))}
+  else if(/rain|shower|drizzle/.test(txt)&&(f.pop==null||f.pop>=40)){up(1);r.push(wxText(f.weather))}
+  if(f.windSpeedMPH>=45){up(2);r.push(T("r_wind",{n:Math.round(f.windSpeedMPH)}))}
+  else if(f.windSpeedMPH>=30){up(1);r.push(T("r_wind",{n:Math.round(f.windSpeedMPH)}))}
+  if(f.tempF!=null&&f.tempF<=34&&((f.precipMM||0)>0||(f.pop||0)>=40)){up(2);r.push(T("r_ice",{n:Math.round(f.tempF)}))}
+  const rd=s.road;
+  if(rd){const c=String((rd.roadSurface||{}).condition||"").toUpperCase();
+    if(rd.summaryIndex>=2)up(2);else if(rd.summaryIndex===1)up(1);
+    if(/ICE|SNOW|FROST|SLUSH/.test(c)){up(2);r.push(T("r_road",{c:roadText(c)}))}else if(c&&c!=="DRY"){up(1);r.push(T("r_road",{c:roadText(c)}))}}
+  (s.alerts||[]).forEach(a=>{const n=alertName(a);up(/warning/i.test(n)?2:1);r.push(n)});
+  s.sev=sev;s.reasons=[...new Set(r.filter(Boolean))];
+}
+async function loadRouteWx(){
+  if(!last||!mcp||wxBusy)return;
+  if(wxMode==="eta"&&!last.sim)return;
+  wxBusy=true;$("wxGo").disabled=true;$("wxGo").classList.remove("btn-go");$("wxGo").style.width="";
+  $("wxBar").className="alertbar calm";$("wxBar").textContent=T("wx_checking");renderOverview();
+  const {coords,dist,sm}=last,total=dist[dist.length-1]/M_PER_MI;
+  const miles=[];for(let m=0;m<total;m+=50)miles.push(m);
+  (last.sim?last.sim.ev:[]).forEach(e=>{if(e.type==="stop"||e.type==="final")miles.push(e.mile)});
+  miles.push(total);
+  const uniq=[...new Set(miles.map(m=>Math.round(m)))].sort((a,b)=>a-b).filter((m,i,a)=>i===0||m-a[i-1]>=8||m===Math.round(total));
+  const now=Date.now(),key=wxKey();
+  const samples=uniq.map(m=>{const i=idxAt(dist,m*M_PER_MI);
+    const when=wxMode==="now"?now:(wxMode==="p24"?now+24*H*1000:last.depart.getTime()+timeAtMile(last.sim,m)*1000);
+    return {mile:m,i,pt:coords[i],st:stateOfIndex(sm.segs,i),when}});
+  let done=0,fatal=null;
+  await pool(samples,5,async s=>{
+    const loc=llStr(s.pt),hour=new Date(Math.max(s.when,now));hour.setUTCMinutes(0,0,0);
+    const startISO=hour.toISOString().replace(".000","");
+    const jobs=[
+      xcall("xweather_get_forecast_weather",{location:loc,forecast_filter:"1hr",limit:1,start_datetime:s.when>now+30*60*1000?startISO:null,fields:["datetime_local","temp_f","wind_speed_mph","precip_mm","precip_probability_percent","weather_primary"]}).then(p=>{s.fc=((p&&p.forecasts)||[])[0]||null;s.place=p&&p.place}),
+      xcall("xweather_get_current_active_weather_alerts",{location:loc,include_body:false}).then(p=>{s.alerts=(p&&p.alerts)||[]})
+    ];
+    if(s.when<=now+23.5*H*1000){const end=new Date(hour.getTime()+H*1000).toISOString().replace(".000","");
+      jobs.push(xcall("xweather_get_roadweather",{location:loc,start_datetime:s.when>now+30*60*1000?startISO:null,end_datetime:s.when>now+30*60*1000?end:null}).then(p=>{s.road=((p&&p.roadweather)||[])[0]||null}));}
+    const rs=await Promise.allSettled(jobs);
+    rs.forEach(x=>{if(x.status==="rejected"){const e=x.reason;if(e&&AUTH_CODES.includes(e.code))fatal=fatal||e;s.err=true}});
+    judge(s);done++;$("wxBar").textContent=T("wx_prog",{d:done,n:samples.length});
+  });
+  wxBusy=false;$("wxGo").disabled=false;
+  if(fatal&&!samples.some(s=>s.fc)){$("wxBar").className="alertbar";$("wxBar").textContent=errText(fatal,WX);last.wxErr=true;renderOverview();return}
+  last.wxErr=false;
+  last.wx={key,samples,at:new Date(),mode:wxMode};
+  renderRouteWx();renderOverview();
+  drawMap(coords,last.tolls||[],last.allPois||[],last.pts,last.sm);
+}
+function renderRouteWx(){
+  const w=last&&last.wx;if(!w)return;
+  const S=w.samples;S.forEach(judge);
+  $("wxMeta").textContent=(w.mode==="eta"?T("wm_eta"):w.mode==="now"?T("wm_now"):T("wm_24"))+" · "+T("checked",{t:w.at.toLocaleTimeString(LOC(),{hour:"numeric",minute:"2-digit"})})+(S.some(s=>s.err)?" · "+T("wm_err"):"");
+  $("tbWx").innerHTML=S.map(s=>{
+    const f=s.fc||{},pl=s.place||{},rd=s.road;
+    const rc=rd?(rd.summaryIndex>=2?"r":rd.summaryIndex===1?"y":"g"):"na";
+    const rtxt=rd?roadText((rd.roadSurface||{}).condition||rd.summary||""):"—";
+    const where=[pl.city,pl.state||s.st].filter(Boolean).join(", ")||stName(s.st);
+    return `<tr class="${s.sev>=2?"wx-bad":s.sev===1?"wx-warn":""}"><td class="mile">${esc(tFmt(new Date(s.when)))}<small>${T("at_mi",{n:num(s.mile)})}</small></td><td>${esc(where)}${s.reasons.length?`<small>${esc(s.reasons.join(" · "))}</small>`:""}</td><td>${esc(f.weather?wxText(f.weather):"—")}</td><td class="n">${f.tempF!=null?Math.round(f.tempF)+"°":"—"}</td><td class="n">${f.windSpeedMPH!=null?Math.round(f.windSpeedMPH)+" mph":"—"}</td><td class="n">${f.pop!=null?f.pop+"%":"—"}</td><td><span class="road ${rc}">${esc(rtxt)}</span></td></tr>`}).join("");
+  // group bad stretches
+  const str=[];let cur=null;
+  S.forEach(s=>{if(s.sev>=1){if(!cur){cur={a:s,b:s,sev:s.sev,why:new Set(s.reasons),st:new Set([stName(s.st)])};str.push(cur)}else{cur.b=s;cur.sev=Math.max(cur.sev,s.sev);s.reasons.forEach(x=>cur.why.add(x));cur.st.add(stName(s.st))}}else cur=null});
+  w.str=str;
+  const bar=$("wxBar");
+  if(!str.length){bar.className="alertbar calm";bar.textContent=w.mode==="eta"?T("wb_eta"):w.mode==="now"?T("wb_now"):T("wb_24");return}
+  bar.className="alertbar";
+  bar.innerHTML="⚠ "+T("wb_str",{n:str.length})+" "+str.slice(0,3).map(x=>`${T("at_mi",{n:num(x.a.mile)+(x.b!==x.a?"–"+num(x.b.mile):"")})} (${esc([...x.st].join(", "))}, ${esc(tFmt(new Date(x.a.when)))}): ${esc([...x.why].slice(0,3).join(", ")||T("wb_poor"))}`).join("; ")+(str.length>3?"; "+T("wb_more"):".");
+}
+document.querySelectorAll("[data-wx]").forEach(b=>b.addEventListener("click",()=>{
+  wxMode=b.dataset.wx;document.querySelectorAll("[data-wx]").forEach(x=>x.setAttribute("aria-checked",String(x===b)));loadRouteWx();
+}));
+$("wxGo").addEventListener("click",loadRouteWx);
+
+// ---------- compact overview ----------
+function tile(go,st,label,value,sub){return `<button type="button" class="tile ${st}" data-go="${go}"><span class="tl"><i></i>${esc(label)}</span><b>${esc(value)}</b>${sub?`<small>${esc(sub)}</small>`:""}</button>`}
+const shortWhen=d=>d.toLocaleString(LOC(),{weekday:"short",hour:"numeric",minute:"2-digit"});
+function renderOverview(){
+  if(!last||!last.ov||!last.arrive)return;
+  const o=last.ov,out=[];
+  // 1. arrival / leave-by
+  const trip=hrs(last.sim.total)+" · "+(hosOn?T("v_hos"):T("v_nohos"));
+  if(planMode==="arr")out.push(tile("sched",last.late?"bad":"ok",last.late?T("late"):T("leave_by"),shortWhen(last.depart),trip));
+  else out.push(tile("sched","ok",T("arrive_final"),shortWhen(last.arrive),trip));
+  // 2. weather
+  const w=last.wx;
+  if(wxBusyNow())out.push(tile("wx","",T("ov_weather"),T("v_checking"),""));
+  else if(last.wxErr||!w)out.push(tile("wx","",T("ov_weather"),"—",last.wxErr?T("wm_err"):""));
+  else{const s=w.str||[];
+    if(!s.length)out.push(tile("wx","ok",T("ov_weather"),T("v_clear"),w.mode==="eta"?T("wm_eta"):w.mode==="now"?T("wm_now"):T("wm_24")));
+    else{const x=s[0],sev=Math.max(...s.map(y=>y.sev));
+      out.push(tile("wx",sev>=2?"bad":"warn",T("ov_weather"),T("v_wx_bad",{n:s.length}),T("at_mi",{n:num(x.a.mile)})+" · "+[...x.st][0]+" · "+shortWhen(new Date(x.a.when))+(x.why.size?" · "+[...x.why][0]:"")));}}
+  // 3. traffic
+  const t=last.traffic;
+  if(!t)out.push(tile("traffic","",T("ov_traffic"),last.trafficErr?"—":T("v_checking"),""));
+  else{const bad=t.filter(x=>SEV_RANK[x.magnitudeOfDelay]>=3||["accident","road-closed","flooding","frost","fog","wind","danger"].includes(x.category));
+    const delay=Math.round(t.reduce((s,x)=>s+(x.delayInSeconds||0),0)/60);
+    const dl=delay?T("v_delay",{m:delay}):T("v_nodelay");
+    if(bad.length)out.push(tile("traffic","bad",T("ov_traffic"),T("v_tr_bad",{n:bad.length}),catLabel(bad[0].category)+" · "+T("at_mi",{n:num(bad[0].mi)})+" · "+dl));
+    else if(t.length)out.push(tile("traffic","warn",T("ov_traffic"),T("v_tr_minor",{n:t.length}),dl));
+    else out.push(tile("traffic","ok",T("ov_traffic"),T("v_clear"),dl));}
+  // 4. tolls
+  out.push(o.tollN?tile("tolls","warn",T("ov_tolls"),"~"+usd(o.tollCost),T("v_toll_mi",{n:num(o.tollMi)})):tile("tolls","ok",T("ov_tolls"),T("v_tolls_none"),""));
+  // 5. scales
+  out.push(tile("cert",o.enfN?"warn":"ok",T("ov_scales"),T("v_cert",{n:o.certN}),T("v_weigh",{n:o.enfN})));
+  // 6. cheapest fuel
+  const ch=o.rows.slice().sort((a,b)=>a.p-b.p)[0];
+  out.push(ch?tile("states","ok",T("ov_fuel"),stName(ch.st),T("v_fuel_sub",{p:usd(ch.p,2),n:o.fuelStops?"~"+o.fuelStops:T("none")})):tile("states","",T("ov_fuel"),"—",""));
+  $("tiles").innerHTML=out.join("");
+}
+function setFull(open,scroll){
+  $("fullWrap").hidden=!open;$("fullBtn").setAttribute("aria-expanded",String(open));
+  $("fullBtnTxt").dataset.pi18n=open?"full_hide":"full_show";$("fullBtnTxt").textContent=T(open?"full_hide":"full_show");
+  try{localStorage.setItem("planner_full",open?"1":"0")}catch(e){}
+  if(open&&scroll)scroll.scrollIntoView({block:"start"});
+}
+$("fullBtn").addEventListener("click",()=>setFull($("fullWrap").hidden));
+$("tiles").addEventListener("click",e=>{
+  const b=e.target.closest(".tile");if(!b)return;const go=b.dataset.go;
+  if(go==="sched"){setFull(true,$("schedCard"));return}
+  if(go==="wx"){setFull(true,$("wxCard"));return}
+  const tab=document.querySelector(`.tab[data-tab="${go}"]`);if(tab)tab.click();
+  setFull(true,$("detailCard"));
+});
+try{if(localStorage.getItem("planner_full")==="1")setFull(true)}catch(e){}
+
+// ---------- schedule / HOS ----------
+let hosOn=true,planMode="dep";
+const H=3600;
+// Property-carrying HOS: 11 h driving, 14 h on-duty window, 30 min break after 8 h driving, 10 h off to reset.
+function simulate(legs,dwellH,hos){
+  let t=0,mile=0,shiftDrive=0,sinceBreak=0,winStart=0;
+  const ev=[{t:0,type:"depart",mile:0,leg:0}],spans=[];
+  legs.forEach((l,k)=>{
+    const s=l.summary||{},len=(s.lengthInMeters||0)/M_PER_MI,dur=s.travelTimeInSeconds||0;
+    const mps=dur?len/dur:0;let rem=dur;
+    let guard=0;
+    while(rem>0.5&&guard++<500){
+      let chunk=rem;
+      if(hos){
+        const toBreak=8*H-sinceBreak,toShift=11*H-shiftDrive,toWin=14*H-(t-winStart);
+        if(toShift<=0||toWin<=0){ev.push({t,type:"reset",mile,dur:10*H});t+=10*H;shiftDrive=0;sinceBreak=0;winStart=t;continue}
+        if(toBreak<=0){ev.push({t,type:"break",mile,dur:.5*H});t+=.5*H;sinceBreak=0;continue}
+        chunk=Math.min(rem,toBreak,toShift,toWin);
+      }
+      spans.push({t0:t,t1:t+chunk,m0:mile,m1:mile+chunk*mps});
+      t+=chunk;mile+=chunk*mps;rem-=chunk;shiftDrive+=chunk;sinceBreak+=chunk;
+    }
+    const lastLeg=k===legs.length-1;
+    ev.push({t,type:lastLeg?"final":"stop",mile,leg:k+1});
+    if(!lastLeg&&dwellH>0){t+=dwellH*H;if(dwellH>=.5)sinceBreak=0;}
+  });
+  return {ev,total:t,spans};
+}
+function timeAtMile(sim,m){
+  const sp=sim.spans;if(!sp.length)return 0;
+  for(const s of sp){if(m<=s.m1+1e-6){if(m<s.m0)return s.t0;const f=s.m1>s.m0?(m-s.m0)/(s.m1-s.m0):0;return s.t0+f*(s.t1-s.t0)}}
+  return sp[sp.length-1].t1;
+}
+function fmtWhen(d){return d.toLocaleString(LOC(),{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})}
+function toLocalInput(d){const p=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`}
+function renderSchedule(sim,dist,sm,labels){
+  const raw=$("when").value;let base=raw?new Date(raw):null;
+  if(!base||isNaN(base)){base=new Date();base.setMinutes(0,0,0);base.setHours(base.getHours()+1);$("when").value=toLocalInput(base)}
+  const depart=planMode==="dep"?base:new Date(base.getTime()-sim.total*1000);
+  last.sim=sim;last.depart=depart;markWxStale();
+  const arrive=new Date(depart.getTime()+sim.total*1000);
+  const now=Date.now();
+  const late=planMode==="arr"&&depart.getTime()<now;
+  last.arrive=arrive;last.late=late;
+  const box1=planMode==="arr"
+    ?`<div class="${late?"late":"hl"}"><span class="lbl">${late?T("late"):T("leave_by")}</span><b>${fmtWhen(depart)}</b>${late?`<span>${T("late_ago",{t:hrs((now-depart.getTime())/1000)})}${hosOn?" "+T("late_team"):""}</span>`:""}</div>`
+    :`<div><span class="lbl">${T("depart")}</span><b>${fmtWhen(depart)}</b></div>`;
+  const box2=`<div class="${planMode==="dep"?"hl":""}"><span class="lbl">${T("arrive_final")}</span><b>${fmtWhen(arrive)}</b></div>`;
+  const nb=sim.ev.filter(e=>e.type==="break").length,nr=sim.ev.filter(e=>e.type==="reset").length;
+  const box3=`<div><span class="lbl">${T("trip_time")}</span><b>${hrs(sim.total)}</b><span class="note">${hosOn?T("hos_count",{r:nr,b:nb}):T("drive_only")}</span></div>`;
+  $("answer").innerHTML=box1+box2+box3;
+  const near=mile=>{const i=idxAt(dist,mile*M_PER_MI);return stName(stateOfIndex(sm.segs,i))};
+  $("tbSched").innerHTML=sim.ev.map(e=>{
+    const at=new Date(depart.getTime()+e.t*1000);let cls="",txt="";
+    if(e.type==="depart"){cls="ev-stop";txt=T("ev_dep")+" · "+esc(short(labels[0]))}
+    else if(e.type==="stop"){cls="ev-stop";txt=T("ev_stop",{n:e.leg+1})+" · "+esc(short(labels[e.leg]))+(parseFloat($("dwell").value)>0?` <small>${T("ev_dwell",{h:$("dwell").value})}</small>`:"")}
+    else if(e.type==="final"){cls="ev-stop";txt=T("arrive_final")+" · "+esc(short(labels[e.leg]))}
+    else if(e.type==="break"){cls="ev-rest";txt=T("ev_break")+" · "+T("near")+" "+esc(near(e.mile))}
+    else if(e.type==="reset"){cls="ev-rest";txt=T("ev_reset")+" · "+T("near")+" "+esc(near(e.mile))+` <small>${T("ev_back")} ${fmtWhen(new Date(at.getTime()+e.dur*1000))}</small>`}
+    return `<tr class="${cls}"><td class="mile">${fmtWhen(at)}</td><td>${txt}</td><td class="n">${num(e.mile)}</td></tr>`}).join("");
+  $("hosNote").textContent=hosOn?T("hos_note"):T("nohos_note");
+}
+(function(){
+  const setSeg=(a,b,on)=>{$(a).setAttribute("aria-checked",String(on));$(b).setAttribute("aria-checked",String(!on))};
+  $("hosOn").addEventListener("click",()=>{hosOn=true;setSeg("hosOn","hosOff",true);render()});
+  $("hosOff").addEventListener("click",()=>{hosOn=false;setSeg("hosOn","hosOff",false);render()});
+  $("modeDep").addEventListener("click",()=>{planMode="dep";setSeg("modeDep","modeArr",true);$("whenLbl").textContent=T("when_dep");render()});
+  $("modeArr").addEventListener("click",()=>{planMode="arr";setSeg("modeDep","modeArr",false);$("whenLbl").textContent=T("when_arr");render()});
+  $("when").addEventListener("change",render);
+  $("dwell").addEventListener("input",render);
+  $("trafficRefresh").addEventListener("click",loadTraffic);
+})();
+
+// ---------- truck type ----------
+let truckType="tt",boxSize=26;
+function applyTruck(){
+  const isBox=truckType==="box";
+  $("typeTT").setAttribute("aria-checked",String(!isBox));$("typeBox").setAttribute("aria-checked",String(isBox));
+  $("boxSizeWrap").hidden=!isBox;
+  $("axles").hidden=isBox;$("axleFixed").hidden=!isBox;
+  document.querySelectorAll(".sz").forEach(b=>b.setAttribute("aria-checked",String(+b.dataset.size===boxSize)));
+  const t=isBox?TRUCKS.box[boxSize]:TRUCKS.tt;
+  $("weight").value=t.weight;$("height").value=t.h;$("length").value=t.len;$("mpg").value=t.mpg;$("tank").value=t.tank;$("speed").value=t.speed;$("fuelType").value=t.fuel;
+  if(!isBox)$("axles").value="5";
+  setTollRate();updateTruckNotes();render();
+}
+function axleCount(){return truckType==="box"?2:(parseInt($("axles").value,10)||5)}
+function setTollRate(){$("tollRate").value=(axleCount()*TOLL_PER_AXLE).toFixed(2)}
+function updateTruckNotes(){
+  const w=parseFloat($("weight").value)||0;
+  $("scaleRule").innerHTML=w<=10000
+    ?"<b>"+T("ws_b")+"</b> "+T("ws_under",{w:num(w)})
+    :"<b>"+T("ws_b")+"</b> "+T("ws_over",{w:num(w)});
+  const gas=$("fuelType").value==="gas";
+  $("tWhen").textContent=gas?T("eia_gas"):T("eia_diesel");
+  $("fuelLbl").textContent=gas?T("gasoline"):T("diesel");
+}
+(function(){
+  const box=$("sizes");
+  Object.keys(TRUCKS.box).forEach(sz=>{const b=document.createElement("button");b.type="button";b.className="sz";b.setAttribute("role","radio");b.dataset.size=sz;
+    b.innerHTML=`${sz}′<small>${TRUCKS.box[sz].gvwr.replace(" GVWR","")}</small>`;b.setAttribute("aria-label",T("t_box",{n:sz})+", "+TRUCKS.box[sz].gvwr);
+    b.addEventListener("click",()=>{boxSize=+sz;applyTruck()});box.appendChild(b)});
+  $("typeTT").addEventListener("click",()=>{truckType="tt";applyTruck()});
+  $("typeBox").addEventListener("click",()=>{truckType="box";applyTruck()});
+  $("axles").addEventListener("change",()=>{setTollRate();render()});
+  $("weight").addEventListener("input",updateTruckNotes);
+  $("fuelType").addEventListener("change",()=>{updateTruckNotes();render()});
+  updateTruckNotes();
+})();
+
+// tabs
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x===t?"true":"false"));
+  document.querySelectorAll(".panel").forEach(p=>p.hidden=p.id!=="p-"+t.dataset.tab);
+}));
+["mpg","tank","tollRate","priceAdj"].forEach(id=>$(id).addEventListener("input",render));
+$("plan").addEventListener("click",plan);
+
+// ---------- hooks for the load board ----------
+window.__planner={
+  applyLang:l=>applyLang(l),
+  setStops:(arr,run)=>{stops=arr.map(x=>({q:x.q,pos:x.pos||null,label:x.label||""}));hideExample();renderStops();stops.forEach((s,i)=>{if(s.pos)setRes(i,"✓ "+s.label,"ok")});if(run)plan()},
+  addStops:arr=>{hideExample();arr.forEach(x=>stops.push({q:x.q,pos:x.pos||null,label:x.label||""}));renderStops();stops.forEach((s,i)=>{if(s.pos)setRes(i,"✓ "+s.label,"ok")})},
+  stopCount:()=>stops.filter(s=>s.q||s.pos).length
+};
+
+applyLang(lang,true);
+renderStops();
+mcp=siteMcp;connState="ready";$("connDot").className="dot ok";$("connTxt").textContent=T("cs_ready");
+$("hereLoc").value=stops[0].q;loadHere(stops[0].q);
+})();
+</script>
 <script>
 (function(){
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const I18N={
-en:{h_title:"Check a carrier or broker before you work with them",h_sub:"Enter a USDOT or MC number. Rigora pulls the live FMCSA record and shows authority, insurance, bond, BOC-3, safety and crashes on one page.",try:"Try",recent:"Recent checks",loading_chk:"Checking FMCSA…",e_bad:"Enter a USDOT number (digits) or an MC number, like MC123456.",e_nf:"No company with {q} in FMCSA records. Check the number and try again.",e_up:"FMCSA didn't answer. Wait a moment and try again.",fl_notallowed:"FMCSA says this company is not allowed to operate",fl_partial:"New registration: FMCSA's safety API has no record yet, so inspections and crashes aren't shown",rp_allowed:"Allowed to operate",rp_no:"No",rp_current:"Up to date",rp_outdated:"Outdated",foot:"Data from FMCSA QCMobile and FMCSA Motus open data. Rigora isn't affiliated with FMCSA. Always confirm before dispatch.",soon:"Trip planner and load board are coming to this site next.",copy_link:"Copy link",copied:"Copied",app:"Rigora",tagline:"Verified moving freight",t_loads:"Loads",t_post:"Post a load",t_check:"Check a company",t_profile:"My company",search_ph:"Search city or state, e.g. Denver or TX",s_new:"Newest",s_rate:"Highest rate",s_rpm:"Best $/mile",s_pick:"Earliest pickup",open_only:"Open loads only",loading:"Loading the board…",
+en:{nav_plan:"Trip planner",nav_check:"Check a company",h_title:"Check a carrier or broker before you work with them",h_sub:"Enter a USDOT or MC number. Rigora pulls the live FMCSA record and shows authority, insurance, bond, BOC-3, safety and crashes on one page.",try:"Try",recent:"Recent checks",loading_chk:"Checking FMCSA…",e_bad:"Enter a USDOT number (digits) or an MC number, like MC123456.",e_nf:"No company with {q} in FMCSA records. Check the number and try again.",e_up:"FMCSA didn't answer. Wait a moment and try again.",fl_notallowed:"FMCSA says this company is not allowed to operate",fl_partial:"New registration: FMCSA's safety API has no record yet, so inspections and crashes aren't shown",rp_allowed:"Allowed to operate",rp_no:"No",rp_current:"Up to date",rp_outdated:"Outdated",foot:"Data from FMCSA QCMobile and FMCSA Motus open data. Rigora isn't affiliated with FMCSA. Always confirm before dispatch.",soon:"Trip planner and load board are coming to this site next.",copy_link:"Copy link",copied:"Copied",app:"Rigora",tagline:"Verified moving freight",t_loads:"Loads",t_post:"Post a load",t_check:"Check a company",t_profile:"My company",search_ph:"Search city or state, e.g. Denver or TX",s_new:"Newest",s_rate:"Highest rate",s_rpm:"Best $/mile",s_pick:"Earliest pickup",open_only:"Open loads only",loading:"Loading the board…",
 pick_h:"Pick a load",pick_p:"Select a load to see the trip calculation for your truck, the company check and bids.",post_h:"Post a moving load",from:"Pickup city or address",to:"Delivery city or address",pick1:"Pickup from",pick2:"Pickup until",deliv:"Deliver by",cf:"Volume, cu ft",lbs:"Est. weight, lb",rate:"Carrier pay, $",notes:"Notes for carriers",notes_ph:"Stairs, long carry, piano, storage, payment terms…",lbs_note:"Weight defaults to 7 lb per cubic foot if you leave it empty.",post_btn:"Post load",
 check_h:"Check a carrier or broker",check_ph:"USDOT number or MC number, e.g. 77949 or MC67234",check_btn:"Check",check_note:"Sources: FMCSA SAFER snapshot and FMCSA's daily Motus open data (authority, insurance and bond on file, BOC-3). Checks run on Claude's side and are written to the board, so members can't edit them.",queue_h:"Waiting for a check",
 prof_h:"My company",prof_p:"Your company appears on loads you post and bids you send. Entering a USDOT number queues a verification check.",co_name:"Company name",role:"Role",r_carrier:"Carrier",r_broker:"Broker",r_both:"Carrier and broker",save:"Save",truck_h:"My truck",truck_p:"Used to work out fuel, tolls and your net on every load. Saved on this device only.",ttype:"Truck",tt:"Tractor-trailer",box:"Box truck",fuel:"Fuel",diesel:"Diesel",gas:"Gasoline",
@@ -328,7 +1783,7 @@ fl_new:"New authority: granted {d} ({n} days ago)",fl_mcsnone:"No MCS-150 date o
 ok_auth:"Active authority: {a}",ok_ins:"Required insurance and bond on file",ok_boc3:"BOC-3 agent: {a}",
 q_note:"Owner: ask Claude in the chat to \"check the queue\" to run these.",me_none:"Signed out",me_co:"{n}",prof_saved:"Saved.",my_check:"Verification",
 mcp_off:"Route calculation needs the TomTom Maps connector in Claude.",db_off:"The board's database isn't available in this view. Open it in Claude while signed in.",ro:"You can view the board but not post or bid with your access level."},
-ru:{h_title:"Проверьте перевозчика или брокера до начала работы",h_sub:"Введите USDOT или MC. Rigora берёт актуальную запись FMCSA и показывает полномочия, страховки, бонд, BOC-3, безопасность и аварии на одной странице.",try:"Пример",recent:"Недавние проверки",loading_chk:"Проверяю в FMCSA…",e_bad:"Введите USDOT (цифры) или MC, например MC123456.",e_nf:"Компании {q} нет в базах FMCSA. Проверьте номер и попробуйте снова.",e_up:"FMCSA не ответил. Подождите немного и попробуйте снова.",fl_notallowed:"По данным FMCSA компании запрещено работать",fl_partial:"Новая регистрация: в API безопасности FMCSA записи ещё нет, поэтому инспекции и аварии не показаны",rp_allowed:"Разрешено работать",rp_no:"Нет",rp_current:"Актуальна",rp_outdated:"Устарела",foot:"Данные FMCSA QCMobile и открытых баз FMCSA Motus. Rigora не связана с FMCSA. Перед отправкой груза всегда перепроверяйте.",soon:"Скоро здесь же появятся планировщик рейсов и биржа грузов.",copy_link:"Копировать ссылку",copied:"Скопировано",app:"Rigora",tagline:"Проверенные мувинг-грузы",t_loads:"Грузы",t_post:"Разместить груз",t_check:"Проверка компании",t_profile:"Моя компания",search_ph:"Город или штат, например Denver или TX",s_new:"Новые",s_rate:"Дороже",s_rpm:"Лучше $/миля",s_pick:"Раньше погрузка",open_only:"Только открытые",loading:"Загружаю биржу…",
+ru:{nav_plan:"Планировщик",nav_check:"Проверка компании",h_title:"Проверьте перевозчика или брокера до начала работы",h_sub:"Введите USDOT или MC. Rigora берёт актуальную запись FMCSA и показывает полномочия, страховки, бонд, BOC-3, безопасность и аварии на одной странице.",try:"Пример",recent:"Недавние проверки",loading_chk:"Проверяю в FMCSA…",e_bad:"Введите USDOT (цифры) или MC, например MC123456.",e_nf:"Компании {q} нет в базах FMCSA. Проверьте номер и попробуйте снова.",e_up:"FMCSA не ответил. Подождите немного и попробуйте снова.",fl_notallowed:"По данным FMCSA компании запрещено работать",fl_partial:"Новая регистрация: в API безопасности FMCSA записи ещё нет, поэтому инспекции и аварии не показаны",rp_allowed:"Разрешено работать",rp_no:"Нет",rp_current:"Актуальна",rp_outdated:"Устарела",foot:"Данные FMCSA QCMobile и открытых баз FMCSA Motus. Rigora не связана с FMCSA. Перед отправкой груза всегда перепроверяйте.",soon:"Скоро здесь же появятся планировщик рейсов и биржа грузов.",copy_link:"Копировать ссылку",copied:"Скопировано",app:"Rigora",tagline:"Проверенные мувинг-грузы",t_loads:"Грузы",t_post:"Разместить груз",t_check:"Проверка компании",t_profile:"Моя компания",search_ph:"Город или штат, например Denver или TX",s_new:"Новые",s_rate:"Дороже",s_rpm:"Лучше $/миля",s_pick:"Раньше погрузка",open_only:"Только открытые",loading:"Загружаю биржу…",
 pick_h:"Выберите груз",pick_p:"Откройте груз, чтобы увидеть расчёт рейса для вашего трака, проверку компании и отклики.",post_h:"Разместить переезд",from:"Откуда: город или адрес",to:"Куда: город или адрес",pick1:"Погрузка с",pick2:"Погрузка до",deliv:"Доставить до",cf:"Объём, куб. футов",lbs:"Вес (оценка), lb",rate:"Оплата перевозчику, $",notes:"Заметки для перевозчиков",notes_ph:"Лестницы, долгий пронос, пианино, склад, условия оплаты…",lbs_note:"Если вес не указан, берётся 7 lb на кубический фут.",post_btn:"Разместить",
 check_h:"Проверка перевозчика или брокера",check_ph:"USDOT или MC, например 77949 или MC67234",check_btn:"Проверить",check_note:"Источники: SAFER и ежедневные открытые данные FMCSA Motus (полномочия, страховки и бонд, BOC-3). Проверку выполняет Claude и записывает на биржу, участники изменить её не могут.",queue_h:"Ждут проверки",
 prof_h:"Моя компания",prof_p:"Компания показывается на ваших грузах и откликах. После ввода USDOT компания встаёт в очередь на проверку.",co_name:"Название компании",role:"Роль",r_carrier:"Перевозчик",r_broker:"Брокер",r_both:"Перевозчик и брокер",save:"Сохранить",truck_h:"Мой трак",truck_p:"Нужен, чтобы считать топливо, toll и чистую прибыль по каждому грузу. Хранится только на этом устройстве.",ttype:"Трак",tt:"Тягач с прицепом",box:"Бокс-трак",fuel:"Топливо",diesel:"Дизель",gas:"Бензин",
@@ -345,7 +1800,7 @@ fl_new:"Новые полномочия: выданы {d} ({n} дн. назад)
 ok_auth:"Активные полномочия: {a}",ok_ins:"Обязательные страховки и бонд поданы",ok_boc3:"Агент BOC-3: {a}",
 q_note:"Владелец: напишите Claude в чате «проверь очередь», чтобы запустить проверки.",me_none:"Не выполнен вход",me_co:"{n}",prof_saved:"Сохранено.",my_check:"Проверка",
 mcp_off:"Для расчёта маршрута нужен коннектор TomTom Maps в Claude.",db_off:"База биржи недоступна в этом окне. Откройте страницу в Claude, войдя в аккаунт.",ro:"Вы можете смотреть биржу, но не размещать грузы и не откликаться с вашим уровнем доступа."},
-es:{h_title:"Verifica a un transportista o bróker antes de trabajar con él",h_sub:"Escribe un número USDOT o MC. Rigora trae el registro actual de FMCSA y muestra autoridad, seguros, fianza, BOC-3, seguridad y choques en una sola página.",try:"Ejemplo",recent:"Verificaciones recientes",loading_chk:"Consultando FMCSA…",e_bad:"Escribe un USDOT (solo números) o un MC, como MC123456.",e_nf:"No hay ninguna empresa {q} en los registros de FMCSA. Revisa el número y vuelve a intentar.",e_up:"FMCSA no respondió. Espera un momento y vuelve a intentar.",fl_notallowed:"Según FMCSA, esta empresa no tiene permiso para operar",fl_partial:"Registro nuevo: la API de seguridad de FMCSA aún no tiene datos, así que no se muestran inspecciones ni choques",rp_allowed:"Permiso para operar",rp_no:"No",rp_current:"Al día",rp_outdated:"Vencido",foot:"Datos de FMCSA QCMobile y de los datos abiertos de FMCSA Motus. Rigora no está afiliada a FMCSA. Confirma siempre antes de despachar.",soon:"Pronto llegarán a este sitio el planificador y la bolsa de cargas.",copy_link:"Copiar enlace",copied:"Copiado",app:"Rigora",tagline:"Mudanzas verificadas",t_loads:"Cargas",t_post:"Publicar carga",t_check:"Verificar empresa",t_profile:"Mi empresa",search_ph:"Ciudad o estado, p. ej. Denver o TX",s_new:"Más recientes",s_rate:"Mejor pago",s_rpm:"Mejor $/milla",s_pick:"Recogida más pronta",open_only:"Solo cargas abiertas",loading:"Cargando la bolsa…",
+es:{nav_plan:"Planificador",nav_check:"Verificar empresa",h_title:"Verifica a un transportista o bróker antes de trabajar con él",h_sub:"Escribe un número USDOT o MC. Rigora trae el registro actual de FMCSA y muestra autoridad, seguros, fianza, BOC-3, seguridad y choques en una sola página.",try:"Ejemplo",recent:"Verificaciones recientes",loading_chk:"Consultando FMCSA…",e_bad:"Escribe un USDOT (solo números) o un MC, como MC123456.",e_nf:"No hay ninguna empresa {q} en los registros de FMCSA. Revisa el número y vuelve a intentar.",e_up:"FMCSA no respondió. Espera un momento y vuelve a intentar.",fl_notallowed:"Según FMCSA, esta empresa no tiene permiso para operar",fl_partial:"Registro nuevo: la API de seguridad de FMCSA aún no tiene datos, así que no se muestran inspecciones ni choques",rp_allowed:"Permiso para operar",rp_no:"No",rp_current:"Al día",rp_outdated:"Vencido",foot:"Datos de FMCSA QCMobile y de los datos abiertos de FMCSA Motus. Rigora no está afiliada a FMCSA. Confirma siempre antes de despachar.",soon:"Pronto llegarán a este sitio el planificador y la bolsa de cargas.",copy_link:"Copiar enlace",copied:"Copiado",app:"Rigora",tagline:"Mudanzas verificadas",t_loads:"Cargas",t_post:"Publicar carga",t_check:"Verificar empresa",t_profile:"Mi empresa",search_ph:"Ciudad o estado, p. ej. Denver o TX",s_new:"Más recientes",s_rate:"Mejor pago",s_rpm:"Mejor $/milla",s_pick:"Recogida más pronta",open_only:"Solo cargas abiertas",loading:"Cargando la bolsa…",
 pick_h:"Elige una carga",pick_p:"Abre una carga para ver el cálculo del viaje para tu camión, la verificación de la empresa y las ofertas.",post_h:"Publicar una mudanza",from:"Ciudad o dirección de recogida",to:"Ciudad o dirección de entrega",pick1:"Recoger desde",pick2:"Recoger hasta",deliv:"Entregar antes de",cf:"Volumen, pies³",lbs:"Peso estimado, lb",rate:"Pago al transportista, $",notes:"Notas para transportistas",notes_ph:"Escaleras, acarreo largo, piano, almacenaje, forma de pago…",lbs_note:"Si no pones el peso, se calculan 7 lb por pie cúbico.",post_btn:"Publicar",
 check_h:"Verificar transportista o bróker",check_ph:"Número USDOT o MC, p. ej. 77949 o MC67234",check_btn:"Verificar",check_note:"Fuentes: SAFER y los datos abiertos diarios de FMCSA Motus (autoridad, seguros y fianza, BOC-3). Claude hace la verificación y la guarda en la bolsa; los miembros no pueden cambiarla.",queue_h:"En espera de verificación",
 prof_h:"Mi empresa",prof_p:"Tu empresa aparece en tus cargas y ofertas. Al poner el USDOT, queda en la fila para verificarse.",co_name:"Nombre de la empresa",role:"Rol",r_carrier:"Transportista",r_broker:"Bróker",r_both:"Transportista y bróker",save:"Guardar",truck_h:"Mi camión",truck_p:"Sirve para calcular combustible, peajes y tu ganancia neta en cada carga. Se guarda solo en este dispositivo.",ttype:"Camión",tt:"Tractocamión",box:"Camión de caja",fuel:"Combustible",diesel:"Diésel",gas:"Gasolina",
@@ -491,7 +1946,7 @@ async function check(raw){
     const r=await fetch("/api/check?q="+encodeURIComponent(q));
     const j=await r.json().catch(()=>({error:"upstream"}));
     if(j.company){COS[j.company.dot]=j.company;state={q,status:"done",dot:j.company.dot};pushRecent(j.company);renderRecent();
-      history.replaceState(null,"","?q="+encodeURIComponent(j.company.dot))}
+      history.replaceState(null,"","?q="+encodeURIComponent(j.company.dot)+"#company")}
     else state={q,status:"error",err:j.error==="bad_query"?T("e_bad"):j.error==="not_found"?T("e_nf",{q}):T("e_up")};
   }catch(e){state={q,status:"error",err:T("e_up")}}
   render();
@@ -502,13 +1957,23 @@ function applyLang(l){
   document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===lang)));
   document.querySelectorAll("[data-i18n]").forEach(el=>el.textContent=T(el.dataset.i18n));
   document.querySelectorAll("[data-i18n-ph]").forEach(el=>el.placeholder=T(el.dataset.i18nPh));
+  if(window.__planner)window.__planner.applyLang(lang);
+  if(window.LocalDate)window.LocalDate.refresh();
   if(state.status==="error"&&state.q)check(state.q);else render();
 }
+function showView(v){
+  if(v!=="check")v="plan";
+  document.querySelectorAll("nav.tabs [data-view]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.view===v)));
+  document.querySelectorAll(".view").forEach(s=>s.hidden=s.id!=="v-"+v);
+  const h=v==="check"?"#company":"#planner";
+  if(location.hash!==h)history.replaceState(null,"",(v==="check"&&state.dot?"?q="+encodeURIComponent(state.dot):location.pathname)+h);
+}
+document.querySelectorAll("nav.tabs [data-view]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));
 document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",()=>applyLang(b.dataset.lang)));
 $("f").addEventListener("submit",e=>{e.preventDefault();check($("q").value)});
-document.addEventListener("click",e=>{const b=e.target.closest("[data-q]");if(b)check(b.dataset.q)});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-q]");if(b&&b.closest("#v-check"))check(b.dataset.q)});
 applyLang(lang);renderRecent();
-const q0=new URLSearchParams(location.search).get("q");if(q0)check(q0);
+const q0=new URLSearchParams(location.search).get("q");showView(q0||location.hash==="#company"?"check":"plan");if(q0)check(q0);
 })();
 </script>
 </body>
