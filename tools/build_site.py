@@ -16,7 +16,7 @@ scripts = re.findall(r"<script>(.*?)</script>", B, re.S)
 dp, pjs = scripts[0], scripts[1]
 pmain = B[B.index('<section class="view" id="v-plan" hidden>'):]
 pmain = pmain[:pmain.index("  </section>\n\n  <!-- POST -->")] + "  </section>"
-pmain = pmain.replace('<section class="view" id="v-plan" hidden>', '<section class="view" id="v-plan">')
+# the company check is the start page; the planner opens from its tab
 
 # ---------- planner markup: truck height and length, honest notes ----------
 pmain = rep(pmain, '<div class="f"><label class="lbl" for="weight" data-pi18n="weight">Gross weight, lb</label>',
@@ -169,6 +169,19 @@ cjs = rep(cjs, 'const q0=new URLSearchParams(location.search).get("q");if(q0)che
                'const q0=new URLSearchParams(location.search).get("q");showView(q0||location.hash==="#company"?"check":"plan");if(q0)check(q0);')
 cjs = rep(cjs, 'document.addEventListener("click",e=>{const b=e.target.closest("[data-q]");if(b)check(b.dataset.q)});',
                'document.addEventListener("click",e=>{const b=e.target.closest("[data-q]");if(b&&b.closest("#v-check"))check(b.dataset.q)});')
+# download the report as JPG or PDF; open on the company check by default
+cjs = rep(cjs, "\n// ---------- page ----------", "\n" + (ROOT / "tools" / "report_img.js").read_text(encoding="utf-8") + "\n// ---------- page ----------")
+cjs = rep(cjs, '''<div class="rp-actions" style="margin-top:12px"><button class="btn" type="button" id="cp">${T("copy_link")}</button></div>''',
+  '''<div class="rp-actions" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-dl" type="button" id="dlPdf">${T("dl_pdf")}</button><button class="btn" type="button" id="dlImg">${T("dl_img")}</button><button class="btn" type="button" id="cp">${T("copy_link")}</button></div>''')
+cjs = rep(cjs, '''  $("cp").addEventListener("click",''', '''  $("dlPdf").addEventListener("click",e=>downloadReport("pdf",e.currentTarget));
+  $("dlImg").addEventListener("click",e=>downloadReport("jpg",e.currentTarget));
+  $("cp").addEventListener("click",''')
+cjs = rep(cjs, 'showView(q0||location.hash==="#company"?"check":"plan")', 'showView(location.hash==="#planner"&&!q0?"plan":"check")')
+for L, a, b, w, er in [("en", "↓ Download PDF", "↓ Download image (JPG)", "Preparing…", "Couldn't make the file"),
+                        ("ru", "↓ Скачать PDF", "↓ Скачать картинку (JPG)", "Готовлю…", "Не удалось сделать файл"),
+                        ("es", "↓ Descargar PDF", "↓ Descargar imagen (JPG)", "Preparando…", "No se pudo crear el archivo")]:
+    k = cjs.index(f"\n{L}:{{") + len(L) + 3
+    cjs = cjs[:k] + f'dl_pdf:"{a}",dl_img:"{b}",dl_wait:"{w}",dl_err:"{er}",' + cjs[k:]
 # nav labels live in the check script's dictionary
 for L, a, b in [("en", "Trip planner", "Check a company"), ("ru", "Планировщик", "Проверка компании"), ("es", "Planificador", "Verificar empresa")]:
     k = cjs.index(f"\n{L}:{{") + len(L) + 3
@@ -199,12 +212,12 @@ html = '''<!doctype html>
   <div class="hdr-r">''' + THEME_BTN + '''<div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="ru" aria-pressed="false">RU</button><button type="button" data-lang="es" aria-pressed="false">ES</button></div></div>
 </div></header>
 <nav class="tabs" aria-label="Sections"><div class="wrap" role="tablist">
-  <button role="tab" data-view="plan" aria-selected="true" data-i18n="nav_plan">Trip planner</button>
-  <button role="tab" data-view="check" aria-selected="false" data-i18n="nav_check">Check a company</button>
+  <button role="tab" data-view="check" aria-selected="true" data-i18n="nav_check">Check a company</button>
+  <button role="tab" data-view="plan" aria-selected="false" data-i18n="nav_plan">Trip planner</button>
 </div></nav>
 <main><div class="wrap">
 ''' + pmain + '''
-  <section class="view" id="v-check" hidden>
+  <section class="view" id="v-check">
 ''' + hero + '''  </section>
   <footer class="site"><span data-i18n="foot">Data from FMCSA.</span></footer>
 </div></main>

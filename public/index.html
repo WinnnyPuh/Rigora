@@ -523,11 +523,11 @@ document.documentElement.setAttribute("data-theme",t)})();
     </div></div><div class="lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="true">EN</button><button type="button" data-lang="ru" aria-pressed="false">RU</button><button type="button" data-lang="es" aria-pressed="false">ES</button></div></div>
 </div></header>
 <nav class="tabs" aria-label="Sections"><div class="wrap" role="tablist">
-  <button role="tab" data-view="plan" aria-selected="true" data-i18n="nav_plan">Trip planner</button>
-  <button role="tab" data-view="check" aria-selected="false" data-i18n="nav_check">Check a company</button>
+  <button role="tab" data-view="check" aria-selected="true" data-i18n="nav_check">Check a company</button>
+  <button role="tab" data-view="plan" aria-selected="false" data-i18n="nav_plan">Trip planner</button>
 </div></nav>
 <main><div class="wrap">
-<section class="view" id="v-plan">
+<section class="view" id="v-plan" hidden>
 <div class="pl-bar"><div class="conn" id="conn"><span class="dot" id="connDot"></span><span id="connTxt">Connecting to TomTom…</span></div><span class="note" id="plTrip"></span></div>
 <div class="pl-grid">
     <div class="col">
@@ -704,7 +704,7 @@ document.documentElement.setAttribute("data-theme",t)})();
     </div>
 </div>
   </section>
-  <section class="view" id="v-check" hidden>
+  <section class="view" id="v-check">
 <section class="hero">
     <h1 data-i18n="h_title">Check a carrier or broker before you work with them</h1>
     <p data-i18n="h_sub">Enter a USDOT or MC number.</p>
@@ -1868,7 +1868,7 @@ $("hereLoc").value=stops[0].q;loadHere(stops[0].q);
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const I18N={
-en:{nav_plan:"Trip planner",nav_check:"Check a company",h_title:"Check a carrier or broker before you work with them",h_sub:"Enter a USDOT or MC number. Rigora pulls the live FMCSA record and shows authority, insurance, bond, BOC-3, safety and crashes on one page.",try:"Try",recent:"Recent checks",loading_chk:"Checking FMCSA…",e_bad:"Enter a USDOT number (digits) or an MC number, like MC123456.",e_nf:"No company with {q} in FMCSA records. Check the number and try again.",e_up:"FMCSA didn't answer. Wait a moment and try again.",fl_notallowed:"FMCSA says this company is not allowed to operate",fl_partial:"New registration: FMCSA's safety API has no record yet, so inspections and crashes aren't shown",rp_allowed:"Allowed to operate",rp_no:"No",rp_current:"Up to date",rp_outdated:"Outdated",foot:"Data from FMCSA QCMobile and FMCSA Motus open data. Rigora isn't affiliated with FMCSA. Always confirm before dispatch.",soon:"Trip planner and load board are coming to this site next.",copy_link:"Copy link",copied:"Copied",app:"Rigora",tagline:"Verified moving freight",t_loads:"Loads",t_post:"Post a load",t_check:"Check a company",t_profile:"My company",search_ph:"Search city or state, e.g. Denver or TX",s_new:"Newest",s_rate:"Highest rate",s_rpm:"Best $/mile",s_pick:"Earliest pickup",open_only:"Open loads only",loading:"Loading the board…",
+en:{nav_plan:"Trip planner",nav_check:"Check a company",dl_pdf:"↓ Download PDF",dl_img:"↓ Download image (JPG)",dl_wait:"Preparing…",dl_err:"Couldn't make the file",h_title:"Check a carrier or broker before you work with them",h_sub:"Enter a USDOT or MC number. Rigora pulls the live FMCSA record and shows authority, insurance, bond, BOC-3, safety and crashes on one page.",try:"Try",recent:"Recent checks",loading_chk:"Checking FMCSA…",e_bad:"Enter a USDOT number (digits) or an MC number, like MC123456.",e_nf:"No company with {q} in FMCSA records. Check the number and try again.",e_up:"FMCSA didn't answer. Wait a moment and try again.",fl_notallowed:"FMCSA says this company is not allowed to operate",fl_partial:"New registration: FMCSA's safety API has no record yet, so inspections and crashes aren't shown",rp_allowed:"Allowed to operate",rp_no:"No",rp_current:"Up to date",rp_outdated:"Outdated",foot:"Data from FMCSA QCMobile and FMCSA Motus open data. Rigora isn't affiliated with FMCSA. Always confirm before dispatch.",soon:"Trip planner and load board are coming to this site next.",copy_link:"Copy link",copied:"Copied",app:"Rigora",tagline:"Verified moving freight",t_loads:"Loads",t_post:"Post a load",t_check:"Check a company",t_profile:"My company",search_ph:"Search city or state, e.g. Denver or TX",s_new:"Newest",s_rate:"Highest rate",s_rpm:"Best $/mile",s_pick:"Earliest pickup",open_only:"Open loads only",loading:"Loading the board…",
 pick_h:"Pick a load",pick_p:"Select a load to see the trip calculation for your truck, the company check and bids.",post_h:"Post a moving load",from:"Pickup city or address",to:"Delivery city or address",pick1:"Pickup from",pick2:"Pickup until",deliv:"Deliver by",cf:"Volume, cu ft",lbs:"Est. weight, lb",rate:"Carrier pay, $",notes:"Notes for carriers",notes_ph:"Stairs, long carry, piano, storage, payment terms…",lbs_note:"Weight defaults to 7 lb per cubic foot if you leave it empty.",post_btn:"Post load",
 check_h:"Check a carrier or broker",check_ph:"USDOT number or MC number, e.g. 77949 or MC67234",check_btn:"Check",check_note:"Sources: FMCSA SAFER snapshot and FMCSA's daily Motus open data (authority, insurance and bond on file, BOC-3). Checks run on Claude's side and are written to the board, so members can't edit them.",queue_h:"Waiting for a check",
 prof_h:"My company",prof_p:"Your company appears on loads you post and bids you send. Entering a USDOT number queues a verification check.",co_name:"Company name",role:"Role",r_carrier:"Carrier",r_broker:"Broker",r_both:"Carrier and broker",save:"Save",truck_h:"My truck",truck_p:"Used to work out fuel, tolls and your net on every load. Saved on this device only.",ttype:"Truck",tt:"Tractor-trailer",box:"Box truck",fuel:"Fuel",diesel:"Diesel",gas:"Gasoline",
@@ -1885,7 +1885,7 @@ fl_new:"New authority: granted {d} ({n} days ago)",fl_mcsnone:"No MCS-150 date o
 ok_auth:"Active authority: {a}",ok_ins:"Required insurance and bond on file",ok_boc3:"BOC-3 agent: {a}",
 q_note:"Owner: ask Claude in the chat to \"check the queue\" to run these.",me_none:"Signed out",me_co:"{n}",prof_saved:"Saved.",my_check:"Verification",
 mcp_off:"Route calculation needs the TomTom Maps connector in Claude.",db_off:"The board's database isn't available in this view. Open it in Claude while signed in.",ro:"You can view the board but not post or bid with your access level."},
-ru:{nav_plan:"Планировщик",nav_check:"Проверка компании",h_title:"Проверьте перевозчика или брокера до начала работы",h_sub:"Введите USDOT или MC. Rigora берёт актуальную запись FMCSA и показывает полномочия, страховки, бонд, BOC-3, безопасность и аварии на одной странице.",try:"Пример",recent:"Недавние проверки",loading_chk:"Проверяю в FMCSA…",e_bad:"Введите USDOT (цифры) или MC, например MC123456.",e_nf:"Компании {q} нет в базах FMCSA. Проверьте номер и попробуйте снова.",e_up:"FMCSA не ответил. Подождите немного и попробуйте снова.",fl_notallowed:"По данным FMCSA компании запрещено работать",fl_partial:"Новая регистрация: в API безопасности FMCSA записи ещё нет, поэтому инспекции и аварии не показаны",rp_allowed:"Разрешено работать",rp_no:"Нет",rp_current:"Актуальна",rp_outdated:"Устарела",foot:"Данные FMCSA QCMobile и открытых баз FMCSA Motus. Rigora не связана с FMCSA. Перед отправкой груза всегда перепроверяйте.",soon:"Скоро здесь же появятся планировщик рейсов и биржа грузов.",copy_link:"Копировать ссылку",copied:"Скопировано",app:"Rigora",tagline:"Проверенные мувинг-грузы",t_loads:"Грузы",t_post:"Разместить груз",t_check:"Проверка компании",t_profile:"Моя компания",search_ph:"Город или штат, например Denver или TX",s_new:"Новые",s_rate:"Дороже",s_rpm:"Лучше $/миля",s_pick:"Раньше погрузка",open_only:"Только открытые",loading:"Загружаю биржу…",
+ru:{nav_plan:"Планировщик",nav_check:"Проверка компании",dl_pdf:"↓ Скачать PDF",dl_img:"↓ Скачать картинку (JPG)",dl_wait:"Готовлю…",dl_err:"Не удалось сделать файл",h_title:"Проверьте перевозчика или брокера до начала работы",h_sub:"Введите USDOT или MC. Rigora берёт актуальную запись FMCSA и показывает полномочия, страховки, бонд, BOC-3, безопасность и аварии на одной странице.",try:"Пример",recent:"Недавние проверки",loading_chk:"Проверяю в FMCSA…",e_bad:"Введите USDOT (цифры) или MC, например MC123456.",e_nf:"Компании {q} нет в базах FMCSA. Проверьте номер и попробуйте снова.",e_up:"FMCSA не ответил. Подождите немного и попробуйте снова.",fl_notallowed:"По данным FMCSA компании запрещено работать",fl_partial:"Новая регистрация: в API безопасности FMCSA записи ещё нет, поэтому инспекции и аварии не показаны",rp_allowed:"Разрешено работать",rp_no:"Нет",rp_current:"Актуальна",rp_outdated:"Устарела",foot:"Данные FMCSA QCMobile и открытых баз FMCSA Motus. Rigora не связана с FMCSA. Перед отправкой груза всегда перепроверяйте.",soon:"Скоро здесь же появятся планировщик рейсов и биржа грузов.",copy_link:"Копировать ссылку",copied:"Скопировано",app:"Rigora",tagline:"Проверенные мувинг-грузы",t_loads:"Грузы",t_post:"Разместить груз",t_check:"Проверка компании",t_profile:"Моя компания",search_ph:"Город или штат, например Denver или TX",s_new:"Новые",s_rate:"Дороже",s_rpm:"Лучше $/миля",s_pick:"Раньше погрузка",open_only:"Только открытые",loading:"Загружаю биржу…",
 pick_h:"Выберите груз",pick_p:"Откройте груз, чтобы увидеть расчёт рейса для вашего трака, проверку компании и отклики.",post_h:"Разместить переезд",from:"Откуда: город или адрес",to:"Куда: город или адрес",pick1:"Погрузка с",pick2:"Погрузка до",deliv:"Доставить до",cf:"Объём, куб. футов",lbs:"Вес (оценка), lb",rate:"Оплата перевозчику, $",notes:"Заметки для перевозчиков",notes_ph:"Лестницы, долгий пронос, пианино, склад, условия оплаты…",lbs_note:"Если вес не указан, берётся 7 lb на кубический фут.",post_btn:"Разместить",
 check_h:"Проверка перевозчика или брокера",check_ph:"USDOT или MC, например 77949 или MC67234",check_btn:"Проверить",check_note:"Источники: SAFER и ежедневные открытые данные FMCSA Motus (полномочия, страховки и бонд, BOC-3). Проверку выполняет Claude и записывает на биржу, участники изменить её не могут.",queue_h:"Ждут проверки",
 prof_h:"Моя компания",prof_p:"Компания показывается на ваших грузах и откликах. После ввода USDOT компания встаёт в очередь на проверку.",co_name:"Название компании",role:"Роль",r_carrier:"Перевозчик",r_broker:"Брокер",r_both:"Перевозчик и брокер",save:"Сохранить",truck_h:"Мой трак",truck_p:"Нужен, чтобы считать топливо, toll и чистую прибыль по каждому грузу. Хранится только на этом устройстве.",ttype:"Трак",tt:"Тягач с прицепом",box:"Бокс-трак",fuel:"Топливо",diesel:"Дизель",gas:"Бензин",
@@ -1902,7 +1902,7 @@ fl_new:"Новые полномочия: выданы {d} ({n} дн. назад)
 ok_auth:"Активные полномочия: {a}",ok_ins:"Обязательные страховки и бонд поданы",ok_boc3:"Агент BOC-3: {a}",
 q_note:"Владелец: напишите Claude в чате «проверь очередь», чтобы запустить проверки.",me_none:"Не выполнен вход",me_co:"{n}",prof_saved:"Сохранено.",my_check:"Проверка",
 mcp_off:"Для расчёта маршрута нужен коннектор TomTom Maps в Claude.",db_off:"База биржи недоступна в этом окне. Откройте страницу в Claude, войдя в аккаунт.",ro:"Вы можете смотреть биржу, но не размещать грузы и не откликаться с вашим уровнем доступа."},
-es:{nav_plan:"Planificador",nav_check:"Verificar empresa",h_title:"Verifica a un transportista o bróker antes de trabajar con él",h_sub:"Escribe un número USDOT o MC. Rigora trae el registro actual de FMCSA y muestra autoridad, seguros, fianza, BOC-3, seguridad y choques en una sola página.",try:"Ejemplo",recent:"Verificaciones recientes",loading_chk:"Consultando FMCSA…",e_bad:"Escribe un USDOT (solo números) o un MC, como MC123456.",e_nf:"No hay ninguna empresa {q} en los registros de FMCSA. Revisa el número y vuelve a intentar.",e_up:"FMCSA no respondió. Espera un momento y vuelve a intentar.",fl_notallowed:"Según FMCSA, esta empresa no tiene permiso para operar",fl_partial:"Registro nuevo: la API de seguridad de FMCSA aún no tiene datos, así que no se muestran inspecciones ni choques",rp_allowed:"Permiso para operar",rp_no:"No",rp_current:"Al día",rp_outdated:"Vencido",foot:"Datos de FMCSA QCMobile y de los datos abiertos de FMCSA Motus. Rigora no está afiliada a FMCSA. Confirma siempre antes de despachar.",soon:"Pronto llegarán a este sitio el planificador y la bolsa de cargas.",copy_link:"Copiar enlace",copied:"Copiado",app:"Rigora",tagline:"Mudanzas verificadas",t_loads:"Cargas",t_post:"Publicar carga",t_check:"Verificar empresa",t_profile:"Mi empresa",search_ph:"Ciudad o estado, p. ej. Denver o TX",s_new:"Más recientes",s_rate:"Mejor pago",s_rpm:"Mejor $/milla",s_pick:"Recogida más pronta",open_only:"Solo cargas abiertas",loading:"Cargando la bolsa…",
+es:{nav_plan:"Planificador",nav_check:"Verificar empresa",dl_pdf:"↓ Descargar PDF",dl_img:"↓ Descargar imagen (JPG)",dl_wait:"Preparando…",dl_err:"No se pudo crear el archivo",h_title:"Verifica a un transportista o bróker antes de trabajar con él",h_sub:"Escribe un número USDOT o MC. Rigora trae el registro actual de FMCSA y muestra autoridad, seguros, fianza, BOC-3, seguridad y choques en una sola página.",try:"Ejemplo",recent:"Verificaciones recientes",loading_chk:"Consultando FMCSA…",e_bad:"Escribe un USDOT (solo números) o un MC, como MC123456.",e_nf:"No hay ninguna empresa {q} en los registros de FMCSA. Revisa el número y vuelve a intentar.",e_up:"FMCSA no respondió. Espera un momento y vuelve a intentar.",fl_notallowed:"Según FMCSA, esta empresa no tiene permiso para operar",fl_partial:"Registro nuevo: la API de seguridad de FMCSA aún no tiene datos, así que no se muestran inspecciones ni choques",rp_allowed:"Permiso para operar",rp_no:"No",rp_current:"Al día",rp_outdated:"Vencido",foot:"Datos de FMCSA QCMobile y de los datos abiertos de FMCSA Motus. Rigora no está afiliada a FMCSA. Confirma siempre antes de despachar.",soon:"Pronto llegarán a este sitio el planificador y la bolsa de cargas.",copy_link:"Copiar enlace",copied:"Copiado",app:"Rigora",tagline:"Mudanzas verificadas",t_loads:"Cargas",t_post:"Publicar carga",t_check:"Verificar empresa",t_profile:"Mi empresa",search_ph:"Ciudad o estado, p. ej. Denver o TX",s_new:"Más recientes",s_rate:"Mejor pago",s_rpm:"Mejor $/milla",s_pick:"Recogida más pronta",open_only:"Solo cargas abiertas",loading:"Cargando la bolsa…",
 pick_h:"Elige una carga",pick_p:"Abre una carga para ver el cálculo del viaje para tu camión, la verificación de la empresa y las ofertas.",post_h:"Publicar una mudanza",from:"Ciudad o dirección de recogida",to:"Ciudad o dirección de entrega",pick1:"Recoger desde",pick2:"Recoger hasta",deliv:"Entregar antes de",cf:"Volumen, pies³",lbs:"Peso estimado, lb",rate:"Pago al transportista, $",notes:"Notas para transportistas",notes_ph:"Escaleras, acarreo largo, piano, almacenaje, forma de pago…",lbs_note:"Si no pones el peso, se calculan 7 lb por pie cúbico.",post_btn:"Publicar",
 check_h:"Verificar transportista o bróker",check_ph:"Número USDOT o MC, p. ej. 77949 o MC67234",check_btn:"Verificar",check_note:"Fuentes: SAFER y los datos abiertos diarios de FMCSA Motus (autoridad, seguros y fianza, BOC-3). Claude hace la verificación y la guarda en la bolsa; los miembros no pueden cambiarla.",queue_h:"En espera de verificación",
 prof_h:"Mi empresa",prof_p:"Tu empresa aparece en tus cargas y ofertas. Al poner el USDOT, queda en la fila para verificarse.",co_name:"Nombre de la empresa",role:"Rol",r_carrier:"Transportista",r_broker:"Bróker",r_both:"Transportista y bróker",save:"Guardar",truck_h:"Mi camión",truck_p:"Sirve para calcular combustible, peajes y tu ganancia neta en cada carga. Se guarda solo en este dispositivo.",ttype:"Camión",tt:"Tractocamión",box:"Camión de caja",fuel:"Combustible",diesel:"Diésel",gas:"Gasolina",
@@ -2027,6 +2027,171 @@ function companyReport(dot){
 }
 
 
+// ---------- company report as a picture (JPG) or PDF, drawn on a canvas, no libraries ----------
+async function reportCanvas(dot){
+  const d=String(dot||"").replace(/\D/g,""),v=verdict(d),c=v.c;if(!c)return null;
+  try{if(document.fonts&&document.fonts.ready)await document.fonts.ready}catch(e){}
+  const S=2,W=1200,P=48,CW=W-2*P;
+  const SANS='"Geist","Helvetica Neue",Arial,sans-serif',MONO='"Geist Mono",ui-monospace,Menlo,Consolas,monospace';
+  const F=(w,s,m)=>w+" "+s+"px "+(m?MONO:SANS);
+  const C={ink:"#111111",muted:"#6b6b69",line:"#e4e4e1",bg:"#f5f5f4",card:"#ffffff",good:"#17803f",warn:"#b45a00",bad:"#c62a1f",info:"#555553",orange:"#ff6a1a",
+    goodBg:"#e9f5ee",warnBg:"#fcf1e4",badBg:"#fcebe9",mutBg:"#efefed"};
+  const TONE={ok:[C.good,C.goodBg],bad:[C.bad,C.badBg],warn:[C.warn,C.warnBg],mut:[C.muted,C.mutBg],info:[C.info,C.mutBg]};
+  const dt=s=>{if(!s)return "—";const t=new Date(String(s).length===10?s+"T12:00:00":s);return isNaN(t)?String(s):t.toLocaleDateString(LOC(),{month:"short",day:"numeric",year:"numeric"})};
+  const mk=h=>{const cv=document.createElement("canvas");cv.width=W*S;cv.height=h*S;const g=cv.getContext("2d");g.scale(S,S);return [cv,g]};
+  const [big,main]=mk(3200),[scr,scratch]=mk(1200); // stay under phone canvas size limits
+  let x=main;
+  const path=(X,Y,w,h,r)=>{x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()};
+  const box=(X,Y,w,h,r,fill,stroke,lw)=>{path(X,Y,w,h,r);if(fill){x.fillStyle=fill;x.fill()}if(stroke){x.strokeStyle=stroke;x.lineWidth=lw||1;x.stroke()}};
+  const text=(t,X,Y,font,color,align)=>{x.font=font;x.fillStyle=color;x.textAlign=align||"left";x.textBaseline="alphabetic";x.fillText(String(t),X,Y);x.textAlign="left"};
+  const tw=(t,font)=>{x.font=font;return x.measureText(String(t)).width};
+  const wrap=(t,maxW,font)=>{x.font=font;const out=[];String(t??"").split("\n").forEach(par=>{let line="";par.split(/\s+/).filter(Boolean).forEach(w=>{const tt=line?line+" "+w:w;
+    if(x.measureText(tt).width>maxW&&line){out.push(line);line=w}else line=tt});out.push(line)});return out.length?out:[""]};
+  const pill=(t,tone,Xr,Y)=>{const f=F(700,12,true),w=Math.ceil(tw(t,f))+20,[fg,bg]=TONE[tone]||TONE.mut;box(Xr-w,Y,w,24,12,bg);text(t,Xr-w/2,Y+16.5,f,fg,"center");return w};
+
+  // ---- header band
+  box(0,0,W,88,0,"#111111");
+  box(P,24,40,40,9,C.orange);box(P+10,37,20,6,3,"#111111");box(P+10,47,14,6,3,"#111111");
+  text("Rigora",P+54,55,F(800,26),"#ffffff");
+  text(T("check_h").toUpperCase(),W-P,44,F(700,12,true),"#bdbdb8","right");
+  text("rigora.org",W-P,64,F(500,13,true),C.orange,"right");
+  let y=88+40;
+
+  // ---- name, chips | verdict
+  const vW=300,leftW=CW-vW-28;
+  const nameL=wrap(c.legal_name,leftW,F(800,32));
+  nameL.forEach((l,i)=>text(l,P,y+28+i*38,F(800,32),C.ink));
+  let ly=y+28+(nameL.length-1)*38+10;
+  if(c.dba&&c.dba!==c.legal_name){ly+=22;text("DBA "+c.dba,P,ly,F(500,15),C.muted)}
+  ly+=18;let cx=P;
+  ["USDOT "+c.dot,...(c.dockets||[]),c.entity||""].filter(Boolean).forEach(ch=>{const f=F(600,13,true),w=Math.ceil(tw(ch,f))+20;
+    if(cx+w>P+leftW){cx=P;ly+=34}box(cx,ly,w,28,6,C.bg,C.line);text(ch,cx+10,ly+19,f,C.ink);cx+=w+8});
+  ly+=28;
+  const lv=v.lvl,[vfg,vbg]=TONE[lv==="ok"?"ok":lv==="bad"?"bad":lv==="warn"?"warn":"mut"];
+  const bad=v.flags.filter(f=>f.l==="bad").length,warn=v.flags.filter(f=>f.l==="warn").length;
+  const sum=lv==="ok"?T("rp_sum_ok"):lv==="bad"?T("rp_sum_bad",{n:bad}):T("rp_sum_n",{n:warn});
+  const sumL=wrap(sum,vW-36,F(500,15));
+  const vH=24+18+34+sumL.length*21+18,vX=W-P-vW;
+  box(vX,y,vW,vH,14,vbg,vfg,2);
+  text(T("rp_verdict").toUpperCase(),vX+18,y+30,F(700,12,true),vfg);
+  text(T("v_"+lv),vX+18,y+66,F(800,28),vfg);
+  sumL.forEach((l,i)=>text(l,vX+18,y+94+i*21,F(500,15),C.ink));
+  y=Math.max(ly,y+vH)+28;
+
+  // ---- flags
+  const fl=v.flags.filter(f=>f.l!=="ok");
+  if(fl.length){
+    const lines=fl.map(f=>({f,L:wrap(f.t,CW-60,F(500,15))}));
+    const h=24+lines.reduce((s,o)=>s+o.L.length*21+10,0)+4;
+    box(P,y,CW,h,12,C.bg,C.line);let fy=y+22;
+    lines.forEach(({f,L})=>{const col=(TONE[f.l]||TONE.info)[0];x.beginPath();x.arc(P+26,fy+9,5,0,Math.PI*2);x.fillStyle=col;x.fill();
+      L.forEach((l,i)=>text(l,P+42,fy+15+i*21,F(f.l==="bad"?700:500,15),f.l==="bad"?C.bad:C.ink));fy+=L.length*21+10});
+    y+=h+24;
+  }
+
+  // ---- sections
+  const auth=c.auth||[],act=auth.filter(AUTH_ACTIVE),cr=c.crashes||{},ins=c.insp||{};
+  const bReq=Math.max(0,...act.map(a=>a.bipd_req||0)),bFile=Math.max(0,...act.map(a=>a.bipd_file||0));
+  const cReq=act.some(a=>a.cargo_req),cFile=act.some(a=>a.cargo_file),dReq=act.some(a=>a.bond_req),dFile=act.some(a=>a.bond_file);
+  const insRow=(l,req,ok,fileTxt)=>req?{t:"row",l,sub:T("rp_req")+": "+req,v:ok?(fileTxt||T("rp_file")):T("rp_missing"),tone:ok?"ok":"bad"}:{t:"row",l,sub:T("rp_notreq"),v:fileTxt||"—",tone:"mut"};
+  const secs=[
+    {h:T("rp_auth_h"),items:[...(auth.length?auth.map(a=>({t:"row",l:a.type,sub:(a.docket||"")+(c.auth_since&&AUTH_ACTIVE(a)?" · "+T("rp_since",{d:dt(c.auth_since)}):""),v:a.status||"—",tone:AUTH_ACTIVE(a)?"ok":"bad"})):[{t:"note",v:T("rp_noauth")}]),
+      {t:"row",l:T("f_status"),v:c.usdot_status||"—",tone:String(c.usdot_status||"").toUpperCase()==="ACTIVE"?"ok":"bad"},
+      ...(c.allowed_to_operate!=null?[{t:"row",l:T("rp_allowed"),v:c.allowed_to_operate?T("rp_yes"):T("rp_no"),tone:c.allowed_to_operate?"ok":"bad"}]:[]),
+      {t:"row",l:T("f_oos"),v:c.oos_date?dt(c.oos_date):T("rp_none"),tone:c.oos_date?"bad":"ok"}]},
+    {h:T("rp_ins_h"),items:[insRow(T("f_bipd"),bReq?usd(bReq):"",bFile>=bReq&&bFile>0,bFile?usd(bFile):""),insRow(T("f_cargo"),cReq?T("rp_yes"):"",cFile,""),insRow(T("f_bond"),dReq?T("rp_yes"):"",dFile,"")]},
+    {h:T("rp_boc_h"),items:c.boc3?[{t:"big",v:c.boc3.agent,sub:[c.boc3.city,c.boc3.state].filter(Boolean).join(", ")},{t:"row",l:"BOC-3",v:T("rp_file"),tone:"ok"}]:[{t:"row",l:"BOC-3",v:T("rp_missing"),tone:"bad"}]},
+    {h:T("rp_safety_h"),items:[{t:"row",l:T("f_rating"),v:(c.safety||{}).rating||"—",tone:"text"},...(ins.veh?[{t:"bar",l:T("rp_veh"),x:ins.veh}]:[]),...(ins.drv?[{t:"bar",l:T("rp_drv"),x:ins.drv}]:[])]},
+    {h:T("rp_crash_h"),items:[{t:"nums",cells:[[cr.fatal,T("rp_fatal"),cr.fatal>0],[cr.injury,T("rp_injury")],[cr.tow,T("rp_tow")],[cr.total,T("rp_total")]]}]},
+    {h:T("rp_fleet_h"),items:[{t:"nums",cells:[[c.power_units,T("rp_units")],[c.drivers,T("rp_drivers")]]},...((c.cargo||[]).length?[{t:"chips",list:c.cargo}]:[]),
+      {t:"row",l:T("f_mcs"),v:c.mcs150?dt(c.mcs150):c.mcs150_outdated===false?T("rp_current"):c.mcs150_outdated?T("rp_outdated"):"—",tone:"text"},
+      {t:"row",l:T("f_phone"),v:c.phone||"—",tone:"text"},{t:"row",l:T("f_addr"),v:c.address||"—",tone:"text",wide:true}]}
+  ];
+  const drawSec=(s,X,Y,w,h)=>{
+    if(h)box(X,Y,w,h,14,C.card,C.line);
+    const iX=X+20,iW=w-40;let yy=Y+34;text(s.h,iX,yy,F(800,18),C.ink);yy+=14;
+    s.items.forEach((it,k)=>{
+      if(k){x.fillStyle=C.line;x.fillRect(iX,yy,iW,1)}
+      if(it.t==="row"){
+        let vw=0;const vf=F(700,15);
+        if(it.tone==="text"){const vl=wrap(it.v,it.wide?iW*0.62:iW*0.5,vf);vw=Math.max(...vl.map(l=>tw(l,vf)));
+          const ll=wrap(it.l,iW-vw-16,F(500,15));const rows=Math.max(ll.length,vl.length);
+          ll.forEach((l,i)=>text(l,iX,yy+26+i*20,F(500,15),C.muted));vl.forEach((l,i)=>text(l,iX+iW,yy+26+i*20,vf,C.ink,"right"));yy+=rows*20+18;return}
+        const pf=F(700,12,true);vw=Math.ceil(tw(it.v,pf))+20;
+        const ll=wrap(it.l,iW-vw-16,F(600,15)),sl=it.sub?wrap(it.sub,iW-vw-16,F(500,12,true)):[];
+        ll.forEach((l,i)=>text(l,iX,yy+26+i*20,F(600,15),C.ink));sl.forEach((l,i)=>text(l,iX,yy+26+ll.length*20+i*17,F(500,12,true),C.muted));
+        pill(it.v,it.tone,iX+iW,yy+10);yy+=Math.max(44,ll.length*20+sl.length*17+18);return}
+      if(it.t==="note"){wrap(it.v,iW,F(500,15)).forEach((l,i)=>{text(l,iX,yy+26+i*20,F(500,15),C.muted)});yy+=40;return}
+      if(it.t==="big"){const bl=wrap(it.v,iW,F(800,20));bl.forEach((l,i)=>text(l,iX,yy+32+i*26,F(800,20),C.ink));yy+=bl.length*26+14;
+        if(it.sub){text(it.sub,iX,yy+16,F(500,14),C.muted);yy+=26}return}
+      if(it.t==="bar"){const b=it.x,good=b.rate<=b.nat,mx=Math.max(b.rate,b.nat,1)*1.25,col=b.n?(good?C.good:C.warn):C.muted;
+        text(it.l,iX,yy+26,F(600,15),C.ink);text(b.n?b.rate+"%":"—",iX+iW,yy+26,F(800,16,true),col,"right");
+        box(iX,yy+38,iW,8,4,C.bg);if(b.n)box(iX,yy+38,Math.max(8,Math.min(1,b.rate/mx)*iW),8,4,col);
+        x.fillStyle=C.ink;x.fillRect(iX+Math.min(1,b.nat/mx)*iW-1,yy+34,2,16);
+        text(T("rp_insp",{n:num(b.n)}),iX,yy+68,F(500,12,true),C.muted);text(T("rp_nat",{n:b.nat}),iX+iW,yy+68,F(500,12,true),C.muted,"right");yy+=82;return}
+      if(it.t==="nums"){const n=it.cells.length,cw=iW/n;it.cells.forEach(([val,l,red],i)=>{const cx0=iX+i*cw;
+          text(val??"—",cx0,yy+44,F(800,30,true),red?C.bad:C.ink);wrap(l,cw-8,F(500,13)).forEach((ln,j)=>text(ln,cx0,yy+66+j*16,F(500,13),C.muted))});yy+=88;return}
+      if(it.t==="chips"){let cx1=iX,cy=yy+12;it.list.forEach(ch=>{const f=F(600,12,true),w2=Math.ceil(tw(ch,f))+16;if(cx1+w2>iX+iW){cx1=iX;cy+=30}
+          box(cx1,cy,w2,24,6,C.bg,C.line);text(ch,cx1+8,cy+16.5,f,C.ink);cx1+=w2+6});yy=cy+36;return}
+    });
+    return yy-Y+14;
+  };
+  const colW=(CW-20)/2;
+  const measure=s=>{const keep=x;x=scratch;x.clearRect(0,0,W,1200);const h=drawSec(s,0,0,colW,0);x=keep;return h};
+  for(let i=0;i<secs.length;i+=2){
+    const a=secs[i],b=secs[i+1],h=Math.max(measure(a),b?measure(b):0);
+    drawSec(a,P,y,colW,h);if(b)drawSec(b,P+colW+20,y,colW,h);y+=h+20;
+  }
+
+  // ---- footer
+  y+=6;x.fillStyle=C.line;x.fillRect(P,y,CW,1);y+=28;
+  text(T("checked_on",{d:dt(c.checked_at)})+" · "+T("rp_sources")+": "+(c.sources||["FMCSA"]).join(", "),P,y,F(500,13,true),C.muted);
+  text("rigora.org/?q="+c.dot,W-P,y,F(700,13,true),C.ink,"right");y+=10;
+  wrap(T("foot"),CW,F(500,13)).forEach(l=>{y+=20;text(l,P,y,F(500,13),C.muted)});
+  y+=36;
+
+  const [out,o]=mk(y);o.setTransform(1,0,0,1,0,0);o.fillStyle="#ffffff";o.fillRect(0,0,out.width,out.height);
+  o.drawImage(big,0,0,out.width,Math.min(out.height,big.height),0,0,out.width,Math.min(out.height,big.height));
+  big.width=big.height=scr.width=scr.height=0; // free memory on phones
+  return out;
+}
+function jpegBlob(cv){return new Promise(r=>cv.toBlob(b=>r(b),"image/jpeg",0.92))}
+// a one-page PDF that holds the JPEG (DCTDecode), page sized to the picture
+async function pdfBlob(cv,title){
+  const jpg=new Uint8Array(await (await jpegBlob(cv)).arrayBuffer());
+  const pw=612,ph=Math.round(612*cv.height/cv.width*100)/100;
+  const enc=new TextEncoder(),parts=[],offs=[];let len=0;
+  const add=p=>{const b=typeof p==="string"?enc.encode(p):p;parts.push(b);len+=b.length};
+  const obj=(n,body)=>{offs[n]=len;add(n+" 0 obj\n");body.forEach(add);add("\nendobj\n")};
+  const esc2=s=>String(s).replace(/[\\()]/g,"\\$&").replace(/[^\x20-\x7e]/g,"?");
+  const content="q "+pw+" 0 0 "+ph+" 0 0 cm /Im0 Do Q";
+  add("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+  obj(1,["<< /Type /Catalog /Pages 2 0 R >>"]);
+  obj(2,["<< /Type /Pages /Kids [3 0 R] /Count 1 >>"]);
+  obj(3,["<< /Type /Page /Parent 2 0 R /MediaBox [0 0 "+pw+" "+ph+"] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>"]);
+  obj(4,["<< /Type /XObject /Subtype /Image /Width "+cv.width+" /Height "+cv.height+" /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "+jpg.length+" >>\nstream\n",jpg,"\nendstream"]);
+  obj(5,["<< /Length "+content.length+" >>\nstream\n"+content+"\nendstream"]);
+  obj(6,["<< /Title ("+esc2(title)+") /Producer (Rigora) >>"]);
+  const xref=len;
+  add("xref\n0 7\n0000000000 65535 f \n"+offs.slice(1).map(o=>String(o).padStart(10,"0")+" 00000 n \n").join(""));
+  add("trailer\n<< /Size 7 /Root 1 0 R /Info 6 0 R >>\nstartxref\n"+xref+"\n%%EOF\n");
+  return new Blob(parts,{type:"application/pdf"});
+}
+function saveBlob(blob,name){
+  const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),60000);
+}
+async function downloadReport(kind,btn){
+  const c=COS[state.dot];if(!c)return;const old=btn.textContent;btn.disabled=true;btn.textContent=T("dl_wait");
+  try{
+    const cv=await reportCanvas(state.dot);
+    const base="Rigora-check-USDOT-"+c.dot+"-"+new Date().toISOString().slice(0,10);
+    if(kind==="pdf")saveBlob(await pdfBlob(cv,"Rigora company check: "+c.legal_name+" (USDOT "+c.dot+")"),base+".pdf");
+    else saveBlob(await jpegBlob(cv),base+".jpg");
+  }catch(e){console.error(e);btn.textContent=T("dl_err");setTimeout(()=>{btn.textContent=old;btn.disabled=false},2500);return}
+  btn.textContent=old;btn.disabled=false;
+}
+
 // ---------- page ----------
 let state={q:null,status:"idle",dot:null,err:null};
 function recent(){try{return JSON.parse(localStorage.getItem("rigora_recent")||"[]")}catch(e){return []}}
@@ -2037,7 +2202,9 @@ function render(){
   if(state.status==="idle"){el.innerHTML="";return}
   if(state.status==="loading"){el.innerHTML=`<div class="card"><p class="note">${T("loading_chk")}</p><div class="loadingbar"></div></div>`;return}
   if(state.status==="error"){el.innerHTML=`<div class="card"><div class="status err">${esc(state.err)}</div></div>`;return}
-  el.innerHTML=`<div class="card">${companyReport(state.dot)}<div class="rp-actions" style="margin-top:12px"><button class="btn" type="button" id="cp">${T("copy_link")}</button></div></div>`;
+  el.innerHTML=`<div class="card">${companyReport(state.dot)}<div class="rp-actions" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-dl" type="button" id="dlPdf">${T("dl_pdf")}</button><button class="btn" type="button" id="dlImg">${T("dl_img")}</button><button class="btn" type="button" id="cp">${T("copy_link")}</button></div></div>`;
+  $("dlPdf").addEventListener("click",e=>downloadReport("pdf",e.currentTarget));
+  $("dlImg").addEventListener("click",e=>downloadReport("jpg",e.currentTarget));
   $("cp").addEventListener("click",async e=>{const u=location.origin+location.pathname+"?q="+encodeURIComponent(state.dot);
     try{await navigator.clipboard.writeText(u);e.target.textContent=T("copied")}catch(_){e.target.textContent=u}});
 }
@@ -2075,7 +2242,7 @@ document.querySelectorAll("[data-lang]").forEach(b=>b.addEventListener("click",(
 $("f").addEventListener("submit",e=>{e.preventDefault();check($("q").value)});
 document.addEventListener("click",e=>{const b=e.target.closest("[data-q]");if(b&&b.closest("#v-check"))check(b.dataset.q)});
 applyLang(lang);renderRecent();
-const q0=new URLSearchParams(location.search).get("q");showView(q0||location.hash==="#company"?"check":"plan");if(q0)check(q0);
+const q0=new URLSearchParams(location.search).get("q");showView(location.hash==="#planner"&&!q0?"plan":"check");if(q0)check(q0);
 })();
 </script>
 <script>
