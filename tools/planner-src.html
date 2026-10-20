@@ -524,7 +524,7 @@ main .wrap{padding-block:20px 48px}
 
     <div class="col">
       <section class="ticket" aria-live="polite">
-        <div class="t-top"><span class="lbl" id="tTitle">Trip estimate</span><span class="lbl" id="tWhen">EIA diesel prices · week of Oct 12, 2026</span></div>
+        <div class="t-top"><span class="lbl" id="tTitle">Trip estimate</span><span class="lbl" id="tWhen">EIA diesel prices · week of Oct 19, 2026</span></div>
         <div id="tEmpty" class="empty">
           <strong data-pi18n="no_route">No route yet</strong>
           <p data-pi18n="no_route_p">Enter a start and at least one more stop, then press Plan route. You'll get miles by state, fuel cost, toll estimate, and the weigh stations and truck stops along the way.</p>
@@ -691,7 +691,7 @@ main .wrap{padding-block:20px 48px}
   <!-- LOCKED -->
   <section class="view narrow" id="v-locked" hidden><div class="card" id="lockedCard"></div></section>
 
-  <p class="caveat" style="margin-top:16px"><b data-i18n="proto_b">Prototype.</b> <span data-i18n="proto">Example loads are marked. Bids and loads are visible to everyone who can open this page. Routes come from TomTom for a standard vehicle; fuel uses EIA weekly prices by region (week of Oct 12, 2026).</span></p>
+  <p class="caveat" style="margin-top:16px"><b data-i18n="proto_b">Prototype.</b> <span data-i18n="proto">Example loads are marked. Bids and loads are visible to everyone who can open this page. Routes come from TomTom for a standard vehicle; fuel uses EIA weekly prices by region (week of Oct 19, 2026).</span></p>
 </div></main>
 
 <script>
@@ -776,10 +776,10 @@ main .wrap{padding-block:20px 48px}
 <script>
 (function(){
 const SERVER="TomTom Maps";
-// EIA weekly retail prices, week of Oct 12, 2026 ($/gal)
+// EIA weekly retail prices, week of Oct 19, 2026 ($/gal)
 const PRICES={
-  diesel:{"1A":6.441,"1B":6.471,"1C":5.645,"2":6.259,"3":5.809,"4":6.302,"5x":6.503,"CA":8.091,US:6.179},
-  gas:{"1A":4.291,"1B":4.347,"1C":3.929,"2":4.145,"3":3.851,"4":4.439,"5x":5.071,"CA":6.104,US:4.331}
+  diesel:{"1A":6.470,"1B":6.508,"1C":5.740,"2":6.352,"3":5.903,"4":6.422,"5x":6.659,"CA":8.242,US:6.276},
+  gas:{"1A":4.249,"1B":4.312,"1C":3.860,"2":4.145,"3":3.784,"4":4.468,"5x":5.007,"CA":6.031,US:4.284}
 };
 // Typical values; the driver can change any of them
 const TRUCKS={
@@ -853,7 +853,7 @@ nohos_note:"No HOS: continuous driving with only the time at each stop, as for a
 when_dep:"Departure, your local time",when_arr:"Must arrive at final stop by",
 ws_b:"Weigh stations:",ws_under:"at {w} lb you're under 10,001 lb, so most states don't require you to stop. Ag inspection stations still apply to everyone.",
 ws_over:"at {w} lb you must stop at open scales in most states (the line is 10,001 lb; a few states use 26,001 lb).",
-eia_gas:"EIA gasoline prices · week of Oct 12, 2026",eia_diesel:"EIA diesel prices · week of Oct 12, 2026",
+eia_gas:"EIA gasoline prices · week of Oct 19, 2026",eia_diesel:"EIA diesel prices · week of Oct 19, 2026",
 cs_unavail:"TomTom unavailable here",s_needclaude:"This page needs to be opened in Claude with the TomTom Maps connector added.",cs_notconn:"TomTom not connected",cs_reauth:"TomTom sign-in expired",cs_ready:"TomTom Maps ready",cs_connecting:"Connecting to TomTom…",
 trip_est:"Trip estimate",more_settings:"More settings",ov_h:"Trip overview",full_show:"Show full details",full_hide:"Hide full details",ov_weather:"Weather",ov_traffic:"Traffic now",ov_tolls:"Tolls",ov_scales:"Scales",ov_fuel:"Cheapest fuel",v_hos:"with HOS",v_nohos:"no HOS",v_checking:"Checking…",v_clear:"All clear",v_wx_bad:"{n} to watch",v_tr_bad:"{n} serious",v_tr_minor:"{n} minor",v_delay:"~{m} min delay",v_nodelay:"no delays",v_tolls_none:"No tolls",v_toll_mi:"{n} toll mi",v_cert:"{n} certified",v_weigh:"{n} weigh / inspection",v_fuel_sub:"{p}/gal · fuel stops: {n}"
 },
@@ -908,7 +908,7 @@ nohos_note:"Без HOS: непрерывное вождение, только в
 when_dep:"Выезд, ваше местное время",when_arr:"Нужно быть на финише к",
 ws_b:"Весовые:",ws_under:"при {w} lb вы легче 10,001 lb, и в большинстве штатов заезжать не нужно. Сельхоз-инспекции обязательны для всех.",
 ws_over:"при {w} lb в большинстве штатов нужно заезжать на открытые весовые (порог 10,001 lb; в нескольких штатах 26,001 lb).",
-eia_gas:"Цены EIA на бензин · неделя 12 окт. 2026",eia_diesel:"Цены EIA на дизель · неделя 12 окт. 2026",
+eia_gas:"Цены EIA на бензин · неделя 19 окт. 2026",eia_diesel:"Цены EIA на дизель · неделя 19 окт. 2026",
 cs_unavail:"TomTom здесь недоступен",s_needclaude:"Откройте эту страницу в Claude с подключённым TomTom Maps.",cs_notconn:"TomTom не подключён",cs_reauth:"Вход в TomTom истёк",cs_ready:"TomTom Maps готов",cs_connecting:"Подключаюсь к TomTom…",
 trip_est:"Расчёт рейса",more_settings:"Дополнительные настройки",ov_h:"Сводка рейса",full_show:"Полный расчёт",full_hide:"Свернуть полный расчёт",ov_weather:"Погода",ov_traffic:"Трафик сейчас",ov_tolls:"Toll",ov_scales:"Весы",ov_fuel:"Дешевле всего топливо",v_hos:"с HOS",v_nohos:"без HOS",v_checking:"Проверяю…",v_clear:"Всё чисто",v_wx_bad:"Опасных участков: {n}",v_tr_bad:"Серьёзных: {n}",v_tr_minor:"Мелких: {n}",v_delay:"задержка ~{m} мин",v_nodelay:"без задержек",v_tolls_none:"Без toll",v_toll_mi:"платных миль: {n}",v_cert:"Сертиф.: {n}",v_weigh:"весовых / инспекций: {n}",v_fuel_sub:"{p}/gal · заправок: {n}"
 },
@@ -963,7 +963,7 @@ nohos_note:"Sin HOS: manejo continuo, solo con el tiempo en cada parada, como en
 when_dep:"Salida, tu hora local",when_arr:"Debes llegar a la última parada antes de",
 ws_b:"Básculas:",ws_under:"con {w} lb estás por debajo de 10,001 lb, así que en la mayoría de los estados no tienes que entrar. Las inspecciones agrícolas aplican a todos.",
 ws_over:"con {w} lb debes entrar a las básculas abiertas en la mayoría de los estados (el límite es 10,001 lb; algunos estados usan 26,001 lb).",
-eia_gas:"Precios EIA de gasolina · semana del 12 oct. 2026",eia_diesel:"Precios EIA de diésel · semana del 12 oct. 2026",
+eia_gas:"Precios EIA de gasolina · semana del 19 oct. 2026",eia_diesel:"Precios EIA de diésel · semana del 19 oct. 2026",
 cs_unavail:"TomTom no disponible aquí",s_needclaude:"Abre esta página en Claude con el conector TomTom Maps agregado.",cs_notconn:"TomTom no conectado",cs_reauth:"Venció la sesión de TomTom",cs_ready:"TomTom Maps listo",cs_connecting:"Conectando con TomTom…",
 trip_est:"Estimado del viaje",more_settings:"Más ajustes",ov_h:"Resumen del viaje",full_show:"Ver detalle completo",full_hide:"Ocultar detalle completo",ov_weather:"Clima",ov_traffic:"Tráfico ahora",ov_tolls:"Peajes",ov_scales:"Básculas",ov_fuel:"Combustible más barato",v_hos:"con HOS",v_nohos:"sin HOS",v_checking:"Revisando…",v_clear:"Todo bien",v_wx_bad:"{n} a vigilar",v_tr_bad:"{n} graves",v_tr_minor:"{n} leves",v_delay:"~{m} min de demora",v_nodelay:"sin demoras",v_tolls_none:"Sin peajes",v_toll_mi:"{n} mi de peaje",v_cert:"{n} certificadas",v_weigh:"{n} básculas / inspecciones",v_fuel_sub:"{p}/gal · cargas: {n}"
 }};
@@ -1788,7 +1788,7 @@ renderStops();
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const M=1609.344,H=3600;
-const PRICES={diesel:{"1A":6.441,"1B":6.471,"1C":5.645,"2":6.259,"3":5.809,"4":6.302,"5x":6.503,"CA":8.091,US:6.179},gas:{"1A":4.291,"1B":4.347,"1C":3.929,"2":4.145,"3":3.851,"4":4.439,"5x":5.071,"CA":6.104,US:4.331}};
+const PRICES={diesel:{"1A":6.470,"1B":6.508,"1C":5.740,"2":6.352,"3":5.903,"4":6.422,"5x":6.659,"CA":8.242,US:6.276},gas:{"1A":4.249,"1B":4.312,"1C":3.860,"2":4.145,"3":3.784,"4":4.468,"5x":5.007,"CA":6.031,US:4.284}};
 const REG={CT:"1A",ME:"1A",MA:"1A",NH:"1A",RI:"1A",VT:"1A",DE:"1B",DC:"1B",MD:"1B",NJ:"1B",NY:"1B",PA:"1B",FL:"1C",GA:"1C",NC:"1C",SC:"1C",VA:"1C",WV:"1C",IL:"2",IN:"2",IA:"2",KS:"2",KY:"2",MI:"2",MN:"2",MO:"2",NE:"2",ND:"2",SD:"2",OH:"2",OK:"2",TN:"2",WI:"2",AL:"3",AR:"3",LA:"3",MS:"3",NM:"3",TX:"3",CO:"4",ID:"4",MT:"4",UT:"4",WY:"4",AK:"5x",AZ:"5x",HI:"5x",NV:"5x",OR:"5x",WA:"5x",CA:"CA"};
 
 // ---------- i18n ----------
@@ -1797,7 +1797,7 @@ en:{app:"Rigora",tagline:"Verified moving freight",t_loads:"Loads",t_post:"Post 
 pick_h:"Pick a load",pick_p:"Select a load to see the trip calculation for your truck, the company check and bids.",post_h:"Post a moving load",from:"Pickup city or address",to:"Delivery city or address",pick1:"Pickup from",pick2:"Pickup until",deliv:"Deliver by",cf:"Volume, cu ft",lbs:"Est. weight, lb",rate:"Carrier pay, $",notes:"Notes for carriers",notes_ph:"Stairs, long carry, piano, storage, payment terms…",lbs_note:"Weight defaults to 7 lb per cubic foot if you leave it empty.",post_btn:"Post load",
 check_h:"Check a carrier or broker",check_ph:"USDOT number or MC number, e.g. 77949 or MC67234",check_btn:"Check",check_note:"Sources: FMCSA SAFER snapshot and FMCSA's daily Motus open data (authority, insurance and bond on file, BOC-3). Checks run on Claude's side and are written to the board, so members can't edit them.",queue_h:"Waiting for a check",
 prof_h:"My company",prof_p:"Your company appears on loads you post and bids you send. Entering a USDOT number queues a verification check.",co_name:"Company name",role:"Role",r_carrier:"Carrier",r_broker:"Broker",r_both:"Carrier and broker",save:"Save",truck_h:"My truck",truck_p:"Used to work out fuel, tolls and your net on every load. Saved on this device only.",ttype:"Truck",tt:"Tractor-trailer",box:"Box truck",fuel:"Fuel",diesel:"Diesel",gas:"Gasoline",
-proto_b:"Prototype.",proto:"Example loads are marked. Bids and loads are visible to everyone who can open this page. Routes come from TomTom for a standard vehicle; fuel uses EIA weekly prices by region (week of Oct 12, 2026).",
+proto_b:"Prototype.",proto:"Example loads are marked. Bids and loads are visible to everyone who can open this page. Routes come from TomTom for a standard vehicle; fuel uses EIA weekly prices by region (week of Oct 19, 2026).",
 example:"EXAMPLE",n_loads:"{n} loads",no_loads:"No loads match.",no_loads_p:"Try another city or turn off \"Open loads only\". Or post the first one.",booked:"Booked",cf_u:"cu ft",mi:"mi",per_mi:"/mi",pickup:"Pickup",deliver:"Deliver by",
 v_ok:"Verified",v_warn:"Check flags",v_bad:"Problems found",v_none:"Not verified",v_pending:"Check pending",
 calc_h:"Trip for your truck",calc_wait:"Calculating the route…",calc_btn:"Calculate trip",calc_err:"Couldn't calculate the route:",gross:"Carrier pay",net:"Your net",rpm:"Net $/mile",miles:"Miles",drive:"Drive time",with_hos:"With HOS",fuel_c:"Fuel ({f}, {mpg} MPG)",tolls_c:"Tolls (est., {a} axles)",states_c:"States",
@@ -1814,7 +1814,7 @@ ru:{app:"Rigora",tagline:"Проверенные мувинг-грузы",t_load
 pick_h:"Выберите груз",pick_p:"Откройте груз, чтобы увидеть расчёт рейса для вашего трака, проверку компании и отклики.",post_h:"Разместить переезд",from:"Откуда: город или адрес",to:"Куда: город или адрес",pick1:"Погрузка с",pick2:"Погрузка до",deliv:"Доставить до",cf:"Объём, куб. футов",lbs:"Вес (оценка), lb",rate:"Оплата перевозчику, $",notes:"Заметки для перевозчиков",notes_ph:"Лестницы, долгий пронос, пианино, склад, условия оплаты…",lbs_note:"Если вес не указан, берётся 7 lb на кубический фут.",post_btn:"Разместить",
 check_h:"Проверка перевозчика или брокера",check_ph:"USDOT или MC, например 77949 или MC67234",check_btn:"Проверить",check_note:"Источники: SAFER и ежедневные открытые данные FMCSA Motus (полномочия, страховки и бонд, BOC-3). Проверку выполняет Claude и записывает на биржу, участники изменить её не могут.",queue_h:"Ждут проверки",
 prof_h:"Моя компания",prof_p:"Компания показывается на ваших грузах и откликах. После ввода USDOT компания встаёт в очередь на проверку.",co_name:"Название компании",role:"Роль",r_carrier:"Перевозчик",r_broker:"Брокер",r_both:"Перевозчик и брокер",save:"Сохранить",truck_h:"Мой трак",truck_p:"Нужен, чтобы считать топливо, toll и чистую прибыль по каждому грузу. Хранится только на этом устройстве.",ttype:"Трак",tt:"Тягач с прицепом",box:"Бокс-трак",fuel:"Топливо",diesel:"Дизель",gas:"Бензин",
-proto_b:"Прототип.",proto:"Примеры грузов отмечены. Грузы и отклики видны всем, кто может открыть страницу. Маршрут считает TomTom для стандартной машины, топливо — по недельным ценам EIA по регионам (неделя 12 окт. 2026).",
+proto_b:"Прототип.",proto:"Примеры грузов отмечены. Грузы и отклики видны всем, кто может открыть страницу. Маршрут считает TomTom для стандартной машины, топливо — по недельным ценам EIA по регионам (неделя 19 окт. 2026).",
 example:"ПРИМЕР",n_loads:"Грузов: {n}",no_loads:"Ничего не найдено.",no_loads_p:"Попробуйте другой город или снимите «Только открытые». Или разместите первый груз.",booked:"Забронирован",cf_u:"куб. фт",mi:"ми",per_mi:"/ми",pickup:"Погрузка",deliver:"Доставить до",
 v_ok:"Проверен",v_warn:"Есть замечания",v_bad:"Найдены проблемы",v_none:"Не проверен",v_pending:"Ждёт проверки",
 calc_h:"Рейс для вашего трака",calc_wait:"Считаю маршрут…",calc_btn:"Рассчитать рейс",calc_err:"Не удалось посчитать маршрут:",gross:"Оплата",net:"Чистыми вам",rpm:"Чистыми за милю",miles:"Мили",drive:"За рулём",with_hos:"С HOS",fuel_c:"Топливо ({f}, {mpg} MPG)",tolls_c:"Toll (оценка, {a} осей)",states_c:"Штаты",
@@ -1831,7 +1831,7 @@ es:{app:"Rigora",tagline:"Mudanzas verificadas",t_loads:"Cargas",t_post:"Publica
 pick_h:"Elige una carga",pick_p:"Abre una carga para ver el cálculo del viaje para tu camión, la verificación de la empresa y las ofertas.",post_h:"Publicar una mudanza",from:"Ciudad o dirección de recogida",to:"Ciudad o dirección de entrega",pick1:"Recoger desde",pick2:"Recoger hasta",deliv:"Entregar antes de",cf:"Volumen, pies³",lbs:"Peso estimado, lb",rate:"Pago al transportista, $",notes:"Notas para transportistas",notes_ph:"Escaleras, acarreo largo, piano, almacenaje, forma de pago…",lbs_note:"Si no pones el peso, se calculan 7 lb por pie cúbico.",post_btn:"Publicar",
 check_h:"Verificar transportista o bróker",check_ph:"Número USDOT o MC, p. ej. 77949 o MC67234",check_btn:"Verificar",check_note:"Fuentes: SAFER y los datos abiertos diarios de FMCSA Motus (autoridad, seguros y fianza, BOC-3). Claude hace la verificación y la guarda en la bolsa; los miembros no pueden cambiarla.",queue_h:"En espera de verificación",
 prof_h:"Mi empresa",prof_p:"Tu empresa aparece en tus cargas y ofertas. Al poner el USDOT, queda en la fila para verificarse.",co_name:"Nombre de la empresa",role:"Rol",r_carrier:"Transportista",r_broker:"Bróker",r_both:"Transportista y bróker",save:"Guardar",truck_h:"Mi camión",truck_p:"Sirve para calcular combustible, peajes y tu ganancia neta en cada carga. Se guarda solo en este dispositivo.",ttype:"Camión",tt:"Tractocamión",box:"Camión de caja",fuel:"Combustible",diesel:"Diésel",gas:"Gasolina",
-proto_b:"Prototipo.",proto:"Las cargas de ejemplo están marcadas. Cargas y ofertas son visibles para quien pueda abrir esta página. TomTom calcula la ruta para un vehículo estándar; el combustible usa precios semanales de la EIA por región (semana del 12 oct. 2026).",
+proto_b:"Prototipo.",proto:"Las cargas de ejemplo están marcadas. Cargas y ofertas son visibles para quien pueda abrir esta página. TomTom calcula la ruta para un vehículo estándar; el combustible usa precios semanales de la EIA por región (semana del 19 oct. 2026).",
 example:"EJEMPLO",n_loads:"{n} cargas",no_loads:"No hay coincidencias.",no_loads_p:"Prueba otra ciudad o quita «Solo cargas abiertas». O publica la primera.",booked:"Reservada",cf_u:"pies³",mi:"mi",per_mi:"/mi",pickup:"Recogida",deliver:"Entregar antes de",
 v_ok:"Verificada",v_warn:"Revisar avisos",v_bad:"Problemas",v_none:"Sin verificar",v_pending:"Verificación pendiente",
 calc_h:"Viaje para tu camión",calc_wait:"Calculando la ruta…",calc_btn:"Calcular viaje",calc_err:"No se pudo calcular la ruta:",gross:"Pago",net:"Tu neto",rpm:"Neto por milla",miles:"Millas",drive:"Manejo",with_hos:"Con HOS",fuel_c:"Combustible ({f}, {mpg} MPG)",tolls_c:"Peajes (est., {a} ejes)",states_c:"Estados",
