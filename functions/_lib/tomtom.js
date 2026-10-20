@@ -33,7 +33,7 @@ export async function search({ q, limit = 6, typeahead = true }, env, fetcher = 
 const num = (v, lo, hi) => { const n = +v; return isFinite(n) && n >= lo && n <= hi ? n : null; };
 export function routeQuery(b) {
   const p = new URLSearchParams({
-    travelMode: "truck", vehicleCommercial: "true", routeType: "fast", traffic: "true",
+    travelMode: "truck", vehicleCommercial: "true", routeType: "fastest", traffic: "true",
     routeRepresentation: "polyline", computeTravelTimeFor: "all",
     maxAlternatives: String(Math.min(2, Math.max(0, +b.maxAlternatives || 0))),
   });
