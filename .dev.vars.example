@@ -1,0 +1,4 @@
+# Copy to .dev.vars for local runs (wrangler pages dev). Never commit real keys.
+FMCSA_KEY=your-fmcsa-qcmobile-webkey
+# Optional: raises data.transportation.gov rate limits
+SOCRATA_TOKEN=
