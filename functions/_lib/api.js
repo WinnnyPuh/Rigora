@@ -52,6 +52,8 @@ export async function api(request, env, waitUntil = () => {}) {
           const r = await fetch(`https://api.tomtom.com/map/1/tile/basic/main/5/9/12.png?key=${encodeURIComponent(env.TOMTOM_KEY)}`);
           out.tiles = r.ok ? "ok" : `${r.status} ${(await r.text()).slice(0, 200)}`;
         } catch (e) { out.tiles = String(e.message || e).slice(0, 200); }
+        try { const t = await tile("tile/sat/10/301/384", env); out.tile_proxy = t.status + " " + t.headers.get("content-type"); }
+        catch (e) { out.tile_proxy = "error " + String(e.message || e).slice(0, 200); }
       }
       return json(out, 200, 0);
     }
