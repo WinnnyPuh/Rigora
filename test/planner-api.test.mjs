@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { decodeStates, stateAt, spansFor } from "../functions/_lib/states.js";
 import { search, route, along, traffic, routeQuery } from "../functions/_lib/tomtom.js";
 import { weather } from "../functions/_lib/nws.js";
-import { api } from "../functions/_lib/api.js";
+import { api, tile } from "../functions/_lib/api.js";
 
 // --- synthetic TopoJSON: CO = x0..10, KS = x10..20 (y 0..10), sharing arc 1, quantized + delta-encoded
 const topo = { type: "Topology", transform: { scale: [1, 1], translate: [0, 0] },
@@ -106,4 +106,16 @@ const nokey = await api(new Request("https://x/api/search?q=a"), {});
 assert.equal(nokey.status, 502);
 const ok = await api(new Request("https://x/api/search?q=Parker"), env);
 assert.equal(ok.status, 200);
+// map tiles through our server
+const tcalls = [];
+const tfake = async (url) => { tcalls.push(url); return { ok: true, status: 200, body: "PNG" }; };
+let tr1 = await tile("tile/basic/5/9/12", env, () => {}, tfake);
+assert.equal(tr1.status, 200); assert.equal(tr1.headers.get("content-type"), "image/png");
+assert.ok(tcalls[0].startsWith("https://api.tomtom.com/map/1/tile/basic/main/5/9/12.png?key=tt"));
+tr1 = await tile("tile/sat/4/3/5", env, () => {}, tfake);
+assert.equal(tr1.headers.get("content-type"), "image/jpeg"); assert.ok(tcalls[1].includes("/sat/main/4/3/5.jpg"));
+assert.equal((await tile("tile/sat/20/1/1", env, () => {}, tfake)).status, 400);
+assert.equal((await tile("tile/basic/2/9/1", env, () => {}, tfake)).status, 400);
+assert.equal((await tile("tile/evil/2/1/1", env, () => {}, tfake)).status, 400);
+assert.equal((await tile("tile/basic/2/1/1", {}, () => {}, tfake)).status, 502);
 console.log("planner api tests passed");

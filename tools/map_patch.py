@@ -74,23 +74,30 @@ function loadLeaflet(){
   });
   return leafletP;
 }
+const darkMap=()=>{const t=document.documentElement.getAttribute("data-theme");return t==="dark"||t==="night"};
+function baseKey(){return mapBase==="sat"?"sat":(darkMap()?"night":"day")}
+function applyBase(){if(!LMAP)return;const k=baseKey();Object.entries(LBASE).forEach(([n,l])=>{if(n!==k&&LMAP.hasLayer(l))LMAP.removeLayer(l)});if(!LMAP.hasLayer(LBASE[k]))LBASE[k].addTo(LMAP)}
 function setBase(b){
   mapBase=b==="sat"?"sat":"map";try{localStorage.setItem("rigora_map",mapBase)}catch(e){}
   document.querySelectorAll("[data-base]").forEach(x=>x.setAttribute("aria-checked",String(x.dataset.base===mapBase)));
-  if(LMAP){Object.values(LBASE).forEach(l=>LMAP.removeLayer(l));LBASE[mapBase].addTo(LMAP)}
+  applyBase();
 }
 document.querySelectorAll("[data-base]").forEach(x=>x.addEventListener("click",()=>setBase(x.dataset.base)));
 setBase(mapBase);
+new MutationObserver(applyBase).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
 async function drawMap(coords,tolls,sc,pts,sm){
   let L;
   try{L=await loadLeaflet()}catch(e){$("mapBox").innerHTML=`<p class="note" style="padding:16px">${T("map_err")}</p>`;return}
   if(!last||last.coords!==coords)return; // a newer route is already on its way
   if(!LMAP){
     LMAP=L.map("lmap",{scrollWheelZoom:false,zoomSnap:0.5,attributionControl:true});
-    LBASE.map=L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{subdomains:"abcd",maxZoom:19,className:"base-map",attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'});
-    LBASE.sat=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Imagery &copy; Esri"});
+    const lp=LMAP.createPane("labels");lp.style.zIndex=350;lp.style.pointerEvents="none";
+    const TT='&copy; <a href="https://www.tomtom.com" target="_blank" rel="noopener">TomTom</a>';
+    const tl=(n,o)=>L.tileLayer("/api/tile/"+n+"/{z}/{x}/{y}",Object.assign({maxZoom:19,attribution:TT,crossOrigin:false},o||{}));
+    LBASE.day=tl("basic",{className:"base-map"});LBASE.night=tl("night",{className:"base-map"});
+    LBASE.sat=L.layerGroup([tl("sat",{maxNativeZoom:19}),tl("hybrid",{pane:"labels"})]);
     LMAP.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
-    LBASE[mapBase].addTo(LMAP);LLAY=L.layerGroup().addTo(LMAP);
+    applyBase();LLAY=L.layerGroup().addTo(LMAP);
     LMAP.on("focus",()=>LMAP.scrollWheelZoom.enable());LMAP.on("blur",()=>LMAP.scrollWheelZoom.disable());
   }
   LMAP.invalidateSize();LLAY.clearLayers();

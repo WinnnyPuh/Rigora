@@ -10,11 +10,38 @@ import { weather } from "./nws.js";
 
 const CACHE = { search: 3600, traffic: 120, wx: 600 };
 
+// GET /api/tile/{basic|night|sat|hybrid|hybridnight}/{z}/{x}/{y}
+const TILE = {
+  basic: ["basic/main", "png", 22], night: ["basic/night", "png", 22],
+  sat: ["sat/main", "jpg", 19], hybrid: ["hybrid/main", "png", 22], hybridnight: ["hybrid/night", "png", 22],
+};
+const TILE_AGE = 7 * 86400;
+export async function tile(name, env, waitUntil = () => {}, fetcher = fetch) {
+  const m = /^tile\/([a-z]+)\/(\d{1,2})\/(\d{1,7})\/(\d{1,7})$/.exec(name);
+  const t = m && TILE[m[1]];
+  const z = m ? +m[2] : -1, x = m ? +m[3] : -1, y = m ? +m[4] : -1;
+  if (!t || z > t[2] || x >= 2 ** z || y >= 2 ** z) return new Response("bad tile", { status: 400 });
+  if (!env.TOMTOM_KEY) return new Response("no key", { status: 502 });
+  const cache = typeof caches !== "undefined" ? caches.default : null;
+  const key = new Request(`https://tiles.rigora.internal/${m[1]}/${z}/${x}/${y}`);
+  if (cache) { const hit = await cache.match(key); if (hit) return hit; }
+  const r = await fetcher(`https://api.tomtom.com/map/1/tile/${t[0]}/${z}/${x}/${y}.${t[1]}?key=${encodeURIComponent(env.TOMTOM_KEY)}`,
+    { cf: { cacheTtl: TILE_AGE, cacheEverything: true } });
+  if (!r.ok) return new Response("tile " + r.status, { status: r.status === 404 ? 404 : 502, headers: { "cache-control": "no-store" } });
+  const res = new Response(r.body, { status: 200, headers: {
+    "content-type": t[1] === "jpg" ? "image/jpeg" : "image/png",
+    "cache-control": `public, max-age=${TILE_AGE}`, "access-control-allow-origin": "*" } });
+  if (cache) waitUntil(cache.put(key, res.clone()));
+  return res;
+}
+
 export async function api(request, env, waitUntil = () => {}) {
   const url = new URL(request.url);
   const name = url.pathname.replace(/^\/api\//, "").replace(/\/$/, "");
   const q = Object.fromEntries(url.searchParams);
   try {
+    // map tiles from TomTom through our server so the key stays private; cached at the edge and in the browser
+    if (name.startsWith("tile/")) return await tile(name, env, waitUntil);
     // setup check: which keys the server sees and whether TomTom accepts ours (never shows the keys)
     if (name === "health") {
       const out = { fmcsa_key: !!env.FMCSA_KEY, tomtom_key: !!env.TOMTOM_KEY, tomtom: null };

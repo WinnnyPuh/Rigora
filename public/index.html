@@ -464,9 +464,6 @@ main .wrap{padding-block:20px 48px}
   --sign:#f2d7a6; --sign-ink:#17110a; --amber:#ff8a3d; --amber-ink:#1a0d02; --stripe:#ff8a3d;
   --good:#b5c76a; --warn:#f0a040; --bad:#ff7d5e; --info:#c9ab82; --route:#f2d7a6; --toll:#ff8a3d; --scale:#ff7d5e; --stop:#6b5638; color-scheme:dark}
 :root[data-theme="night"] img,:root[data-theme="night"] #lmap .leaflet-pane{filter:sepia(.55) saturate(.85) brightness(.8)}
-:root[data-theme="dark"] #lmap .base-map{filter:invert(.92) hue-rotate(180deg) brightness(.9) contrast(.9)}
-:root[data-theme="night"] #lmap .base-map{filter:invert(.92) hue-rotate(180deg) sepia(.7) brightness(.8)}
-:root[data-theme="night"] #lmap .leaflet-tile-pane{filter:none}
 /* theme picker */
 .theme{position:relative}
 .theme-btn{display:flex;align-items:center;gap:6px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font:600 12px var(--mono);cursor:pointer;min-height:30px}
@@ -1427,23 +1424,30 @@ function loadLeaflet(){
   });
   return leafletP;
 }
+const darkMap=()=>{const t=document.documentElement.getAttribute("data-theme");return t==="dark"||t==="night"};
+function baseKey(){return mapBase==="sat"?"sat":(darkMap()?"night":"day")}
+function applyBase(){if(!LMAP)return;const k=baseKey();Object.entries(LBASE).forEach(([n,l])=>{if(n!==k&&LMAP.hasLayer(l))LMAP.removeLayer(l)});if(!LMAP.hasLayer(LBASE[k]))LBASE[k].addTo(LMAP)}
 function setBase(b){
   mapBase=b==="sat"?"sat":"map";try{localStorage.setItem("rigora_map",mapBase)}catch(e){}
   document.querySelectorAll("[data-base]").forEach(x=>x.setAttribute("aria-checked",String(x.dataset.base===mapBase)));
-  if(LMAP){Object.values(LBASE).forEach(l=>LMAP.removeLayer(l));LBASE[mapBase].addTo(LMAP)}
+  applyBase();
 }
 document.querySelectorAll("[data-base]").forEach(x=>x.addEventListener("click",()=>setBase(x.dataset.base)));
 setBase(mapBase);
+new MutationObserver(applyBase).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
 async function drawMap(coords,tolls,sc,pts,sm){
   let L;
   try{L=await loadLeaflet()}catch(e){$("mapBox").innerHTML=`<p class="note" style="padding:16px">${T("map_err")}</p>`;return}
   if(!last||last.coords!==coords)return; // a newer route is already on its way
   if(!LMAP){
     LMAP=L.map("lmap",{scrollWheelZoom:false,zoomSnap:0.5,attributionControl:true});
-    LBASE.map=L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{subdomains:"abcd",maxZoom:19,className:"base-map",attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'});
-    LBASE.sat=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:19,attribution:"Imagery &copy; Esri"});
+    const lp=LMAP.createPane("labels");lp.style.zIndex=350;lp.style.pointerEvents="none";
+    const TT='&copy; <a href="https://www.tomtom.com" target="_blank" rel="noopener">TomTom</a>';
+    const tl=(n,o)=>L.tileLayer("/api/tile/"+n+"/{z}/{x}/{y}",Object.assign({maxZoom:19,attribution:TT,crossOrigin:false},o||{}));
+    LBASE.day=tl("basic",{className:"base-map"});LBASE.night=tl("night",{className:"base-map"});
+    LBASE.sat=L.layerGroup([tl("sat",{maxNativeZoom:19}),tl("hybrid",{pane:"labels"})]);
     LMAP.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
-    LBASE[mapBase].addTo(LMAP);LLAY=L.layerGroup().addTo(LMAP);
+    applyBase();LLAY=L.layerGroup().addTo(LMAP);
     LMAP.on("focus",()=>LMAP.scrollWheelZoom.enable());LMAP.on("blur",()=>LMAP.scrollWheelZoom.disable());
   }
   LMAP.invalidateSize();LLAY.clearLayers();

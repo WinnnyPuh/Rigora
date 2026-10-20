@@ -8,9 +8,6 @@ css += r'''
   --sign:#f2d7a6; --sign-ink:#17110a; --amber:#ff8a3d; --amber-ink:#1a0d02; --stripe:#ff8a3d;
   --good:#b5c76a; --warn:#f0a040; --bad:#ff7d5e; --info:#c9ab82; --route:#f2d7a6; --toll:#ff8a3d; --scale:#ff7d5e; --stop:#6b5638; color-scheme:dark}
 :root[data-theme="night"] img,:root[data-theme="night"] #lmap .leaflet-pane{filter:sepia(.55) saturate(.85) brightness(.8)}
-:root[data-theme="dark"] #lmap .base-map{filter:invert(.92) hue-rotate(180deg) brightness(.9) contrast(.9)}
-:root[data-theme="night"] #lmap .base-map{filter:invert(.92) hue-rotate(180deg) sepia(.7) brightness(.8)}
-:root[data-theme="night"] #lmap .leaflet-tile-pane{filter:none}
 /* theme picker */
 .theme{position:relative}
 .theme-btn{display:flex;align-items:center;gap:6px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font:600 12px var(--mono);cursor:pointer;min-height:30px}
